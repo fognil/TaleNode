@@ -335,17 +335,21 @@ impl TaleNodeApp {
                     ui.label("Add Node");
                     ui.separator();
 
-                    if ui.button("Start").clicked() {
-                        self.graph.add_node(Node::new_start(ctx_pos));
-                        close_menu = true;
-                    }
-                    if ui.button("Dialogue").clicked() {
-                        self.graph.add_node(Node::new_dialogue(ctx_pos));
-                        close_menu = true;
-                    }
-                    if ui.button("End").clicked() {
-                        self.graph.add_node(Node::new_end(ctx_pos));
-                        close_menu = true;
+                    type NodeCtor = fn([f32; 2]) -> Node;
+                    let items: &[(&str, NodeCtor)] = &[
+                        ("Start", Node::new_start),
+                        ("Dialogue", Node::new_dialogue),
+                        ("Choice", Node::new_choice),
+                        ("Condition", Node::new_condition),
+                        ("Event", Node::new_event),
+                        ("Random", Node::new_random),
+                        ("End", Node::new_end),
+                    ];
+                    for (label, constructor) in items {
+                        if ui.button(*label).clicked() {
+                            self.graph.add_node(constructor(ctx_pos));
+                            close_menu = true;
+                        }
                     }
                 });
             });
@@ -377,6 +381,23 @@ impl eframe::App for TaleNodeApp {
         egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
             self.show_status_bar(ui);
         });
+
+        // Inspector panel (right side) — only when exactly 1 node selected
+        if self.selected_nodes.len() == 1 {
+            let selected_id = self.selected_nodes[0];
+            egui::SidePanel::right("inspector")
+                .default_width(280.0)
+                .min_width(220.0)
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        crate::ui::inspector::show_inspector(
+                            ui,
+                            &mut self.graph,
+                            selected_id,
+                        );
+                    });
+                });
+        }
 
         // Main canvas
         egui::CentralPanel::default()
