@@ -1,5 +1,6 @@
 pub mod eval;
 pub mod expr;
+mod expr_tokenizer;
 pub mod interpolate;
 
 use std::collections::HashMap;

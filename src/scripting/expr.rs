@@ -1,5 +1,7 @@
 use crate::model::node::VariableValue;
 
+use super::expr_tokenizer::{tokenize, Token};
+
 /// Expression AST node.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
@@ -29,154 +31,6 @@ pub enum BinOp {
     Lte,
     And,
     Or,
-}
-
-// --- Tokenizer ---
-
-#[derive(Debug, Clone, PartialEq)]
-enum Token {
-    Int(i64),
-    Float(f64),
-    Str(String),
-    Bool(bool),
-    Ident(String),
-    Op(BinOp),
-    Not,
-    Minus,
-    LParen,
-    RParen,
-}
-
-fn tokenize(input: &str) -> Result<Vec<Token>, String> {
-    let mut tokens = Vec::new();
-    let chars: Vec<char> = input.chars().collect();
-    let mut i = 0;
-
-    while i < chars.len() {
-        match chars[i] {
-            ' ' | '\t' | '\r' | '\n' => i += 1,
-            '(' => {
-                tokens.push(Token::LParen);
-                i += 1;
-            }
-            ')' => {
-                tokens.push(Token::RParen);
-                i += 1;
-            }
-            '+' => {
-                tokens.push(Token::Op(BinOp::Add));
-                i += 1;
-            }
-            '*' => {
-                tokens.push(Token::Op(BinOp::Mul));
-                i += 1;
-            }
-            '/' => {
-                tokens.push(Token::Op(BinOp::Div));
-                i += 1;
-            }
-            '%' => {
-                tokens.push(Token::Op(BinOp::Mod));
-                i += 1;
-            }
-            '-' => {
-                // Decide if this is unary minus or subtraction
-                let is_unary = tokens.is_empty()
-                    || matches!(
-                        tokens.last(),
-                        Some(Token::Op(_) | Token::Not | Token::Minus | Token::LParen)
-                    );
-                if is_unary {
-                    tokens.push(Token::Minus);
-                } else {
-                    tokens.push(Token::Op(BinOp::Sub));
-                }
-                i += 1;
-            }
-            '!' if i + 1 < chars.len() && chars[i + 1] == '=' => {
-                tokens.push(Token::Op(BinOp::Neq));
-                i += 2;
-            }
-            '!' => {
-                tokens.push(Token::Not);
-                i += 1;
-            }
-            '=' if i + 1 < chars.len() && chars[i + 1] == '=' => {
-                tokens.push(Token::Op(BinOp::Eq));
-                i += 2;
-            }
-            '>' if i + 1 < chars.len() && chars[i + 1] == '=' => {
-                tokens.push(Token::Op(BinOp::Gte));
-                i += 2;
-            }
-            '>' => {
-                tokens.push(Token::Op(BinOp::Gt));
-                i += 1;
-            }
-            '<' if i + 1 < chars.len() && chars[i + 1] == '=' => {
-                tokens.push(Token::Op(BinOp::Lte));
-                i += 2;
-            }
-            '<' => {
-                tokens.push(Token::Op(BinOp::Lt));
-                i += 1;
-            }
-            '&' if i + 1 < chars.len() && chars[i + 1] == '&' => {
-                tokens.push(Token::Op(BinOp::And));
-                i += 2;
-            }
-            '|' if i + 1 < chars.len() && chars[i + 1] == '|' => {
-                tokens.push(Token::Op(BinOp::Or));
-                i += 2;
-            }
-            '"' => {
-                i += 1;
-                let start = i;
-                while i < chars.len() && chars[i] != '"' {
-                    i += 1;
-                }
-                if i >= chars.len() {
-                    return Err("Unterminated string literal".to_string());
-                }
-                let s: String = chars[start..i].iter().collect();
-                tokens.push(Token::Str(s));
-                i += 1; // skip closing "
-            }
-            c if c.is_ascii_digit() => {
-                let start = i;
-                while i < chars.len() && chars[i].is_ascii_digit() {
-                    i += 1;
-                }
-                if i < chars.len() && chars[i] == '.' && i + 1 < chars.len() && chars[i + 1].is_ascii_digit() {
-                    i += 1; // skip dot
-                    while i < chars.len() && chars[i].is_ascii_digit() {
-                        i += 1;
-                    }
-                    let s: String = chars[start..i].iter().collect();
-                    let f: f64 = s.parse().map_err(|_| format!("Invalid float: {s}"))?;
-                    tokens.push(Token::Float(f));
-                } else {
-                    let s: String = chars[start..i].iter().collect();
-                    let n: i64 = s.parse().map_err(|_| format!("Invalid int: {s}"))?;
-                    tokens.push(Token::Int(n));
-                }
-            }
-            c if c.is_ascii_alphabetic() || c == '_' => {
-                let start = i;
-                while i < chars.len() && (chars[i].is_ascii_alphanumeric() || chars[i] == '_') {
-                    i += 1;
-                }
-                let word: String = chars[start..i].iter().collect();
-                match word.as_str() {
-                    "true" => tokens.push(Token::Bool(true)),
-                    "false" => tokens.push(Token::Bool(false)),
-                    _ => tokens.push(Token::Ident(word)),
-                }
-            }
-            c => return Err(format!("Unexpected character: '{c}'")),
-        }
-    }
-    Ok(tokens)
 }
 
 // --- Recursive descent parser ---
@@ -392,18 +246,30 @@ mod tests {
     #[test]
     fn parse_string() {
         let expr = parse_expr("\"hello\"").unwrap();
-        assert_eq!(expr, Expr::Literal(VariableValue::Text("hello".to_string())));
+        assert_eq!(
+            expr,
+            Expr::Literal(VariableValue::Text("hello".to_string()))
+        );
     }
 
     #[test]
     fn parse_bool() {
-        assert_eq!(parse_expr("true").unwrap(), Expr::Literal(VariableValue::Bool(true)));
-        assert_eq!(parse_expr("false").unwrap(), Expr::Literal(VariableValue::Bool(false)));
+        assert_eq!(
+            parse_expr("true").unwrap(),
+            Expr::Literal(VariableValue::Bool(true))
+        );
+        assert_eq!(
+            parse_expr("false").unwrap(),
+            Expr::Literal(VariableValue::Bool(false))
+        );
     }
 
     #[test]
     fn parse_variable() {
-        assert_eq!(parse_expr("gold").unwrap(), Expr::Variable("gold".to_string()));
+        assert_eq!(
+            parse_expr("gold").unwrap(),
+            Expr::Variable("gold".to_string())
+        );
     }
 
     #[test]
@@ -434,7 +300,6 @@ mod tests {
 
     #[test]
     fn parse_precedence() {
-        // 2 + 3 * 4 should parse as 2 + (3 * 4)
         let expr = parse_expr("2 + 3 * 4").unwrap();
         assert_eq!(
             expr,
@@ -453,7 +318,6 @@ mod tests {
     #[test]
     fn parse_boolean_operators() {
         let expr = parse_expr("a && b || c").unwrap();
-        // || is lower precedence: (a && b) || c
         assert!(matches!(expr, Expr::BinaryOp { op: BinOp::Or, .. }));
     }
 
@@ -484,7 +348,6 @@ mod tests {
     #[test]
     fn parse_complex_boolean() {
         let expr = parse_expr("has_key && level > 5").unwrap();
-        // && binds tighter than nothing else here, > binds tighter than &&
         assert!(matches!(expr, Expr::BinaryOp { op: BinOp::And, .. }));
     }
 

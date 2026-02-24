@@ -1,4 +1,4 @@
-use crate::export::json_export::build_id_map;
+use crate::export::json_export_helpers::build_id_map;
 use crate::model::graph::DialogueGraph;
 use crate::model::node::NodeType;
 

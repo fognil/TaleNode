@@ -4,12 +4,22 @@ use uuid::Uuid;
 /// A visual group of nodes with a colored background rectangle.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NodeGroup {
+    #[serde(default = "Uuid::new_v4")]
     pub id: Uuid,
+    #[serde(default)]
     pub name: String,
     /// Node IDs belonging to this group.
+    #[serde(default)]
     pub node_ids: Vec<Uuid>,
     /// Group background color as [r, g, b, a] (0-255).
+    #[serde(default = "NodeGroup::default_color")]
     pub color: [u8; 4],
+}
+
+impl NodeGroup {
+    fn default_color() -> [u8; 4] {
+        [100, 150, 255, 40]
+    }
 }
 
 impl NodeGroup {

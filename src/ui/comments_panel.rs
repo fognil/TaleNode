@@ -156,13 +156,13 @@ pub fn show_comments_panel(
         let resp = ui.text_edit_singleline(new_comment_text);
         if (resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter))
             || ui.button("Add").clicked())
-            && comment_target_node.is_some()
             && !new_comment_text.trim().is_empty()
         {
-            let node_id = comment_target_node.unwrap();
-            let text = new_comment_text.trim().to_string();
-            *new_comment_text = String::new();
-            action = CommentsPanelAction::AddComment(node_id, text);
+            if let Some(node_id) = *comment_target_node {
+                let text = new_comment_text.trim().to_string();
+                *new_comment_text = String::new();
+                action = CommentsPanelAction::AddComment(node_id, text);
+            }
         }
     });
 

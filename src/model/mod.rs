@@ -3,6 +3,7 @@ pub mod connection;
 pub mod graph;
 pub mod group;
 pub mod node;
+pub mod node_types;
 pub mod port;
 pub mod project;
 pub mod review;

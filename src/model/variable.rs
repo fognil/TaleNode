@@ -14,9 +14,13 @@ pub enum VariableType {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Variable {
+    #[serde(default = "Uuid::new_v4")]
     pub id: Uuid,
+    #[serde(default)]
     pub name: String,
+    #[serde(default)]
     pub var_type: VariableType,
+    #[serde(default)]
     pub default_value: VariableValue,
 }
 

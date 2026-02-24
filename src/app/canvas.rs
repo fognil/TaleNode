@@ -272,11 +272,9 @@ impl TaleNodeApp {
     }
 
     fn handle_context_menu(&mut self, response: &egui::Response) {
-        if self.context_menu_pos.is_none() {
+        let Some(ctx_pos) = self.context_menu_pos else {
             return;
-        }
-
-        let ctx_pos = self.context_menu_pos.unwrap();
+        };
         let mut close_menu = false;
 
         let menu_id = response.id.with("ctx_menu");

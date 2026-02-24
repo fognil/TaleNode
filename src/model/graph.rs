@@ -13,7 +13,9 @@ use super::variable::Variable;
 /// The central data structure holding the entire dialogue graph.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DialogueGraph {
+    #[serde(default)]
     pub nodes: HashMap<Uuid, Node>,
+    #[serde(default)]
     pub connections: Vec<Connection>,
     #[serde(default)]
     pub variables: Vec<Variable>,
