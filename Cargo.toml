@@ -1,8 +1,11 @@
 [package]
 name = "talenode"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 description = "Node-based dialogue and quest editor for game developers"
+authors = ["TaleNode"]
+license = "MIT"
+repository = "https://github.com/talenode/talenode"
 
 [dependencies]
 eframe = "0.31"
@@ -11,3 +14,9 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4", "serde"] }
 rfd = "0.15"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
