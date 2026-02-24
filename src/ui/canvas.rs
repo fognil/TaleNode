@@ -45,27 +45,55 @@ impl CanvasState {
         )
     }
 
-    /// Handle pan (middle mouse drag) and zoom (ctrl+scroll).
+    /// Handle pan and zoom input.
+    /// - Middle mouse drag or Space+left drag: pan
+    /// - Scroll wheel: zoom
+    /// - Trackpad pinch: zoom
     pub fn handle_input(&mut self, response: &egui::Response, ui: &egui::Ui) {
         // Pan with middle mouse button drag
         if response.dragged_by(egui::PointerButton::Middle) {
             self.pan_offset += response.drag_delta();
         }
 
-        // Zoom with Ctrl + scroll
-        if response.hovered() {
-            let scroll = ui.input(|i| i.smooth_scroll_delta.y);
-            if ui.input(|i| i.modifiers.ctrl) && scroll != 0.0 {
-                let zoom_factor = 1.0 + scroll * 0.002;
-                let new_zoom = (self.zoom * zoom_factor).clamp(ZOOM_MIN, ZOOM_MAX);
+        // Pan with Space + left mouse drag
+        if response.dragged_by(egui::PointerButton::Primary)
+            && ui.input(|i| i.key_down(egui::Key::Space))
+        {
+            self.pan_offset += response.drag_delta();
+        }
 
-                // Zoom toward cursor position
+        if response.hovered() {
+            // Trackpad pinch-to-zoom (macOS)
+            let pinch = ui.input(|i| i.zoom_delta());
+            if pinch != 1.0 {
+                let new_zoom = (self.zoom * pinch).clamp(ZOOM_MIN, ZOOM_MAX);
                 if let Some(cursor) = response.hover_pos() {
                     let zoom_ratio = new_zoom / self.zoom;
                     self.pan_offset = cursor.to_vec2()
                         - (cursor.to_vec2() - self.pan_offset) * zoom_ratio;
                 }
                 self.zoom = new_zoom;
+            }
+
+            // Scroll wheel zoom (Ctrl+scroll or Cmd+scroll)
+            let scroll = ui.input(|i| i.smooth_scroll_delta.y);
+            let has_modifier = ui.input(|i| i.modifiers.ctrl || i.modifiers.command);
+            if has_modifier && scroll != 0.0 {
+                let zoom_factor = 1.0 + scroll * 0.002;
+                let new_zoom = (self.zoom * zoom_factor).clamp(ZOOM_MIN, ZOOM_MAX);
+                if let Some(cursor) = response.hover_pos() {
+                    let zoom_ratio = new_zoom / self.zoom;
+                    self.pan_offset = cursor.to_vec2()
+                        - (cursor.to_vec2() - self.pan_offset) * zoom_ratio;
+                }
+                self.zoom = new_zoom;
+            }
+
+            // Scroll without modifier: pan
+            if !has_modifier && scroll != 0.0 {
+                let scroll_x = ui.input(|i| i.smooth_scroll_delta.x);
+                self.pan_offset.x += scroll_x;
+                self.pan_offset.y += scroll;
             }
         }
     }
