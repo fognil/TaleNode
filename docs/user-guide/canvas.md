@@ -91,7 +91,7 @@ Navigate through results with the **<** / **>** buttons or press ++enter++ to cy
 
 ## Search & Replace
 
-Press ++ctrl+h++ to open the search bar with the replace row, or click **Replace** in the search bar to toggle it.
+Press ++ctrl+h++ (or ++cmd+shift+h++ on macOS) to open the search bar with the replace row, or click **Replace** in the search bar to toggle it.
 
 | Button | Action |
 |---|---|

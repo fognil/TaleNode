@@ -38,7 +38,7 @@ Complete list of keyboard shortcuts in TaleNode.
 | Shortcut | Action |
 |---|---|
 | ++ctrl+f++ | Open search bar |
-| ++ctrl+h++ | Open search bar with replace |
+| ++ctrl+h++ / ++cmd+shift+h++ | Open search bar with replace |
 | ++escape++ | Close search bar |
 | ++enter++ | Next search result |
 

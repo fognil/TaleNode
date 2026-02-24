@@ -50,7 +50,7 @@ Press ++ctrl+f++ to open the search bar. It searches across all node types, dial
 
 ### Can I find and replace text across nodes?
 
-Yes. Press ++ctrl+h++ to open Search & Replace. You can replace in the current match or all matches at once. Replacements are case-insensitive and support undo.
+Yes. Press ++ctrl+h++ (++cmd+shift+h++ on macOS) to open Search & Replace. You can replace in the current match or all matches at once. Replacements are case-insensitive and support undo.
 
 ## Nodes
 

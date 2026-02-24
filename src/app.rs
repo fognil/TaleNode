@@ -1074,7 +1074,15 @@ impl eframe::App for TaleNodeApp {
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::F)) {
             self.show_search = true;
         }
-        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::H)) {
+        // Replace: Ctrl+H on Windows/Linux, Cmd+Shift+H on macOS
+        // (Cmd+H is reserved by macOS for "Hide Application")
+        if ctx.input(|i| {
+            if cfg!(target_os = "macos") {
+                i.modifiers.command && i.modifiers.shift && i.key_pressed(egui::Key::H)
+            } else {
+                i.modifiers.command && i.key_pressed(egui::Key::H)
+            }
+        }) {
             self.show_search = true;
             self.show_replace = true;
         }
