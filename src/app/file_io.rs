@@ -141,6 +141,29 @@ impl TaleNodeApp {
         }
     }
 
+    pub(super) fn do_export_xml(&mut self) {
+        let path = rfd::FileDialog::new()
+            .add_filter("XML", &["xml"])
+            .set_file_name(format!("{}.xml", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            match crate::export::xml_export::export_xml(&self.graph, &self.project_name) {
+                Ok(xml) => {
+                    if let Err(e) = std::fs::write(&path, xml) {
+                        eprintln!("Failed to write XML export: {e}");
+                    } else {
+                        self.status_message =
+                            Some(("XML exported".to_string(), Instant::now()));
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Failed to export XML: {e}");
+                }
+            }
+        }
+    }
+
     /// Handle New Project: reset graph, clear state.
     pub(super) fn do_new_project(&mut self) {
         self.graph = DialogueGraph::new();

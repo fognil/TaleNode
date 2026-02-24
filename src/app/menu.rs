@@ -47,6 +47,10 @@ impl TaleNodeApp {
                     self.do_export_json();
                     ui.close_menu();
                 }
+                if ui.button("Export XML...").clicked() {
+                    self.do_export_xml();
+                    ui.close_menu();
+                }
                 if ui.button("Export Godot Plugin...").clicked() {
                     self.do_export_godot_plugin();
                     ui.close_menu();
