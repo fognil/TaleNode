@@ -59,6 +59,10 @@ impl TaleNodeApp {
                     self.do_export_unity_plugin();
                     ui.close_menu();
                 }
+                if ui.button("Export Unreal Plugin...").clicked() {
+                    self.do_export_unreal_plugin();
+                    ui.close_menu();
+                }
                 ui.separator();
                 if ui.button("Export Voice Script (CSV)...").clicked() {
                     self.do_export_voice_csv();

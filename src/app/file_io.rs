@@ -123,6 +123,24 @@ impl TaleNodeApp {
         }
     }
 
+    pub(super) fn do_export_unreal_plugin(&mut self) {
+        let path = rfd::FileDialog::new()
+            .set_title("Select Unreal project Source folder")
+            .pick_folder();
+
+        if let Some(dir) = path {
+            match crate::export::plugin_export::export_unreal_plugin(&dir) {
+                Ok(()) => {
+                    self.status_message =
+                        Some(("Unreal plugin exported".to_string(), Instant::now()));
+                }
+                Err(e) => {
+                    eprintln!("Failed to export Unreal plugin: {e}");
+                }
+            }
+        }
+    }
+
     pub(super) fn do_export_voice_csv(&mut self) {
         let path = rfd::FileDialog::new()
             .add_filter("CSV", &["csv"])
@@ -258,6 +276,52 @@ impl TaleNodeApp {
                 Err(e) => {
                     eprintln!("Failed to read file: {e}");
                 }
+            }
+        }
+    }
+
+    pub(super) fn do_export_analytics_csv(
+        &mut self,
+        stats: &crate::validation::analytics::GraphAnalytics,
+    ) {
+        let path = rfd::FileDialog::new()
+            .add_filter("CSV", &["csv"])
+            .set_file_name(format!("{}_analytics.csv", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            let csv = crate::export::analytics_export::export_analytics_csv(
+                stats,
+                &self.project_name,
+            );
+            if let Err(e) = std::fs::write(&path, csv) {
+                eprintln!("Failed to write analytics CSV: {e}");
+            } else {
+                self.status_message =
+                    Some(("Analytics CSV exported".to_string(), Instant::now()));
+            }
+        }
+    }
+
+    pub(super) fn do_export_analytics_text(
+        &mut self,
+        stats: &crate::validation::analytics::GraphAnalytics,
+    ) {
+        let path = rfd::FileDialog::new()
+            .add_filter("Text", &["txt"])
+            .set_file_name(format!("{}_analytics.txt", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            let text = crate::export::analytics_export::export_analytics_text(
+                stats,
+                &self.project_name,
+            );
+            if let Err(e) = std::fs::write(&path, text) {
+                eprintln!("Failed to write analytics report: {e}");
+            } else {
+                self.status_message =
+                    Some(("Analytics report exported".to_string(), Instant::now()));
             }
         }
     }
