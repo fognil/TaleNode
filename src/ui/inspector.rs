@@ -6,6 +6,7 @@ use crate::model::graph::DialogueGraph;
 use crate::model::node::{
     CompareOp, EventAction, EventActionType, NodeType, VariableValue,
 };
+use crate::model::review::ReviewStatus;
 
 /// Deferred mutation to apply after the inspector UI pass.
 enum DeferredAction {
@@ -109,6 +110,33 @@ pub fn show_inspector(ui: &mut Ui, graph: &mut DialogueGraph, selected: Uuid) {
         }
         DeferredAction::None => {}
     }
+
+    // Review section
+    ui.add_space(8.0);
+    ui.separator();
+    ui.heading("Review");
+
+    let current_status = graph.get_review_status(selected);
+    let mut selected_idx = ReviewStatus::all()
+        .iter()
+        .position(|s| *s == current_status)
+        .unwrap_or(0);
+    egui::ComboBox::from_id_salt("review_status_combo")
+        .selected_text(current_status.label())
+        .show_ui(ui, |ui| {
+            for (i, status) in ReviewStatus::all().iter().enumerate() {
+                if ui.selectable_label(selected_idx == i, status.label()).clicked() {
+                    selected_idx = i;
+                }
+            }
+        });
+    let new_status = ReviewStatus::all()[selected_idx];
+    if new_status != current_status {
+        graph.set_review_status(selected, new_status);
+    }
+
+    let comment_count = graph.comments.iter().filter(|c| c.node_id == selected).count();
+    ui.label(format!("Comments: {comment_count}"));
 }
 
 fn show_dialogue_inspector(

@@ -7,6 +7,7 @@ use super::connection::Connection;
 use super::group::NodeGroup;
 use super::node::Node;
 use super::port::{PortDirection, PortId};
+use super::review::{NodeComment, ReviewStatus};
 use super::variable::Variable;
 
 /// The central data structure holding the entire dialogue graph.
@@ -20,6 +21,10 @@ pub struct DialogueGraph {
     pub characters: Vec<Character>,
     #[serde(default)]
     pub groups: Vec<NodeGroup>,
+    #[serde(default)]
+    pub review_statuses: HashMap<Uuid, ReviewStatus>,
+    #[serde(default)]
+    pub comments: Vec<NodeComment>,
 }
 
 impl Default for DialogueGraph {
@@ -36,6 +41,8 @@ impl DialogueGraph {
             variables: Vec::new(),
             characters: Vec::new(),
             groups: Vec::new(),
+            review_statuses: HashMap::new(),
+            comments: Vec::new(),
         }
     }
 
@@ -54,6 +61,8 @@ impl DialogueGraph {
                 .collect();
             self.connections
                 .retain(|c| c.from_node != node_id && c.to_node != node_id);
+            self.review_statuses.remove(&node_id);
+            self.comments.retain(|c| c.node_id != node_id);
             Some((node, removed))
         } else {
             None
@@ -110,6 +119,23 @@ impl DialogueGraph {
             Some(self.connections.remove(idx))
         } else {
             None
+        }
+    }
+
+    /// Get the review status for a node (defaults to Draft).
+    pub fn get_review_status(&self, node_id: Uuid) -> ReviewStatus {
+        self.review_statuses
+            .get(&node_id)
+            .copied()
+            .unwrap_or_default()
+    }
+
+    /// Set the review status for a node. Removes the entry if Draft (the default).
+    pub fn set_review_status(&mut self, node_id: Uuid, status: ReviewStatus) {
+        if status == ReviewStatus::Draft {
+            self.review_statuses.remove(&node_id);
+        } else {
+            self.review_statuses.insert(node_id, status);
         }
     }
 

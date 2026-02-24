@@ -2,6 +2,7 @@ use egui::{Color32, CornerRadius, FontId, Pos2, Rect, Stroke, StrokeKind, Vec2};
 
 use crate::model::character::Character;
 use crate::model::node::{Node, NodeType};
+use crate::model::review::ReviewStatus;
 use crate::ui::canvas::CanvasState;
 
 /// Visual constants for node rendering.
@@ -94,6 +95,7 @@ pub fn draw_node(
     is_selected: bool,
     is_search_match: bool,
     characters: &[Character],
+    review_status: ReviewStatus,
 ) {
     let rect = node_rect(node);
     let screen_rect = canvas.canvas_rect_to_screen(rect);
@@ -167,6 +169,17 @@ pub fn draw_node(
             Stroke::new(1.0 * canvas.zoom, Color32::from_rgb(70, 70, 70)),
             StrokeKind::Inside,
         );
+    }
+
+    // Review status badge (top-right of header)
+    if review_status != ReviewStatus::Draft {
+        let badge_color = crate::ui::comments_panel::status_color(review_status);
+        let badge_radius = 5.0 * canvas.zoom;
+        let badge_pos = Pos2::new(
+            header_rect.max.x - badge_radius - 4.0 * canvas.zoom,
+            header_rect.min.y + badge_radius + 4.0 * canvas.zoom,
+        );
+        painter.circle_filled(badge_pos, badge_radius, badge_color);
     }
 }
 

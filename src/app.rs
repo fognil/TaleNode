@@ -82,6 +82,14 @@ pub struct TaleNodeApp {
     status_message: Option<(String, Instant)>,
     /// Batch audio assignment state.
     audio_manager: crate::ui::audio_manager::AudioManagerState,
+    /// Whether the comments panel is visible.
+    show_comments_panel: bool,
+    /// Filter for the comments panel.
+    comments_filter: Option<crate::model::review::ReviewStatus>,
+    /// Which node is targeted for new comments.
+    comment_target_node: Option<Uuid>,
+    /// Text input for new comment.
+    new_comment_text: String,
 }
 
 impl TaleNodeApp {
@@ -116,6 +124,10 @@ impl TaleNodeApp {
             last_auto_save: Instant::now(),
             status_message: None,
             audio_manager: Default::default(),
+            show_comments_panel: false,
+            comments_filter: None,
+            comment_target_node: None,
+            new_comment_text: String::new(),
         }
     }
 
@@ -214,7 +226,8 @@ impl TaleNodeApp {
             if let Some(node) = self.graph.nodes.get(id) {
                 let is_selected = self.selected_nodes.contains(id);
                 let is_search_match = self.search_results.contains(id);
-                draw_node(&painter, node, &self.canvas, is_selected, is_search_match, &self.graph.characters);
+                let review_status = self.graph.get_review_status(*id);
+                draw_node(&painter, node, &self.canvas, is_selected, is_search_match, &self.graph.characters, review_status);
             }
         }
 
@@ -595,6 +608,9 @@ impl TaleNodeApp {
                     ui.close_menu();
                 }
                 if ui.checkbox(&mut self.show_playtest, "Playtest Panel").changed() {
+                    ui.close_menu();
+                }
+                if ui.checkbox(&mut self.show_comments_panel, "Comments Panel").changed() {
                     ui.close_menu();
                 }
                 ui.separator();
@@ -1271,6 +1287,47 @@ impl eframe::App for TaleNodeApp {
         egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
             self.show_status_bar(ui);
         });
+
+        // Comments panel (above status bar)
+        if self.show_comments_panel {
+            // Auto-select the first selected node as comment target
+            if let Some(first) = self.selected_nodes.first() {
+                self.comment_target_node = Some(*first);
+            }
+            egui::TopBottomPanel::bottom("comments_panel")
+                .resizable(true)
+                .default_height(180.0)
+                .show(ctx, |ui| {
+                    let action = crate::ui::comments_panel::show_comments_panel(
+                        ui,
+                        &self.graph,
+                        &mut self.comments_filter,
+                        &mut self.comment_target_node,
+                        &mut self.new_comment_text,
+                    );
+                    match action {
+                        crate::ui::comments_panel::CommentsPanelAction::Navigate(node_id) => {
+                            self.selected_nodes = vec![node_id];
+                            if let Some(node) = self.graph.nodes.get(&node_id) {
+                                self.canvas.pan_offset = egui::Vec2::new(
+                                    -node.position[0] * self.canvas.zoom,
+                                    -node.position[1] * self.canvas.zoom,
+                                );
+                            }
+                        }
+                        crate::ui::comments_panel::CommentsPanelAction::AddComment(node_id, text) => {
+                            self.snapshot();
+                            let comment = crate::model::review::NodeComment::new(node_id, text);
+                            self.graph.comments.push(comment);
+                        }
+                        crate::ui::comments_panel::CommentsPanelAction::DeleteComment(comment_id) => {
+                            self.snapshot();
+                            self.graph.comments.retain(|c| c.id != comment_id);
+                        }
+                        crate::ui::comments_panel::CommentsPanelAction::None => {}
+                    }
+                });
+        }
 
         // Validation panel (above status bar)
         if self.show_validation_panel {

@@ -1,5 +1,6 @@
 pub mod audio_manager;
 pub mod canvas;
+pub mod comments_panel;
 pub mod connection_renderer;
 pub mod inspector;
 pub mod left_panel;
