@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 use super::character::Character;
 use super::connection::Connection;
+use super::group::NodeGroup;
 use super::node::Node;
 use super::port::{PortDirection, PortId};
 use super::variable::Variable;
@@ -17,6 +18,8 @@ pub struct DialogueGraph {
     pub variables: Vec<Variable>,
     #[serde(default)]
     pub characters: Vec<Character>,
+    #[serde(default)]
+    pub groups: Vec<NodeGroup>,
 }
 
 impl Default for DialogueGraph {
@@ -32,6 +35,7 @@ impl DialogueGraph {
             connections: Vec::new(),
             variables: Vec::new(),
             characters: Vec::new(),
+            groups: Vec::new(),
         }
     }
 
@@ -100,6 +104,7 @@ impl DialogueGraph {
         true
     }
 
+    #[allow(dead_code)]
     pub fn remove_connection(&mut self, connection_id: Uuid) -> Option<Connection> {
         if let Some(idx) = self.connections.iter().position(|c| c.id == connection_id) {
             Some(self.connections.remove(idx))
@@ -109,6 +114,7 @@ impl DialogueGraph {
     }
 
     /// Find which node and port a given PortId belongs to.
+    #[allow(dead_code)]
     pub fn find_port_node(&self, port_id: PortId) -> Option<(Uuid, PortDirection)> {
         for node in self.nodes.values() {
             for p in &node.inputs {

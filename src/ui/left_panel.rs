@@ -152,4 +152,52 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
             graph.characters.len() + 1
         )));
     }
+
+    // --- Groups section ---
+    if !graph.groups.is_empty() {
+        ui.add_space(16.0);
+        ui.heading("Groups");
+        ui.separator();
+
+        let mut remove_group = None;
+        for (i, group) in graph.groups.iter_mut().enumerate() {
+            ui.horizontal(|ui| {
+                let color = egui::Color32::from_rgba_premultiplied(
+                    group.color[0], group.color[1], group.color[2], group.color[3].max(100),
+                );
+                let (rect, _) = ui.allocate_exact_size(
+                    egui::Vec2::new(12.0, 12.0),
+                    egui::Sense::hover(),
+                );
+                ui.painter().rect_filled(rect, 2.0, color);
+
+                ui.label(format!("{} ({})", group.name, group.node_ids.len()));
+                if ui.small_button("X").clicked() {
+                    remove_group = Some(i);
+                }
+            });
+
+            ui.indent(group.id, |ui| {
+                ui.horizontal(|ui| {
+                    ui.label("Name:");
+                    ui.text_edit_singleline(&mut group.name);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Color:");
+                    let mut color_arr = [group.color[0], group.color[1], group.color[2]];
+                    if ui.color_edit_button_srgb(&mut color_arr).changed() {
+                        group.color[0] = color_arr[0];
+                        group.color[1] = color_arr[1];
+                        group.color[2] = color_arr[2];
+                    }
+                });
+            });
+
+            ui.add_space(4.0);
+        }
+
+        if let Some(idx) = remove_group {
+            graph.groups.remove(idx);
+        }
+    }
 }
