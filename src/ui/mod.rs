@@ -3,6 +3,7 @@ pub mod canvas;
 pub mod comments_panel;
 pub mod connection_renderer;
 pub mod inspector;
+mod inspector_widgets;
 pub mod left_panel;
 pub mod node_widget;
 pub mod playtest;

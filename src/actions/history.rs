@@ -34,6 +34,16 @@ impl UndoHistory {
         self.redo_stack.clear();
     }
 
+    /// Push an already-cloned graph onto the undo stack.
+    /// Use this when you already have a pre-clone (avoids double-cloning).
+    pub fn push_undo(&mut self, graph: DialogueGraph) {
+        self.undo_stack.push(graph);
+        if self.undo_stack.len() > MAX_HISTORY {
+            self.undo_stack.remove(0);
+        }
+        self.redo_stack.clear();
+    }
+
     /// Undo: restore the previous graph state.
     /// Returns the restored graph, or None if nothing to undo.
     pub fn undo(&mut self, current: &DialogueGraph) -> Option<DialogueGraph> {

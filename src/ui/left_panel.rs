@@ -6,7 +6,11 @@ use crate::model::graph::DialogueGraph;
 use crate::model::node::VariableValue;
 use crate::model::variable::{Variable, VariableType};
 
-pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
+/// Draw the left panel (variables, characters, groups).
+/// Returns `true` when an undo-worthy event starts (caller should snapshot).
+pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) -> bool {
+    let mut snapshot_needed = false;
+
     // --- Variables section ---
     ui.heading("Variables");
     ui.separator();
@@ -17,13 +21,16 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
             ui.label(&var.name);
             if ui.small_button("X").clicked() {
                 remove_var = Some(i);
+                snapshot_needed = true;
             }
         });
 
         ui.indent(var.id, |ui| {
             ui.horizontal(|ui| {
                 ui.label("Name:");
-                ui.text_edit_singleline(&mut var.name);
+                if ui.text_edit_singleline(&mut var.name).gained_focus() {
+                    snapshot_needed = true;
+                }
             });
 
             // Type selector
@@ -41,6 +48,7 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
                     for (idx, label) in type_labels.iter().enumerate() {
                         if ui.selectable_label(selected == idx, *label).clicked() {
                             selected = idx;
+                            snapshot_needed = true;
                         }
                     }
                 });
@@ -61,16 +69,24 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
                 ui.label("Default:");
                 match &mut var.default_value {
                     VariableValue::Bool(b) => {
-                        ui.checkbox(b, "");
+                        if ui.checkbox(b, "").changed() {
+                            snapshot_needed = true;
+                        }
                     }
                     VariableValue::Int(i) => {
-                        ui.add(egui::DragValue::new(i));
+                        if ui.add(egui::DragValue::new(i)).drag_started() {
+                            snapshot_needed = true;
+                        }
                     }
                     VariableValue::Float(f) => {
-                        ui.add(egui::DragValue::new(f).speed(0.1));
+                        if ui.add(egui::DragValue::new(f).speed(0.1)).drag_started() {
+                            snapshot_needed = true;
+                        }
                     }
                     VariableValue::Text(s) => {
-                        ui.text_edit_singleline(s);
+                        if ui.text_edit_singleline(s).gained_focus() {
+                            snapshot_needed = true;
+                        }
                     }
                 }
             });
@@ -84,6 +100,7 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
     }
 
     if ui.button("+ Add Variable").clicked() {
+        snapshot_needed = true;
         graph.variables.push(Variable {
             id: Uuid::new_v4(),
             name: format!("var_{}", graph.variables.len() + 1),
@@ -101,7 +118,6 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
     let mut remove_char = None;
     for (i, ch) in graph.characters.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            // Color indicator
             let color = egui::Color32::from_rgba_premultiplied(
                 ch.color[0], ch.color[1], ch.color[2], ch.color[3],
             );
@@ -114,19 +130,24 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
             ui.label(&ch.name);
             if ui.small_button("X").clicked() {
                 remove_char = Some(i);
+                snapshot_needed = true;
             }
         });
 
         ui.indent(ch.id, |ui| {
             ui.horizontal(|ui| {
                 ui.label("Name:");
-                ui.text_edit_singleline(&mut ch.name);
+                if ui.text_edit_singleline(&mut ch.name).gained_focus() {
+                    snapshot_needed = true;
+                }
             });
 
             ui.horizontal(|ui| {
                 ui.label("Color:");
                 let mut color_arr = [ch.color[0], ch.color[1], ch.color[2]];
-                ui.color_edit_button_srgb(&mut color_arr);
+                if ui.color_edit_button_srgb(&mut color_arr).changed() {
+                    snapshot_needed = true;
+                }
                 ch.color[0] = color_arr[0];
                 ch.color[1] = color_arr[1];
                 ch.color[2] = color_arr[2];
@@ -134,7 +155,9 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
 
             ui.horizontal(|ui| {
                 ui.label("Portrait:");
-                ui.text_edit_singleline(&mut ch.portrait_path);
+                if ui.text_edit_singleline(&mut ch.portrait_path).gained_focus() {
+                    snapshot_needed = true;
+                }
             });
         });
 
@@ -146,6 +169,7 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
     }
 
     if ui.button("+ Add Character").clicked() {
+        snapshot_needed = true;
         graph.characters.push(Character::new(format!(
             "Character {}",
             graph.characters.len() + 1
@@ -162,7 +186,10 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
         for (i, group) in graph.groups.iter_mut().enumerate() {
             ui.horizontal(|ui| {
                 let color = egui::Color32::from_rgba_premultiplied(
-                    group.color[0], group.color[1], group.color[2], group.color[3].max(100),
+                    group.color[0],
+                    group.color[1],
+                    group.color[2],
+                    group.color[3].max(100),
                 );
                 let (rect, _) = ui.allocate_exact_size(
                     egui::Vec2::new(12.0, 12.0),
@@ -173,18 +200,23 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
                 ui.label(format!("{} ({})", group.name, group.node_ids.len()));
                 if ui.small_button("X").clicked() {
                     remove_group = Some(i);
+                    snapshot_needed = true;
                 }
             });
 
             ui.indent(group.id, |ui| {
                 ui.horizontal(|ui| {
                     ui.label("Name:");
-                    ui.text_edit_singleline(&mut group.name);
+                    if ui.text_edit_singleline(&mut group.name).gained_focus() {
+                        snapshot_needed = true;
+                    }
                 });
                 ui.horizontal(|ui| {
                     ui.label("Color:");
                     let mut color_arr = [group.color[0], group.color[1], group.color[2]];
-                    ui.color_edit_button_srgb(&mut color_arr);
+                    if ui.color_edit_button_srgb(&mut color_arr).changed() {
+                        snapshot_needed = true;
+                    }
                     group.color[0] = color_arr[0];
                     group.color[1] = color_arr[1];
                     group.color[2] = color_arr[2];
@@ -198,4 +230,6 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
             graph.groups.remove(idx);
         }
     }
+
+    snapshot_needed
 }
