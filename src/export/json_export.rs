@@ -234,7 +234,7 @@ fn build_export(graph: &DialogueGraph, name: &str) -> ExportedDialogue {
 }
 
 /// Build a map of Uuid -> readable ID like "start_1", "dlg_2", etc.
-fn build_id_map(graph: &DialogueGraph) -> HashMap<Uuid, String> {
+pub fn build_id_map(graph: &DialogueGraph) -> HashMap<Uuid, String> {
     let mut map = HashMap::new();
     let mut counters: HashMap<&str, usize> = HashMap::new();
 

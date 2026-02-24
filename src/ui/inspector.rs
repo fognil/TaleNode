@@ -187,10 +187,20 @@ fn show_dialogue_inspector(
 
     ui.add_space(4.0);
     ui.label("Audio clip:");
-    let mut audio = data.audio_clip.clone().unwrap_or_default();
-    if ui.text_edit_singleline(&mut audio).changed() {
-        data.audio_clip = if audio.is_empty() { None } else { Some(audio) };
-    }
+    ui.horizontal(|ui| {
+        let mut audio = data.audio_clip.clone().unwrap_or_default();
+        if ui.text_edit_singleline(&mut audio).changed() {
+            data.audio_clip = if audio.is_empty() { None } else { Some(audio) };
+        }
+        if ui.button("Browse").clicked() {
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Audio", &["wav", "ogg", "mp3"])
+                .pick_file()
+            {
+                data.audio_clip = Some(path.display().to_string());
+            }
+        }
+    });
 }
 
 fn show_choice_inspector(

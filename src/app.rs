@@ -80,6 +80,8 @@ pub struct TaleNodeApp {
     last_auto_save: Instant,
     /// Brief message shown in status bar.
     status_message: Option<(String, Instant)>,
+    /// Batch audio assignment state.
+    audio_manager: crate::ui::audio_manager::AudioManagerState,
 }
 
 impl TaleNodeApp {
@@ -113,6 +115,7 @@ impl TaleNodeApp {
             show_playtest: false,
             last_auto_save: Instant::now(),
             status_message: None,
+            audio_manager: Default::default(),
         }
     }
 
@@ -512,6 +515,15 @@ impl TaleNodeApp {
                     self.do_export_unity_plugin();
                     ui.close_menu();
                 }
+                ui.separator();
+                if ui.button("Export Voice Script (CSV)...").clicked() {
+                    self.do_export_voice_csv();
+                    ui.close_menu();
+                }
+                if ui.button("Batch Assign Audio...").clicked() {
+                    self.audio_manager.open = true;
+                    ui.close_menu();
+                }
             });
             ui.menu_button("Edit", |ui| {
                 if ui.add_enabled(
@@ -705,6 +717,26 @@ impl TaleNodeApp {
                 Err(e) => {
                     eprintln!("Failed to export Unity plugin: {e}");
                 }
+            }
+        }
+    }
+
+    fn do_export_voice_csv(&mut self) {
+        let path = rfd::FileDialog::new()
+            .add_filter("CSV", &["csv"])
+            .set_file_name(format!("{}_voice_script.csv", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            let csv = crate::export::voice_export::export_voice_csv(
+                &self.graph,
+                &self.project_name,
+            );
+            if let Err(e) = std::fs::write(&path, csv) {
+                eprintln!("Failed to write voice script: {e}");
+            } else {
+                self.status_message =
+                    Some(("Voice script exported".to_string(), Instant::now()));
             }
         }
     }
@@ -1264,6 +1296,13 @@ impl eframe::App for TaleNodeApp {
                     );
                 });
         }
+
+        // Audio manager window
+        crate::ui::audio_manager::show_audio_manager(
+            ctx,
+            &mut self.audio_manager,
+            &mut self.graph,
+        );
 
         // Left panel (variables, characters)
         if self.show_left_panel {
