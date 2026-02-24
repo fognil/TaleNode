@@ -86,6 +86,12 @@ pub struct TaleNodeApp {
     status_message: Option<(String, Instant)>,
     /// Batch audio assignment state.
     audio_manager: crate::ui::audio_manager::AudioManagerState,
+    /// Whether the version panel is visible.
+    show_version_panel: bool,
+    /// Text input for new version description.
+    version_new_desc: String,
+    /// Saved version snapshots.
+    versions: Vec<crate::model::project::VersionSnapshot>,
     /// Whether the analytics panel is visible.
     show_analytics_panel: bool,
     /// Whether the bookmark panel is visible.
@@ -136,6 +142,9 @@ impl TaleNodeApp {
             last_auto_save: Instant::now(),
             status_message: None,
             audio_manager: Default::default(),
+            show_version_panel: false,
+            version_new_desc: String::new(),
+            versions: Vec::new(),
             show_analytics_panel: false,
             show_bookmark_panel: false,
             bookmark_tag_filter: None,

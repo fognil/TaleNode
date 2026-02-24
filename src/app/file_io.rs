@@ -17,6 +17,7 @@ impl TaleNodeApp {
                         Ok(project) => {
                             self.graph = project.graph;
                             self.project_name = project.name;
+                            self.versions = project.versions;
                             self.project_path = Some(path);
                             self.selected_nodes.clear();
                         }
@@ -47,6 +48,7 @@ impl TaleNodeApp {
                 version: "1.0".to_string(),
                 name: self.project_name.clone(),
                 graph: self.graph.clone(),
+                versions: self.versions.clone(),
             };
             match project.save_to_string() {
                 Ok(json) => {
@@ -171,6 +173,7 @@ impl TaleNodeApp {
         self.selected_nodes.clear();
         self.project_name = "Untitled".to_string();
         self.project_path = None;
+        self.versions.clear();
         self.history.clear();
     }
 }

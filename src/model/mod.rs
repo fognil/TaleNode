@@ -1,5 +1,6 @@
 pub mod character;
 pub mod connection;
+mod example_project;
 pub mod graph;
 pub mod group;
 pub mod node;
@@ -8,3 +9,4 @@ pub mod port;
 pub mod project;
 pub mod review;
 pub mod variable;
+pub mod version;

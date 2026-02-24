@@ -1,11 +1,12 @@
 use super::TaleNodeApp;
 
 impl TaleNodeApp {
-    /// Render bottom panels (comments, bookmarks, analytics) and handle their actions.
+    /// Render bottom panels (comments, bookmarks, analytics, version) and handle their actions.
     pub(super) fn show_bottom_panels(&mut self, ctx: &egui::Context) {
         self.show_comments_bottom_panel(ctx);
         self.show_bookmark_bottom_panel(ctx);
         self.show_analytics_bottom_panel(ctx);
+        self.show_version_bottom_panel(ctx);
     }
 
     fn show_comments_bottom_panel(&mut self, ctx: &egui::Context) {
@@ -107,6 +108,48 @@ impl TaleNodeApp {
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     crate::ui::analytics_panel::show_analytics_panel(ui, &stats);
                 });
+            });
+    }
+
+    fn show_version_bottom_panel(&mut self, ctx: &egui::Context) {
+        if !self.show_version_panel {
+            return;
+        }
+        egui::TopBottomPanel::bottom("version_panel")
+            .resizable(true)
+            .default_height(180.0)
+            .show(ctx, |ui| {
+                let action = crate::ui::version_panel::show_version_panel(
+                    ui,
+                    &self.versions,
+                    &mut self.version_new_desc,
+                );
+                match action {
+                    crate::ui::version_panel::VersionPanelAction::CreateVersion(desc) => {
+                        let mut project = crate::model::project::Project {
+                            version: "1.0".to_string(),
+                            name: self.project_name.clone(),
+                            graph: self.graph.clone(),
+                            versions: self.versions.clone(),
+                        };
+                        project.create_version(desc);
+                        self.versions = project.versions;
+                    }
+                    crate::ui::version_panel::VersionPanelAction::RestoreVersion(id) => {
+                        let mut project = crate::model::project::Project {
+                            version: "1.0".to_string(),
+                            name: self.project_name.clone(),
+                            graph: self.graph.clone(),
+                            versions: self.versions.clone(),
+                        };
+                        if let Some(old_graph) = project.restore_version(id) {
+                            self.snapshot();
+                            let _ = old_graph; // old graph is for undo (snapshot already saved)
+                            self.graph = project.graph;
+                        }
+                    }
+                    crate::ui::version_panel::VersionPanelAction::None => {}
+                }
             });
     }
 }

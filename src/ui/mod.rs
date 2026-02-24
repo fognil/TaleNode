@@ -9,3 +9,4 @@ mod inspector_widgets;
 pub mod left_panel;
 pub mod node_widget;
 pub mod playtest;
+pub mod version_panel;
