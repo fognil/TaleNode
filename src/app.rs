@@ -1,8 +1,10 @@
 use egui::{Color32, Pos2, Rect, Sense, Stroke, StrokeKind};
+use std::time::Instant;
 use uuid::Uuid;
 
 use crate::actions::history::UndoHistory;
 use crate::model::graph::DialogueGraph;
+use crate::model::group::NodeGroup;
 use crate::model::node::Node;
 use crate::model::port::{PortDirection, PortId};
 use crate::ui::canvas::CanvasState;
@@ -27,9 +29,7 @@ enum InteractionState {
     #[default]
     Idle,
     /// Dragging one or more selected nodes.
-    DraggingNodes {
-        start_positions: Vec<(Uuid, [f32; 2])>,
-    },
+    DraggingNodes,
     /// Dragging a wire from a port.
     DraggingWire(DragWire),
     /// Box-selecting nodes.
@@ -72,6 +72,10 @@ pub struct TaleNodeApp {
     playtest: PlaytestState,
     /// Whether the playtest panel is visible.
     show_playtest: bool,
+    /// Last auto-save time.
+    last_auto_save: Instant,
+    /// Brief message shown in status bar.
+    status_message: Option<(String, Instant)>,
 }
 
 impl TaleNodeApp {
@@ -101,6 +105,8 @@ impl TaleNodeApp {
             dark_theme: true,
             playtest: PlaytestState::new(),
             show_playtest: false,
+            last_auto_save: Instant::now(),
+            status_message: None,
         }
     }
 
@@ -160,6 +166,9 @@ impl TaleNodeApp {
 
         // Draw grid
         self.canvas.draw_grid(&painter, canvas_rect);
+
+        // Draw groups (below connections and nodes)
+        self.draw_groups(&painter);
 
         // Draw connections (below nodes)
         draw_connections(&painter, &self.graph, &self.canvas, None);
@@ -259,14 +268,7 @@ impl TaleNodeApp {
                 }
                 // Snapshot before dragging for undo
                 self.snapshot();
-                let start_positions: Vec<(Uuid, [f32; 2])> = self
-                    .selected_nodes
-                    .iter()
-                    .filter_map(|id| {
-                        self.graph.nodes.get(id).map(|n| (*id, n.position))
-                    })
-                    .collect();
-                self.interaction = InteractionState::DraggingNodes { start_positions };
+                self.interaction = InteractionState::DraggingNodes;
             }
             // Empty space → box select
             else {
@@ -280,7 +282,7 @@ impl TaleNodeApp {
         // During drag
         if response.dragged_by(egui::PointerButton::Primary) {
             match &mut self.interaction {
-                InteractionState::DraggingNodes { .. } => {
+                InteractionState::DraggingNodes => {
                     let delta = response.drag_delta() / self.canvas.zoom;
                     let ids: Vec<Uuid> = self.selected_nodes.clone();
                     for id in ids {
@@ -408,6 +410,29 @@ impl TaleNodeApp {
                             close_menu = true;
                         }
                     }
+
+                    // Group actions
+                    if !self.selected_nodes.is_empty() {
+                        ui.separator();
+                        if ui.button("Group Selected").clicked() {
+                            self.snapshot();
+                            let mut group = NodeGroup::new("Group");
+                            group.node_ids = self.selected_nodes.clone();
+                            self.graph.groups.push(group);
+                            close_menu = true;
+                        }
+                        // Ungroup: remove any group containing all selected nodes
+                        let has_group = self.graph.groups.iter().any(|g| {
+                            self.selected_nodes.iter().any(|id| g.node_ids.contains(id))
+                        });
+                        if has_group && ui.button("Ungroup").clicked() {
+                            self.snapshot();
+                            self.graph.groups.retain(|g| {
+                                !self.selected_nodes.iter().any(|id| g.node_ids.contains(id))
+                            });
+                            close_menu = true;
+                        }
+                    }
                 });
             });
 
@@ -443,6 +468,35 @@ impl TaleNodeApp {
                 ui.separator();
                 if ui.button("Export JSON...").clicked() {
                     self.do_export_json();
+                    ui.close_menu();
+                }
+            });
+            ui.menu_button("Edit", |ui| {
+                if ui.add_enabled(self.history.can_undo(), egui::Button::new("Undo")).clicked() {
+                    if let Some(prev) = self.history.undo(&self.graph) {
+                        self.graph = prev;
+                        self.selected_nodes.clear();
+                    }
+                    ui.close_menu();
+                }
+                if ui.add_enabled(self.history.can_redo(), egui::Button::new("Redo")).clicked() {
+                    if let Some(next) = self.history.redo(&self.graph) {
+                        self.graph = next;
+                        self.selected_nodes.clear();
+                    }
+                    ui.close_menu();
+                }
+                ui.separator();
+                if ui.button("Select All").clicked() {
+                    self.selected_nodes = self.graph.nodes.keys().copied().collect();
+                    ui.close_menu();
+                }
+                if ui.add_enabled(!self.selected_nodes.is_empty(), egui::Button::new("Delete Selected")).clicked() {
+                    self.snapshot();
+                    let ids: Vec<Uuid> = self.selected_nodes.drain(..).collect();
+                    for id in ids {
+                        self.graph.remove_node(id);
+                    }
                     ui.close_menu();
                 }
             });
@@ -513,6 +567,8 @@ impl TaleNodeApp {
                         eprintln!("Failed to write file: {e}");
                     } else {
                         self.project_path = Some(path);
+                        self.status_message = Some(("Saved".to_string(), Instant::now()));
+                        self.last_auto_save = Instant::now();
                     }
                 }
                 Err(e) => {
@@ -594,6 +650,64 @@ impl TaleNodeApp {
                     -node.position[1] * self.canvas.zoom,
                 );
             }
+        }
+    }
+
+    fn draw_groups(&self, painter: &egui::Painter) {
+        for group in &self.graph.groups {
+            if group.node_ids.is_empty() {
+                continue;
+            }
+            // Compute bounding box of all nodes in the group
+            let mut min_x = f32::MAX;
+            let mut min_y = f32::MAX;
+            let mut max_x = f32::MIN;
+            let mut max_y = f32::MIN;
+
+            for &node_id in &group.node_ids {
+                if let Some(node) = self.graph.nodes.get(&node_id) {
+                    let rect = node_widget::node_rect(node);
+                    min_x = min_x.min(rect.min.x);
+                    min_y = min_y.min(rect.min.y);
+                    max_x = max_x.max(rect.max.x);
+                    max_y = max_y.max(rect.max.y);
+                }
+            }
+
+            if min_x >= max_x || min_y >= max_y {
+                continue;
+            }
+
+            // Add padding around the group
+            let pad = 20.0;
+            let group_rect = Rect::from_min_max(
+                Pos2::new(min_x - pad, min_y - pad - 20.0),
+                Pos2::new(max_x + pad, max_y + pad),
+            );
+            let screen_rect = self.canvas.canvas_rect_to_screen(group_rect);
+
+            let [r, g, b, a] = group.color;
+            painter.rect_filled(
+                screen_rect,
+                8.0,
+                Color32::from_rgba_premultiplied(r, g, b, a),
+            );
+            painter.rect_stroke(
+                screen_rect,
+                8.0,
+                Stroke::new(1.0, Color32::from_rgba_premultiplied(r, g, b, (a as u16 * 3).min(255) as u8)),
+                StrokeKind::Inside,
+            );
+
+            // Group label
+            let font_size = 12.0 * self.canvas.zoom;
+            painter.text(
+                Pos2::new(screen_rect.min.x + 8.0, screen_rect.min.y + 4.0),
+                egui::Align2::LEFT_TOP,
+                &group.name,
+                egui::FontId::proportional(font_size),
+                Color32::from_rgba_premultiplied(r, g, b, 200),
+            );
         }
     }
 
@@ -742,6 +856,14 @@ impl TaleNodeApp {
                 ui.label(format!("Selected: {}", self.selected_nodes.len()));
             }
 
+            // Status message (auto-save, etc.)
+            if let Some((ref msg, when)) = self.status_message {
+                if when.elapsed().as_secs() < 3 {
+                    ui.separator();
+                    ui.colored_label(Color32::from_rgb(100, 200, 100), msg);
+                }
+            }
+
             // Validation indicator (right-aligned)
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 let errors = self.validation_warnings.iter().filter(|w| w.severity == Severity::Error).count();
@@ -827,6 +949,13 @@ impl eframe::App for TaleNodeApp {
         // Run validation each frame (cheap for typical graph sizes)
         self.validation_warnings = validator::validate(&self.graph);
 
+        // Auto-save every 60 seconds if project has a save path
+        if self.project_path.is_some() && self.last_auto_save.elapsed().as_secs() >= 60 {
+            self.last_auto_save = Instant::now();
+            self.do_save(false);
+            self.status_message = Some(("Auto-saved".to_string(), Instant::now()));
+        }
+
         // Keyboard shortcuts
         if ctx.input(|i| i.modifiers.command && !i.modifiers.shift && i.key_pressed(egui::Key::S)) {
             self.do_save(false);
@@ -855,7 +984,7 @@ impl eframe::App for TaleNodeApp {
             self.selected_nodes.clear();
             self.project_name = "Untitled".to_string();
             self.project_path = None;
-            self.history = UndoHistory::new();
+            self.history.clear();
         }
         // Ctrl+A: select all nodes
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::A)) {
