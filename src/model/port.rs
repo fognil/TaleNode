@@ -75,5 +75,30 @@ mod tests {
     fn input_port_direction() {
         let p = Port::input();
         assert_eq!(p.direction, PortDirection::Input);
+        assert!(p.label.is_empty());
+    }
+
+    #[test]
+    fn output_port_direction() {
+        let p = Port::output();
+        assert_eq!(p.direction, PortDirection::Output);
+        assert!(p.label.is_empty());
+    }
+
+    #[test]
+    fn output_with_label_stores_label() {
+        let p = Port::output_with_label("True");
+        assert_eq!(p.direction, PortDirection::Output);
+        assert_eq!(p.label, "True");
+    }
+
+    #[test]
+    fn port_serialization_roundtrip() {
+        let p = Port::output_with_label("False");
+        let json = serde_json::to_string(&p).unwrap();
+        let loaded: Port = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded.id, p.id);
+        assert_eq!(loaded.direction, PortDirection::Output);
+        assert_eq!(loaded.label, "False");
     }
 }

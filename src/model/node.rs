@@ -461,4 +461,111 @@ mod tests {
         assert_eq!(deserialized.id, node.id);
         assert_eq!(deserialized.position, node.position);
     }
+
+    #[test]
+    fn title_all_node_types() {
+        assert_eq!(Node::new_choice([0.0, 0.0]).title(), "Choice");
+        assert_eq!(Node::new_condition([0.0, 0.0]).title(), "Condition");
+        assert_eq!(Node::new_event([0.0, 0.0]).title(), "Event");
+        assert_eq!(Node::new_random([0.0, 0.0]).title(), "Random");
+    }
+
+    #[test]
+    fn dialogue_title_uses_speaker_name() {
+        let mut node = Node::new_dialogue([0.0, 0.0]);
+        if let NodeType::Dialogue(ref mut d) = node.node_type {
+            d.speaker_name = "Guard".to_string();
+        }
+        assert_eq!(node.title(), "Guard");
+    }
+
+    #[test]
+    fn add_choice_on_non_choice_returns_none() {
+        let mut node = Node::new_dialogue([0.0, 0.0]);
+        assert!(node.add_choice().is_none());
+    }
+
+    #[test]
+    fn remove_choice_on_non_choice_returns_none() {
+        let mut node = Node::new_dialogue([0.0, 0.0]);
+        assert!(node.remove_choice(0).is_none());
+    }
+
+    #[test]
+    fn remove_last_choice_refused() {
+        let mut node = Node::new_choice([0.0, 0.0]);
+        // Remove first, leaving 1
+        node.remove_choice(0);
+        // Try to remove the last one — should be refused
+        assert!(node.remove_choice(0).is_none());
+    }
+
+    #[test]
+    fn remove_choice_out_of_bounds() {
+        let mut node = Node::new_choice([0.0, 0.0]);
+        assert!(node.remove_choice(99).is_none());
+    }
+
+    #[test]
+    fn add_choice_returns_port_uuid() {
+        let mut node = Node::new_choice([0.0, 0.0]);
+        let port_uuid = node.add_choice().unwrap();
+        // The returned UUID should match the last output port
+        assert_eq!(node.outputs.last().unwrap().id.0, port_uuid);
+    }
+
+    #[test]
+    fn add_random_branch_on_non_random_returns_none() {
+        let mut node = Node::new_dialogue([0.0, 0.0]);
+        assert!(node.add_random_branch().is_none());
+    }
+
+    #[test]
+    fn remove_random_branch_on_non_random_returns_none() {
+        let mut node = Node::new_dialogue([0.0, 0.0]);
+        assert!(node.remove_random_branch(0).is_none());
+    }
+
+    #[test]
+    fn remove_last_random_branch_refused() {
+        let mut node = Node::new_random([0.0, 0.0]);
+        node.remove_random_branch(0); // 2 -> 1
+        assert!(node.remove_random_branch(0).is_none()); // can't remove last
+    }
+
+    #[test]
+    fn remove_random_branch_out_of_bounds() {
+        let mut node = Node::new_random([0.0, 0.0]);
+        assert!(node.remove_random_branch(99).is_none());
+    }
+
+    #[test]
+    fn variable_value_default() {
+        assert_eq!(VariableValue::default(), VariableValue::Bool(false));
+    }
+
+    #[test]
+    fn compare_op_default() {
+        assert_eq!(CompareOp::default(), CompareOp::Eq);
+    }
+
+    #[test]
+    fn serialization_roundtrip_all_types() {
+        let nodes = vec![
+            Node::new_start([0.0, 0.0]),
+            Node::new_dialogue([0.0, 0.0]),
+            Node::new_choice([0.0, 0.0]),
+            Node::new_condition([0.0, 0.0]),
+            Node::new_event([0.0, 0.0]),
+            Node::new_random([0.0, 0.0]),
+            Node::new_end([0.0, 0.0]),
+        ];
+        for node in &nodes {
+            let json = serde_json::to_string(node).unwrap();
+            let loaded: Node = serde_json::from_str(&json).unwrap();
+            assert_eq!(loaded.id, node.id);
+            assert_eq!(loaded.inputs.len(), node.inputs.len());
+            assert_eq!(loaded.outputs.len(), node.outputs.len());
+        }
+    }
 }

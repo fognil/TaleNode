@@ -368,4 +368,257 @@ mod tests {
         assert!(values.contains(&&"dlg_1".to_string()));
         assert!(values.contains(&&"dlg_2".to_string()));
     }
+
+    #[test]
+    fn readable_id_prefixes_all_types() {
+        let mut graph = DialogueGraph::new();
+        graph.add_node(Node::new_start([0.0, 0.0]));
+        graph.add_node(Node::new_dialogue([0.0, 100.0]));
+        graph.add_node(Node::new_choice([0.0, 200.0]));
+        graph.add_node(Node::new_condition([0.0, 300.0]));
+        graph.add_node(Node::new_event([0.0, 400.0]));
+        graph.add_node(Node::new_random([0.0, 500.0]));
+        graph.add_node(Node::new_end([0.0, 600.0]));
+
+        let id_map = build_id_map(&graph);
+        let values: Vec<String> = id_map.values().cloned().collect();
+        assert!(values.contains(&"start_1".to_string()));
+        assert!(values.contains(&"dlg_1".to_string()));
+        assert!(values.contains(&"choice_1".to_string()));
+        assert!(values.contains(&"cond_1".to_string()));
+        assert!(values.contains(&"evt_1".to_string()));
+        assert!(values.contains(&"rand_1".to_string()));
+        assert!(values.contains(&"end_1".to_string()));
+    }
+
+    #[test]
+    fn export_choice_node() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let choice = Node::new_choice([200.0, 0.0]);
+        let end1 = Node::new_end([400.0, 0.0]);
+        let end2 = Node::new_end([400.0, 100.0]);
+
+        let s_out = start.outputs[0].id;
+        let c_in = choice.inputs[0].id;
+        let c_out0 = choice.outputs[0].id;
+        let c_out1 = choice.outputs[1].id;
+        let e1_in = end1.inputs[0].id;
+        let e2_in = end2.inputs[0].id;
+        let s_id = start.id;
+        let c_id = choice.id;
+        let e1_id = end1.id;
+        let e2_id = end2.id;
+
+        graph.add_node(start);
+        graph.add_node(choice);
+        graph.add_node(end1);
+        graph.add_node(end2);
+        graph.add_connection(s_id, s_out, c_id, c_in);
+        graph.add_connection(c_id, c_out0, e1_id, e1_in);
+        graph.add_connection(c_id, c_out1, e2_id, e2_in);
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        let nodes = parsed["nodes"].as_array().unwrap();
+        let choice_node = nodes.iter().find(|n| n["type"] == "choice").unwrap();
+        let options = choice_node["options"].as_array().unwrap();
+        assert_eq!(options.len(), 2);
+        assert!(options[0]["next"].as_str().is_some());
+        assert!(options[1]["next"].as_str().is_some());
+    }
+
+    #[test]
+    fn export_condition_node() {
+        use crate::model::node::NodeType;
+
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let mut cond = Node::new_condition([200.0, 0.0]);
+        if let NodeType::Condition(ref mut d) = cond.node_type {
+            d.variable_name = "gold".to_string();
+            d.operator = CompareOp::Gte;
+            d.value = VariableValue::Int(100);
+        }
+        let end_t = Node::new_end([400.0, 0.0]);
+        let end_f = Node::new_end([400.0, 100.0]);
+
+        let s_out = start.outputs[0].id;
+        let c_in = cond.inputs[0].id;
+        let c_true = cond.outputs[0].id;
+        let c_false = cond.outputs[1].id;
+        let et_in = end_t.inputs[0].id;
+        let ef_in = end_f.inputs[0].id;
+        let s_id = start.id;
+        let c_id = cond.id;
+        let et_id = end_t.id;
+        let ef_id = end_f.id;
+
+        graph.add_node(start);
+        graph.add_node(cond);
+        graph.add_node(end_t);
+        graph.add_node(end_f);
+        graph.add_connection(s_id, s_out, c_id, c_in);
+        graph.add_connection(c_id, c_true, et_id, et_in);
+        graph.add_connection(c_id, c_false, ef_id, ef_in);
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        let nodes = parsed["nodes"].as_array().unwrap();
+        let cond_node = nodes.iter().find(|n| n["type"] == "condition").unwrap();
+        assert_eq!(cond_node["variable"], "gold");
+        assert_eq!(cond_node["operator"], ">=");
+        assert_eq!(cond_node["value"], 100);
+        assert!(cond_node["true_next"].as_str().is_some());
+        assert!(cond_node["false_next"].as_str().is_some());
+    }
+
+    #[test]
+    fn export_event_node() {
+        use crate::model::node::{EventAction, EventActionType, NodeType};
+
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let mut evt = Node::new_event([200.0, 0.0]);
+        if let NodeType::Event(ref mut e) = evt.node_type {
+            e.actions.push(EventAction {
+                action_type: EventActionType::SetVariable,
+                key: "has_key".to_string(),
+                value: VariableValue::Bool(true),
+            });
+        }
+        let end = Node::new_end([400.0, 0.0]);
+
+        let s_out = start.outputs[0].id;
+        let e_in = evt.inputs[0].id;
+        let e_out = evt.outputs[0].id;
+        let end_in = end.inputs[0].id;
+        let s_id = start.id;
+        let e_id = evt.id;
+        let end_id = end.id;
+
+        graph.add_node(start);
+        graph.add_node(evt);
+        graph.add_node(end);
+        graph.add_connection(s_id, s_out, e_id, e_in);
+        graph.add_connection(e_id, e_out, end_id, end_in);
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        let nodes = parsed["nodes"].as_array().unwrap();
+        let evt_node = nodes.iter().find(|n| n["type"] == "event").unwrap();
+        let actions = evt_node["actions"].as_array().unwrap();
+        assert_eq!(actions.len(), 1);
+        assert_eq!(actions[0]["key"], "has_key");
+        assert_eq!(actions[0]["value"], true);
+    }
+
+    #[test]
+    fn export_random_node() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let rand = Node::new_random([200.0, 0.0]);
+        let end1 = Node::new_end([400.0, 0.0]);
+        let end2 = Node::new_end([400.0, 100.0]);
+
+        let s_out = start.outputs[0].id;
+        let r_in = rand.inputs[0].id;
+        let r_out0 = rand.outputs[0].id;
+        let r_out1 = rand.outputs[1].id;
+        let e1_in = end1.inputs[0].id;
+        let e2_in = end2.inputs[0].id;
+        let s_id = start.id;
+        let r_id = rand.id;
+        let e1_id = end1.id;
+        let e2_id = end2.id;
+
+        graph.add_node(start);
+        graph.add_node(rand);
+        graph.add_node(end1);
+        graph.add_node(end2);
+        graph.add_connection(s_id, s_out, r_id, r_in);
+        graph.add_connection(r_id, r_out0, e1_id, e1_in);
+        graph.add_connection(r_id, r_out1, e2_id, e2_in);
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        let nodes = parsed["nodes"].as_array().unwrap();
+        let rand_node = nodes.iter().find(|n| n["type"] == "random").unwrap();
+        let branches = rand_node["branches"].as_array().unwrap();
+        assert_eq!(branches.len(), 2);
+        assert_eq!(branches[0]["weight"], 0.5);
+        assert!(branches[0]["next"].as_str().is_some());
+    }
+
+    #[test]
+    fn export_unconnected_output_is_null() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        graph.add_node(start);
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        let nodes = parsed["nodes"].as_array().unwrap();
+        let start_node = nodes.iter().find(|n| n["type"] == "start").unwrap();
+        assert!(start_node["next"].is_null());
+    }
+
+    #[test]
+    fn export_empty_graph() {
+        let graph = DialogueGraph::new();
+        let json = export_json(&graph, "empty").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed["version"], "1.0");
+        assert_eq!(parsed["name"], "empty");
+        assert_eq!(parsed["nodes"].as_array().unwrap().len(), 0);
+    }
+
+    #[test]
+    fn export_with_variables() {
+        use crate::model::variable::Variable;
+
+        let mut graph = DialogueGraph::new();
+        graph.variables.push(Variable::new_bool("flag", true));
+        graph.variables.push(Variable::new_int("score", 99));
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        let vars = parsed["variables"].as_array().unwrap();
+        assert_eq!(vars.len(), 2);
+        assert_eq!(vars[0]["name"], "flag");
+        assert_eq!(vars[0]["default"], true);
+        assert_eq!(vars[1]["name"], "score");
+        assert_eq!(vars[1]["default"], 99);
+    }
+
+    #[test]
+    fn export_with_characters() {
+        use crate::model::character::Character;
+
+        let mut graph = DialogueGraph::new();
+        let ch = Character::new("Hero");
+        graph.characters.push(ch);
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        let chars = parsed["characters"].as_array().unwrap();
+        assert_eq!(chars.len(), 1);
+        assert_eq!(chars[0]["name"], "Hero");
+        assert_eq!(chars[0]["id"], "char_1");
+        // Color should be hex format
+        let color = chars[0]["color"].as_str().unwrap();
+        assert!(color.starts_with('#'));
+        assert_eq!(color.len(), 7);
+    }
+
+    #[test]
+    fn export_no_positions_in_output() {
+        let mut graph = DialogueGraph::new();
+        graph.add_node(Node::new_start([123.0, 456.0]));
+
+        let json = export_json(&graph, "test").unwrap();
+        assert!(!json.contains("position"));
+        assert!(!json.contains("123"));
+        assert!(!json.contains("456"));
+    }
 }

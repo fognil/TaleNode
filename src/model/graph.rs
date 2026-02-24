@@ -208,4 +208,126 @@ mod tests {
         assert_eq!(removed_conns.len(), 1);
         assert!(graph.connections.is_empty());
     }
+
+    #[test]
+    fn remove_nonexistent_node_returns_none() {
+        let mut graph = DialogueGraph::new();
+        assert!(graph.remove_node(Uuid::new_v4()).is_none());
+    }
+
+    #[test]
+    fn remove_connection_basic() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let end = Node::new_end([200.0, 0.0]);
+        let start_out = start.outputs[0].id;
+        let end_in = end.inputs[0].id;
+        let start_id = start.id;
+        let end_id = end.id;
+        graph.add_node(start);
+        graph.add_node(end);
+        graph.add_connection(start_id, start_out, end_id, end_in);
+
+        let conn_id = graph.connections[0].id;
+        let removed = graph.remove_connection(conn_id).unwrap();
+        assert_eq!(removed.id, conn_id);
+        assert!(graph.connections.is_empty());
+    }
+
+    #[test]
+    fn remove_nonexistent_connection_returns_none() {
+        let mut graph = DialogueGraph::new();
+        assert!(graph.remove_connection(Uuid::new_v4()).is_none());
+    }
+
+    #[test]
+    fn find_port_node_input() {
+        let mut graph = DialogueGraph::new();
+        let dlg = Node::new_dialogue([0.0, 0.0]);
+        let dlg_id = dlg.id;
+        let in_port = dlg.inputs[0].id;
+        graph.add_node(dlg);
+
+        let (node_id, dir) = graph.find_port_node(in_port).unwrap();
+        assert_eq!(node_id, dlg_id);
+        assert_eq!(dir, PortDirection::Input);
+    }
+
+    #[test]
+    fn find_port_node_output() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let start_id = start.id;
+        let out_port = start.outputs[0].id;
+        graph.add_node(start);
+
+        let (node_id, dir) = graph.find_port_node(out_port).unwrap();
+        assert_eq!(node_id, start_id);
+        assert_eq!(dir, PortDirection::Output);
+    }
+
+    #[test]
+    fn find_port_node_nonexistent() {
+        let graph = DialogueGraph::new();
+        assert!(graph.find_port_node(PortId::new()).is_none());
+    }
+
+    #[test]
+    fn duplicate_input_port_rejected() {
+        let mut graph = DialogueGraph::new();
+        let start1 = Node::new_start([0.0, 0.0]);
+        let start2 = Node::new_start([0.0, 100.0]);
+        let dlg = Node::new_dialogue([200.0, 0.0]);
+
+        let s1_out = start1.outputs[0].id;
+        let s2_out = start2.outputs[0].id;
+        let dlg_in = dlg.inputs[0].id;
+        let s1_id = start1.id;
+        let s2_id = start2.id;
+        let dlg_id = dlg.id;
+
+        graph.add_node(start1);
+        graph.add_node(start2);
+        graph.add_node(dlg);
+
+        // First connection succeeds
+        assert!(graph.add_connection(s1_id, s1_out, dlg_id, dlg_in));
+        // Same input port from different source — rejected
+        assert!(!graph.add_connection(s2_id, s2_out, dlg_id, dlg_in));
+    }
+
+    #[test]
+    fn invalid_port_ids_rejected() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let dlg = Node::new_dialogue([200.0, 0.0]);
+        let start_id = start.id;
+        let dlg_id = dlg.id;
+        graph.add_node(start);
+        graph.add_node(dlg);
+
+        // Use fake port IDs
+        assert!(!graph.add_connection(start_id, PortId::new(), dlg_id, PortId::new()));
+    }
+
+    #[test]
+    fn connection_with_nonexistent_nodes_rejected() {
+        let mut graph = DialogueGraph::new();
+        assert!(!graph.add_connection(
+            Uuid::new_v4(),
+            PortId::new(),
+            Uuid::new_v4(),
+            PortId::new()
+        ));
+    }
+
+    #[test]
+    fn graph_serialization_roundtrip() {
+        let mut graph = DialogueGraph::new();
+        graph.add_node(Node::new_start([10.0, 20.0]));
+        graph.add_node(Node::new_dialogue([30.0, 40.0]));
+        let json = serde_json::to_string(&graph).unwrap();
+        let loaded: DialogueGraph = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded.nodes.len(), 2);
+    }
 }

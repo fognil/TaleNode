@@ -224,4 +224,131 @@ mod tests {
         let warnings = validate(&graph);
         assert!(warnings.iter().any(|w| w.message.contains("dead end")));
     }
+
+    #[test]
+    fn multiple_start_nodes_warning() {
+        let mut graph = DialogueGraph::new();
+        graph.add_node(Node::new_start([0.0, 0.0]));
+        graph.add_node(Node::new_start([200.0, 0.0]));
+
+        let warnings = validate(&graph);
+        assert!(warnings
+            .iter()
+            .any(|w| w.message.contains("Multiple Start") && w.severity == Severity::Warning));
+    }
+
+    #[test]
+    fn empty_dialogue_warning() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let dlg = Node::new_dialogue([200.0, 0.0]); // empty text
+        let end = Node::new_end([400.0, 0.0]);
+
+        let s_out = start.outputs[0].id;
+        let d_in = dlg.inputs[0].id;
+        let d_out = dlg.outputs[0].id;
+        let e_in = end.inputs[0].id;
+        let s_id = start.id;
+        let d_id = dlg.id;
+        let e_id = end.id;
+
+        graph.add_node(start);
+        graph.add_node(dlg);
+        graph.add_node(end);
+        graph.add_connection(s_id, s_out, d_id, d_in);
+        graph.add_connection(d_id, d_out, e_id, e_in);
+
+        let warnings = validate(&graph);
+        assert!(warnings.iter().any(|w| w.message.contains("empty text")));
+    }
+
+    #[test]
+    fn whitespace_only_dialogue_warning() {
+        let mut graph = DialogueGraph::new();
+        let mut dlg = Node::new_dialogue([200.0, 0.0]);
+        if let NodeType::Dialogue(ref mut d) = dlg.node_type {
+            d.text = "   \n  ".to_string();
+        }
+        graph.add_node(Node::new_start([0.0, 0.0]));
+        graph.add_node(dlg);
+
+        let warnings = validate(&graph);
+        assert!(warnings.iter().any(|w| w.message.contains("empty text")));
+    }
+
+    #[test]
+    fn disconnected_output_warning() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let choice = Node::new_choice([200.0, 0.0]);
+        let end = Node::new_end([400.0, 0.0]);
+
+        let s_out = start.outputs[0].id;
+        let c_in = choice.inputs[0].id;
+        let c_out0 = choice.outputs[0].id;
+        // c_out1 is NOT connected
+        let e_in = end.inputs[0].id;
+        let s_id = start.id;
+        let c_id = choice.id;
+        let e_id = end.id;
+
+        graph.add_node(start);
+        graph.add_node(choice);
+        graph.add_node(end);
+        graph.add_connection(s_id, s_out, c_id, c_in);
+        graph.add_connection(c_id, c_out0, e_id, e_in);
+
+        let warnings = validate(&graph);
+        assert!(warnings
+            .iter()
+            .any(|w| w.message.contains("unconnected output")));
+    }
+
+    #[test]
+    fn fully_connected_graph_no_errors() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let mut dlg = Node::new_dialogue([200.0, 0.0]);
+        if let NodeType::Dialogue(ref mut d) = dlg.node_type {
+            d.text = "Hello!".to_string();
+        }
+        let end = Node::new_end([400.0, 0.0]);
+
+        let s_out = start.outputs[0].id;
+        let d_in = dlg.inputs[0].id;
+        let d_out = dlg.outputs[0].id;
+        let e_in = end.inputs[0].id;
+        let s_id = start.id;
+        let d_id = dlg.id;
+        let e_id = end.id;
+
+        graph.add_node(start);
+        graph.add_node(dlg);
+        graph.add_node(end);
+        graph.add_connection(s_id, s_out, d_id, d_in);
+        graph.add_connection(d_id, d_out, e_id, e_in);
+
+        let warnings = validate(&graph);
+        assert!(warnings.is_empty(), "Expected no warnings, got: {warnings:?}");
+    }
+
+    #[test]
+    fn end_node_no_dead_end_or_disconnected_warning() {
+        let mut graph = DialogueGraph::new();
+        let start = Node::new_start([0.0, 0.0]);
+        let end = Node::new_end([200.0, 0.0]);
+        let s_out = start.outputs[0].id;
+        let e_in = end.inputs[0].id;
+        let s_id = start.id;
+        let e_id = end.id;
+        graph.add_node(start);
+        graph.add_node(end);
+        graph.add_connection(s_id, s_out, e_id, e_in);
+
+        let warnings = validate(&graph);
+        // End node should not trigger "dead end" or "disconnected output"
+        assert!(!warnings
+            .iter()
+            .any(|w| w.message.contains("dead end") || w.message.contains("unconnected")));
+    }
 }

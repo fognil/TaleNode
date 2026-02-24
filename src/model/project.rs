@@ -52,6 +52,59 @@ mod tests {
     }
 
     #[test]
+    fn default_project_values() {
+        let p = Project::default();
+        assert_eq!(p.version, "1.0");
+        assert_eq!(p.name, "Untitled");
+        assert!(p.graph.nodes.is_empty());
+        assert!(p.graph.connections.is_empty());
+    }
+
+    #[test]
+    fn load_invalid_json_returns_err() {
+        assert!(Project::load_from_string("not json").is_err());
+    }
+
+    #[test]
+    fn load_empty_string_returns_err() {
+        assert!(Project::load_from_string("").is_err());
+    }
+
+    #[test]
+    fn roundtrip_with_variables_and_characters() {
+        let mut project = Project::default();
+        project.graph.variables.push(Variable::new_bool("flag", true));
+        project
+            .graph
+            .characters
+            .push(Character::new("Merchant"));
+
+        let json = project.save_to_string().unwrap();
+        let loaded = Project::load_from_string(&json).unwrap();
+        assert_eq!(loaded.graph.variables.len(), 1);
+        assert_eq!(loaded.graph.characters.len(), 1);
+        assert_eq!(loaded.graph.characters[0].name, "Merchant");
+    }
+
+    #[test]
+    fn backward_compat_missing_optional_fields() {
+        // Minimal JSON with no variables, characters, or groups
+        let json = r#"{
+            "version": "1.0",
+            "name": "Old Project",
+            "graph": {
+                "nodes": {},
+                "connections": []
+            }
+        }"#;
+        let loaded = Project::load_from_string(json).unwrap();
+        assert_eq!(loaded.name, "Old Project");
+        assert!(loaded.graph.variables.is_empty());
+        assert!(loaded.graph.characters.is_empty());
+        assert!(loaded.graph.groups.is_empty());
+    }
+
+    #[test]
     #[ignore] // Run manually: cargo test generate_example -- --ignored
     fn generate_example_project() {
         let mut graph = crate::model::graph::DialogueGraph::new();
