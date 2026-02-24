@@ -248,12 +248,14 @@ impl TaleNodeApp {
             self.interaction = InteractionState::Idle;
         }
 
-        // Click on empty space to deselect
-        if response.clicked()
-            && matches!(self.interaction, InteractionState::Idle)
-            && self.node_at_screen_pos(pointer_pos).is_none()
-        {
-            self.selected_nodes.clear();
+        // Click to select node or deselect on empty space
+        if response.clicked() && matches!(self.interaction, InteractionState::Idle) {
+            if let Some(node_id) = self.node_at_screen_pos(pointer_pos) {
+                self.selected_nodes.clear();
+                self.selected_nodes.push(node_id);
+            } else {
+                self.selected_nodes.clear();
+            }
         }
 
         // Delete selected nodes
