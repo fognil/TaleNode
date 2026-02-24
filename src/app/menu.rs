@@ -77,6 +77,10 @@ impl TaleNodeApp {
                     self.do_import_chatmapper();
                     ui.close_menu();
                 }
+                if ui.button("Import from articy...").clicked() {
+                    self.do_import_articy();
+                    ui.close_menu();
+                }
             });
             ui.menu_button("Edit", |ui| {
                 if ui

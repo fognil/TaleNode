@@ -230,6 +230,38 @@ impl TaleNodeApp {
         }
     }
 
+    pub(super) fn do_import_articy(&mut self) {
+        let file = rfd::FileDialog::new()
+            .add_filter("articy:draft XML", &["xml"])
+            .pick_file();
+        if let Some(path) = file {
+            match std::fs::read_to_string(&path) {
+                Ok(contents) => {
+                    match crate::import::articy_import::import_articy(&contents) {
+                        Ok(graph) => {
+                            self.graph = graph;
+                            self.selected_nodes.clear();
+                            self.project_name = path
+                                .file_stem()
+                                .map(|s| s.to_string_lossy().to_string())
+                                .unwrap_or_else(|| "Imported".to_string());
+                            self.project_path = None;
+                            self.history.clear();
+                            self.status_message =
+                                Some(("Imported from articy".to_string(), Instant::now()));
+                        }
+                        Err(e) => {
+                            eprintln!("Failed to import articy: {e}");
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Failed to read file: {e}");
+                }
+            }
+        }
+    }
+
     /// Handle New Project: reset graph, clear state.
     pub(super) fn do_new_project(&mut self) {
         self.graph = DialogueGraph::new();
