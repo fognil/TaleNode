@@ -27,6 +27,8 @@ pub struct DialogueGraph {
     pub review_statuses: HashMap<Uuid, ReviewStatus>,
     #[serde(default)]
     pub comments: Vec<NodeComment>,
+    #[serde(default)]
+    pub node_tags: HashMap<Uuid, Vec<String>>,
 }
 
 impl Default for DialogueGraph {
@@ -45,6 +47,7 @@ impl DialogueGraph {
             groups: Vec::new(),
             review_statuses: HashMap::new(),
             comments: Vec::new(),
+            node_tags: HashMap::new(),
         }
     }
 
@@ -65,6 +68,7 @@ impl DialogueGraph {
                 .retain(|c| c.from_node != node_id && c.to_node != node_id);
             self.review_statuses.remove(&node_id);
             self.comments.retain(|c| c.node_id != node_id);
+            self.node_tags.remove(&node_id);
             Some((node, removed))
         } else {
             None
@@ -157,6 +161,29 @@ impl DialogueGraph {
             }
         }
         None
+    }
+
+    pub fn get_tags(&self, node_id: Uuid) -> &[String] {
+        self.node_tags
+            .get(&node_id)
+            .map(|v| v.as_slice())
+            .unwrap_or(&[])
+    }
+
+    pub fn add_tag(&mut self, node_id: Uuid, tag: String) {
+        let tags = self.node_tags.entry(node_id).or_default();
+        if !tags.contains(&tag) {
+            tags.push(tag);
+        }
+    }
+
+    pub fn remove_tag(&mut self, node_id: Uuid, tag: &str) {
+        if let Some(tags) = self.node_tags.get_mut(&node_id) {
+            tags.retain(|t| t != tag);
+            if tags.is_empty() {
+                self.node_tags.remove(&node_id);
+            }
+        }
     }
 }
 
@@ -269,34 +296,19 @@ mod tests {
     }
 
     #[test]
-    fn find_port_node_input() {
+    fn find_port_node() {
         let mut graph = DialogueGraph::new();
         let dlg = Node::new_dialogue([0.0, 0.0]);
         let dlg_id = dlg.id;
         let in_port = dlg.inputs[0].id;
+        let out_port = dlg.outputs[0].id;
         graph.add_node(dlg);
-
-        let (node_id, dir) = graph.find_port_node(in_port).unwrap();
-        assert_eq!(node_id, dlg_id);
+        let (nid, dir) = graph.find_port_node(in_port).unwrap();
+        assert_eq!(nid, dlg_id);
         assert_eq!(dir, PortDirection::Input);
-    }
-
-    #[test]
-    fn find_port_node_output() {
-        let mut graph = DialogueGraph::new();
-        let start = Node::new_start([0.0, 0.0]);
-        let start_id = start.id;
-        let out_port = start.outputs[0].id;
-        graph.add_node(start);
-
-        let (node_id, dir) = graph.find_port_node(out_port).unwrap();
-        assert_eq!(node_id, start_id);
+        let (nid, dir) = graph.find_port_node(out_port).unwrap();
+        assert_eq!(nid, dlg_id);
         assert_eq!(dir, PortDirection::Output);
-    }
-
-    #[test]
-    fn find_port_node_nonexistent() {
-        let graph = DialogueGraph::new();
         assert!(graph.find_port_node(PortId::new()).is_none());
     }
 
@@ -341,12 +353,8 @@ mod tests {
     #[test]
     fn connection_with_nonexistent_nodes_rejected() {
         let mut graph = DialogueGraph::new();
-        assert!(!graph.add_connection(
-            Uuid::new_v4(),
-            PortId::new(),
-            Uuid::new_v4(),
-            PortId::new()
-        ));
+        let (a, b) = (Uuid::new_v4(), Uuid::new_v4());
+        assert!(!graph.add_connection(a, PortId::new(), b, PortId::new()));
     }
 
     #[test]
@@ -357,5 +365,26 @@ mod tests {
         let json = serde_json::to_string(&graph).unwrap();
         let loaded: DialogueGraph = serde_json::from_str(&json).unwrap();
         assert_eq!(loaded.nodes.len(), 2);
+    }
+
+    #[test]
+    fn node_tags_add_remove_and_cleanup() {
+        let mut graph = DialogueGraph::new();
+        let node = Node::new_dialogue([0.0, 0.0]);
+        let id = node.id;
+        graph.add_node(node);
+        graph.add_tag(id, "important".to_string());
+        graph.add_tag(id, "quest".to_string());
+        assert_eq!(graph.get_tags(id).len(), 2);
+        graph.add_tag(id, "important".to_string()); // duplicate ignored
+        assert_eq!(graph.get_tags(id).len(), 2);
+        graph.remove_tag(id, "important");
+        assert_eq!(graph.get_tags(id), &["quest"]);
+        graph.remove_tag(id, "quest");
+        assert!(!graph.node_tags.contains_key(&id));
+        // remove_node also cleans up tags
+        graph.add_tag(id, "test".to_string());
+        graph.remove_node(id);
+        assert!(!graph.node_tags.contains_key(&id));
     }
 }

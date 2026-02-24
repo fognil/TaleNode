@@ -1,6 +1,7 @@
 mod canvas;
 mod file_io;
 mod menu;
+mod panel_handlers;
 mod panels;
 mod search;
 
@@ -85,6 +86,14 @@ pub struct TaleNodeApp {
     status_message: Option<(String, Instant)>,
     /// Batch audio assignment state.
     audio_manager: crate::ui::audio_manager::AudioManagerState,
+    /// Whether the bookmark panel is visible.
+    show_bookmark_panel: bool,
+    /// Tag filter for bookmark panel.
+    bookmark_tag_filter: Option<String>,
+    /// Text input for new tag in bookmark panel.
+    bookmark_new_tag_text: String,
+    /// Text input for new tag in inspector.
+    inspector_new_tag_text: String,
     /// Whether the comments panel is visible.
     show_comments_panel: bool,
     /// Filter for the comments panel.
@@ -125,6 +134,10 @@ impl TaleNodeApp {
             last_auto_save: Instant::now(),
             status_message: None,
             audio_manager: Default::default(),
+            show_bookmark_panel: false,
+            bookmark_tag_filter: None,
+            bookmark_new_tag_text: String::new(),
+            inspector_new_tag_text: String::new(),
             show_comments_panel: false,
             comments_filter: None,
             comment_target_node: None,
@@ -238,53 +251,8 @@ impl eframe::App for TaleNodeApp {
             self.show_status_bar(ui);
         });
 
-        // Comments panel (above status bar)
-        if self.show_comments_panel {
-            if let Some(first) = self.selected_nodes.first() {
-                self.comment_target_node = Some(*first);
-            }
-            egui::TopBottomPanel::bottom("comments_panel")
-                .resizable(true)
-                .default_height(180.0)
-                .show(ctx, |ui| {
-                    let action = crate::ui::comments_panel::show_comments_panel(
-                        ui,
-                        &self.graph,
-                        &mut self.comments_filter,
-                        &mut self.comment_target_node,
-                        &mut self.new_comment_text,
-                    );
-                    match action {
-                        crate::ui::comments_panel::CommentsPanelAction::Navigate(
-                            node_id,
-                        ) => {
-                            self.selected_nodes = vec![node_id];
-                            if let Some(node) = self.graph.nodes.get(&node_id) {
-                                self.canvas.pan_offset = egui::Vec2::new(
-                                    -node.position[0] * self.canvas.zoom,
-                                    -node.position[1] * self.canvas.zoom,
-                                );
-                            }
-                        }
-                        crate::ui::comments_panel::CommentsPanelAction::AddComment(
-                            node_id,
-                            text,
-                        ) => {
-                            self.snapshot();
-                            let comment =
-                                crate::model::review::NodeComment::new(node_id, text);
-                            self.graph.comments.push(comment);
-                        }
-                        crate::ui::comments_panel::CommentsPanelAction::DeleteComment(
-                            comment_id,
-                        ) => {
-                            self.snapshot();
-                            self.graph.comments.retain(|c| c.id != comment_id);
-                        }
-                        crate::ui::comments_panel::CommentsPanelAction::None => {}
-                    }
-                });
-        }
+        // Comments + Bookmark panels
+        self.show_bottom_panels(ctx);
 
         // Validation panel (above status bar)
         if self.show_validation_panel {
@@ -350,6 +318,7 @@ impl eframe::App for TaleNodeApp {
                             ui,
                             &mut self.graph,
                             selected_id,
+                            &mut self.inspector_new_tag_text,
                         );
                         if changed {
                             self.history.push_undo(pre_graph);

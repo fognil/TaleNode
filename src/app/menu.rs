@@ -181,6 +181,12 @@ impl TaleNodeApp {
                 {
                     ui.close_menu();
                 }
+                if ui
+                    .checkbox(&mut self.show_bookmark_panel, "Bookmark Panel")
+                    .changed()
+                {
+                    ui.close_menu();
+                }
                 ui.separator();
                 if ui
                     .button(if self.dark_theme {

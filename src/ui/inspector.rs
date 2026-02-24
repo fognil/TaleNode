@@ -20,7 +20,12 @@ enum DeferredAction {
 
 /// Draw the inspector panel for the currently selected node.
 /// Returns `true` when an undo-worthy event starts (caller should snapshot).
-pub fn show_inspector(ui: &mut Ui, graph: &mut DialogueGraph, selected: Uuid) -> bool {
+pub fn show_inspector(
+    ui: &mut Ui,
+    graph: &mut DialogueGraph,
+    selected: Uuid,
+    new_tag_text: &mut String,
+) -> bool {
     let mut deferred = DeferredAction::None;
     let mut snapshot_needed = false;
 
@@ -125,6 +130,33 @@ pub fn show_inspector(ui: &mut Ui, graph: &mut DialogueGraph, selected: Uuid) ->
         }
         DeferredAction::None => {}
     }
+
+    // Tags section
+    ui.add_space(8.0);
+    ui.separator();
+    ui.heading("Tags");
+    let tags = graph.get_tags(selected).to_vec();
+    ui.horizontal_wrapped(|ui| {
+        let mut tag_to_remove = None;
+        for tag in &tags {
+            ui.label(tag.as_str());
+            if ui.small_button("x").clicked() {
+                tag_to_remove = Some(tag.clone());
+                snapshot_needed = true;
+            }
+        }
+        if let Some(tag) = tag_to_remove {
+            graph.remove_tag(selected, &tag);
+        }
+    });
+    ui.horizontal(|ui| {
+        ui.text_edit_singleline(new_tag_text);
+        if ui.button("+").clicked() && !new_tag_text.trim().is_empty() {
+            graph.add_tag(selected, new_tag_text.trim().to_string());
+            *new_tag_text = String::new();
+            snapshot_needed = true;
+        }
+    });
 
     // Review section
     ui.add_space(8.0);

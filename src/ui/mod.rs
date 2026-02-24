@@ -1,4 +1,5 @@
 pub mod audio_manager;
+pub mod bookmark_panel;
 pub mod canvas;
 pub mod comments_panel;
 pub mod connection_renderer;

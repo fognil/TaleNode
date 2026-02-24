@@ -16,7 +16,7 @@ impl TaleNodeApp {
             return;
         }
         for node in self.graph.nodes.values() {
-            if node_matches_query(node, &query) {
+            if node_matches_query(node, &query, &self.graph) {
                 self.search_results.push(node.id);
             }
         }
@@ -156,8 +156,19 @@ impl TaleNodeApp {
     }
 }
 
-fn node_matches_query(node: &Node, query: &str) -> bool {
+fn node_matches_query(
+    node: &Node,
+    query: &str,
+    graph: &crate::model::graph::DialogueGraph,
+) -> bool {
     use crate::model::node::NodeType;
+
+    // Check tags first
+    for tag in graph.get_tags(node.id) {
+        if tag.to_lowercase().contains(query) {
+            return true;
+        }
+    }
 
     if node.title().to_lowercase().contains(query) {
         return true;
