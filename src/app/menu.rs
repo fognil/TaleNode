@@ -68,6 +68,11 @@ impl TaleNodeApp {
                     self.audio_manager.open = true;
                     ui.close_menu();
                 }
+                ui.separator();
+                if ui.button("Import from Yarn...").clicked() {
+                    self.do_import_yarn();
+                    ui.close_menu();
+                }
             });
             ui.menu_button("Edit", |ui| {
                 if ui
