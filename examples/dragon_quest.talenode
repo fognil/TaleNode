@@ -1,0 +1,617 @@
+{
+  "version": "1.0",
+  "name": "Dragon Quest Example",
+  "graph": {
+    "nodes": {
+      "96ac3772-af94-4f6f-b459-3a30e8c4695f": {
+        "id": "96ac3772-af94-4f6f-b459-3a30e8c4695f",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
+            "speaker_name": "Village Elder",
+            "text": "Welcome, traveler! Our village is in danger. A dragon has been spotted near the northern caves.",
+            "emotion": "worried",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          400.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "04e445cc-14d8-47e3-b9ca-cd2d54f1cc22",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "c4a6189f-05ae-4cf7-9e70-7f588b60d12f",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "ff70c236-9526-44ae-b5a8-f96b2c2fdac5": {
+        "id": "ff70c236-9526-44ae-b5a8-f96b2c2fdac5",
+        "node_type": {
+          "End": {
+            "tag": "bought_supplies"
+          }
+        },
+        "position": [
+          2550.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "a7e651dc-59bb-4412-bc61-2709b1697ffd",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e": {
+        "id": "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e",
+        "node_type": "Start",
+        "position": [
+          100.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "5c2cb39b-2c52-4975-b842-d111bcd8381c",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b": {
+        "id": "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b",
+        "node_type": {
+          "End": {
+            "tag": "declined"
+          }
+        },
+        "position": [
+          1500.0,
+          650.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "2b54a1ef-6fa7-4b33-ab2c-f99594fce10d",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "8b3352ac-50f3-40d0-8df3-08867c3dac60": {
+        "id": "8b3352ac-50f3-40d0-8df3-08867c3dac60",
+        "node_type": {
+          "Event": {
+            "actions": [
+              {
+                "action_type": "SetVariable",
+                "key": "has_sword",
+                "value": {
+                  "Bool": true
+                }
+              }
+            ]
+          }
+        },
+        "position": [
+          1850.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "767ac9c7-cc77-47f5-9413-43e6495987ce",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "5204af07-4dcd-4677-9ad7-b35fbc4e39af",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35": {
+        "id": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
+            "speaker_name": "Merchant",
+            "text": "Here's your sword! Good luck on your quest.",
+            "emotion": "neutral",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          2200.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "15bab2dc-4947-4f1a-9e7d-68adf48d8021",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "e365d5fb-6c9d-46b3-be06-331d54112289",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "ef7f14f4-57e5-47dc-8936-b4464627e039": {
+        "id": "ef7f14f4-57e5-47dc-8936-b4464627e039",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
+            "speaker_name": "Merchant",
+            "text": "Welcome to my shop! I have swords and potions. What do you need?",
+            "emotion": "happy",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1150.0,
+          400.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "311d68fb-2fc9-44d3-abe7-2cffdb3b8409",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "4b3d3249-daf3-428e-b223-aee03c60275b",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "08457b20-8422-4177-831d-f631d82810ea": {
+        "id": "08457b20-8422-4177-831d-f631d82810ea",
+        "node_type": {
+          "End": {
+            "tag": "no_gold"
+          }
+        },
+        "position": [
+          2200.0,
+          550.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "57064afa-5d50-42ef-a905-70f82a0725f0",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "bae46683-9995-4b7f-959c-323a5041dc27": {
+        "id": "bae46683-9995-4b7f-959c-323a5041dc27",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
+            "speaker_name": "Village Elder",
+            "text": "You are brave indeed! Head north through the forest. Be careful!",
+            "emotion": "happy",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1500.0,
+          150.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "94916c6f-28d8-48ce-9ae4-00f39305b9a5",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "1f8fc1f8-7157-490c-8939-e13cd637ce7b",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036": {
+        "id": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
+            "speaker_name": "Village Elder",
+            "text": "I understand. Safe travels, stranger.",
+            "emotion": "sad",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1150.0,
+          650.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "d3af1784-3555-4a52-87b7-fffb8af7c4ca",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "cd090199-1f95-4cf9-8db6-7cefcde63f3c",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "4216a2a0-57b3-4ca4-a3a8-030594dea0d8": {
+        "id": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
+            "speaker_name": "Merchant",
+            "text": "Sorry, you don't have enough gold. Come back when you have 30 gold.",
+            "emotion": "sad",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1850.0,
+          550.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "59546216-dcc4-47c0-911a-608f2d27915a",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "523b7098-c24f-439f-83ef-7c329fe7e699",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "3e985f2c-fe71-4ce3-b6f4-0540ff452f36": {
+        "id": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
+        "node_type": {
+          "Choice": {
+            "prompt": "What will you do?",
+            "choices": [
+              {
+                "id": "7d0efd82-5235-4f75-be9e-2bc11676d445",
+                "text": "I'll help you!",
+                "condition": null
+              },
+              {
+                "id": "74bfacf6-a614-4037-a5ac-223d753571b1",
+                "text": "I need supplies first.",
+                "condition": null
+              },
+              {
+                "id": "ac4a1fa6-1ba8-4f69-bb3c-613f089d189e",
+                "text": "Not interested.",
+                "condition": null
+              }
+            ]
+          }
+        },
+        "position": [
+          750.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "ddb5cdc6-d7e6-49b2-9137-c4daee3fd8d8",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "b148b657-640e-4f20-8a3a-50edd2603526",
+            "direction": "Output",
+            "label": "I'll help you!"
+          },
+          {
+            "id": "1d8e6c3d-8063-49a2-aa04-bf00963bf881",
+            "direction": "Output",
+            "label": "I need supplies first."
+          },
+          {
+            "id": "10088c1e-4755-4c63-b3ba-bcb9b19e02c0",
+            "direction": "Output",
+            "label": "Not interested."
+          }
+        ]
+      },
+      "c773d629-f0ff-4cd8-abae-79b8386b71a8": {
+        "id": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
+        "node_type": {
+          "Condition": {
+            "variable_name": "gold",
+            "operator": "Gte",
+            "value": {
+              "Int": 30
+            }
+          }
+        },
+        "position": [
+          1500.0,
+          400.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "75ad568f-b83f-45ed-9619-fd0217db105c",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "a405a422-77ce-4600-87f5-80c53f9c72e0",
+            "direction": "Output",
+            "label": "True"
+          },
+          {
+            "id": "09dc3c24-e1ce-41b3-951c-ccd61ae43ee5",
+            "direction": "Output",
+            "label": "False"
+          }
+        ]
+      },
+      "05034862-26bc-45c9-ba09-16dfa9a08f22": {
+        "id": "05034862-26bc-45c9-ba09-16dfa9a08f22",
+        "node_type": {
+          "End": {
+            "tag": "quest_accepted"
+          }
+        },
+        "position": [
+          1850.0,
+          150.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "11ee0276-263f-49bc-a711-bc60813c62b9",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "288b2675-c68e-4c7f-b921-ab8323ca841f": {
+        "id": "288b2675-c68e-4c7f-b921-ab8323ca841f",
+        "node_type": {
+          "Event": {
+            "actions": [
+              {
+                "action_type": "SetVariable",
+                "key": "quest_started",
+                "value": {
+                  "Bool": true
+                }
+              }
+            ]
+          }
+        },
+        "position": [
+          1150.0,
+          150.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "4e95744a-d80d-49de-9a52-0f08ed94bb3e",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "c0a2e41b-50e7-4aba-9279-5bff032c2389",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      }
+    },
+    "connections": [
+      {
+        "id": "edeb2889-1bb1-4aa4-8dcf-df990d0b7885",
+        "from_node": "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e",
+        "from_port": "5c2cb39b-2c52-4975-b842-d111bcd8381c",
+        "to_node": "96ac3772-af94-4f6f-b459-3a30e8c4695f",
+        "to_port": "04e445cc-14d8-47e3-b9ca-cd2d54f1cc22"
+      },
+      {
+        "id": "e18909f9-dac4-4858-8274-8c3a660e1c33",
+        "from_node": "96ac3772-af94-4f6f-b459-3a30e8c4695f",
+        "from_port": "c4a6189f-05ae-4cf7-9e70-7f588b60d12f",
+        "to_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
+        "to_port": "ddb5cdc6-d7e6-49b2-9137-c4daee3fd8d8"
+      },
+      {
+        "id": "2011c5e3-68cc-4c9d-87f3-56a557d625ce",
+        "from_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
+        "from_port": "b148b657-640e-4f20-8a3a-50edd2603526",
+        "to_node": "288b2675-c68e-4c7f-b921-ab8323ca841f",
+        "to_port": "4e95744a-d80d-49de-9a52-0f08ed94bb3e"
+      },
+      {
+        "id": "a97fd8c2-56a1-47c6-b04d-384b79078247",
+        "from_node": "288b2675-c68e-4c7f-b921-ab8323ca841f",
+        "from_port": "c0a2e41b-50e7-4aba-9279-5bff032c2389",
+        "to_node": "bae46683-9995-4b7f-959c-323a5041dc27",
+        "to_port": "94916c6f-28d8-48ce-9ae4-00f39305b9a5"
+      },
+      {
+        "id": "4447bf1c-2c5a-4184-94d5-f22934db1160",
+        "from_node": "bae46683-9995-4b7f-959c-323a5041dc27",
+        "from_port": "1f8fc1f8-7157-490c-8939-e13cd637ce7b",
+        "to_node": "05034862-26bc-45c9-ba09-16dfa9a08f22",
+        "to_port": "11ee0276-263f-49bc-a711-bc60813c62b9"
+      },
+      {
+        "id": "41a3f635-1910-4734-8020-d2e82831394c",
+        "from_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
+        "from_port": "1d8e6c3d-8063-49a2-aa04-bf00963bf881",
+        "to_node": "ef7f14f4-57e5-47dc-8936-b4464627e039",
+        "to_port": "311d68fb-2fc9-44d3-abe7-2cffdb3b8409"
+      },
+      {
+        "id": "47ae9bb6-3e50-4ed8-af6f-ec162783156f",
+        "from_node": "ef7f14f4-57e5-47dc-8936-b4464627e039",
+        "from_port": "4b3d3249-daf3-428e-b223-aee03c60275b",
+        "to_node": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
+        "to_port": "75ad568f-b83f-45ed-9619-fd0217db105c"
+      },
+      {
+        "id": "8825a22b-9927-40f4-89b1-45dc2054b8f1",
+        "from_node": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
+        "from_port": "a405a422-77ce-4600-87f5-80c53f9c72e0",
+        "to_node": "8b3352ac-50f3-40d0-8df3-08867c3dac60",
+        "to_port": "767ac9c7-cc77-47f5-9413-43e6495987ce"
+      },
+      {
+        "id": "00384651-0324-4af9-a6b4-355c97351958",
+        "from_node": "8b3352ac-50f3-40d0-8df3-08867c3dac60",
+        "from_port": "5204af07-4dcd-4677-9ad7-b35fbc4e39af",
+        "to_node": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
+        "to_port": "15bab2dc-4947-4f1a-9e7d-68adf48d8021"
+      },
+      {
+        "id": "ef4f2766-d485-44c3-9449-5689ce1cb048",
+        "from_node": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
+        "from_port": "e365d5fb-6c9d-46b3-be06-331d54112289",
+        "to_node": "ff70c236-9526-44ae-b5a8-f96b2c2fdac5",
+        "to_port": "a7e651dc-59bb-4412-bc61-2709b1697ffd"
+      },
+      {
+        "id": "8a03e535-b4ae-4baf-aa85-05eebbe38260",
+        "from_node": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
+        "from_port": "09dc3c24-e1ce-41b3-951c-ccd61ae43ee5",
+        "to_node": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
+        "to_port": "59546216-dcc4-47c0-911a-608f2d27915a"
+      },
+      {
+        "id": "098f9abe-6e2f-4152-be05-4d6eb1846450",
+        "from_node": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
+        "from_port": "523b7098-c24f-439f-83ef-7c329fe7e699",
+        "to_node": "08457b20-8422-4177-831d-f631d82810ea",
+        "to_port": "57064afa-5d50-42ef-a905-70f82a0725f0"
+      },
+      {
+        "id": "39d2706b-dc9f-4bed-af44-d42deeb701a4",
+        "from_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
+        "from_port": "10088c1e-4755-4c63-b3ba-bcb9b19e02c0",
+        "to_node": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
+        "to_port": "d3af1784-3555-4a52-87b7-fffb8af7c4ca"
+      },
+      {
+        "id": "f4fa08c7-8f4f-4c84-8e0f-330b619dd8c0",
+        "from_node": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
+        "from_port": "cd090199-1f95-4cf9-8db6-7cefcde63f3c",
+        "to_node": "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b",
+        "to_port": "2b54a1ef-6fa7-4b33-ab2c-f99594fce10d"
+      }
+    ],
+    "variables": [
+      {
+        "id": "1f20de2a-8d1e-4138-a9e3-c3d0e87bfcec",
+        "name": "quest_started",
+        "var_type": "Bool",
+        "default_value": {
+          "Bool": false
+        }
+      },
+      {
+        "id": "87747cd2-f75e-43b7-bd3d-06ba84d62490",
+        "name": "gold",
+        "var_type": "Int",
+        "default_value": {
+          "Int": 50
+        }
+      },
+      {
+        "id": "165d17c4-075d-4b80-9881-f3d93f8d24f0",
+        "name": "has_sword",
+        "var_type": "Bool",
+        "default_value": {
+          "Bool": false
+        }
+      }
+    ],
+    "characters": [
+      {
+        "id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
+        "name": "Village Elder",
+        "color": [
+          74,
+          144,
+          217,
+          255
+        ],
+        "portrait_path": ""
+      },
+      {
+        "id": "d61a4c90-e417-446c-864c-30da0d73024a",
+        "name": "Merchant",
+        "color": [
+          217,
+          165,
+          74,
+          255
+        ],
+        "portrait_path": ""
+      }
+    ]
+  }
+}
