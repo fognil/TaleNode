@@ -48,6 +48,10 @@ Not directly. You can duplicate nodes within the same project with ++ctrl+d++.
 
 Press ++ctrl+f++ to open the search bar. It searches across all node types, dialogue text, speaker names, and more.
 
+### Can I find and replace text across nodes?
+
+Yes. Press ++ctrl+h++ to open Search & Replace. You can replace in the current match or all matches at once. Replacements are case-insensitive and support undo.
+
 ## Nodes
 
 ### Can I create custom node types?
@@ -80,7 +84,15 @@ Bool, Int, Float, and Text. See [Variables](../user-guide/variables.md).
 
 ### How do conditions work at runtime?
 
-Your game engine evaluates Condition nodes by comparing the named variable against the specified value using the given operator. TaleNode's playtest mode simulates this by always taking the True branch.
+Your game engine evaluates Condition nodes by comparing the named variable against the specified value using the given operator. TaleNode's playtest mode evaluates conditions against runtime variables, taking the correct True or False branch.
+
+### Can I use variables in dialogue text?
+
+Yes. Use `{variable_name}` syntax in dialogue or choice text for inline substitution. You can also use math expressions (`{100 - gold}`), comparisons (`{gold >= 50}`), and inline conditionals (`{if has_key}...{else}...{/if}`). See [Variables — Text Interpolation](../user-guide/variables.md#text-interpolation).
+
+### Are expressions evaluated in exported JSON?
+
+No. The `{...}` syntax is preserved as-is in the exported JSON. Your game engine is responsible for evaluating expressions at runtime. TaleNode only evaluates them during playtest preview.
 
 ## Export
 

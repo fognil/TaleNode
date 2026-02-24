@@ -73,6 +73,83 @@ Choice options can have visibility conditions. A choice is only shown to the pla
 
 **Example**: A choice "Use the key" with condition `has_key == true` only appears if the player has acquired the key.
 
+## Text Interpolation
+
+Dialogue text and choice text support inline variable substitution using `{...}` syntax. This works in playtest mode and is preserved as-is in exported JSON for your game engine to handle.
+
+### Basic Substitution
+
+Use `{variable_name}` to insert a variable's current value:
+
+```
+Hello {player_name}, you have {gold} gold.
+```
+
+### Math Expressions
+
+Use arithmetic operators inside `{...}`:
+
+```
+You need {100 - gold} more gold.
+Total cost: {price * quantity} gold.
+```
+
+Supported operators: `+`, `-`, `*`, `/`, `%`
+
+### Comparisons
+
+Comparisons evaluate to `true` or `false`:
+
+```
+Rich: {gold >= 100}
+```
+
+Supported: `==`, `!=`, `>`, `<`, `>=`, `<=`
+
+### Boolean Operators
+
+Combine conditions with `&&` (and) and `||` (or), negate with `!`:
+
+```
+{has_key && level > 5}
+{!is_hidden || has_detect}
+```
+
+### Inline Conditionals
+
+Show different text based on a condition:
+
+```
+{if has_key}You unlock the door.{else}The door is locked.{/if}
+{if gold >= 50}You can afford it.{/if}
+```
+
+The `{else}` block is optional. Without it, nothing is shown when the condition is false.
+
+### Operator Precedence
+
+From lowest to highest:
+
+1. `||` (or)
+2. `&&` (and)
+3. `==`, `!=` (equality)
+4. `>`, `<`, `>=`, `<=` (comparison)
+5. `+`, `-` (additive)
+6. `*`, `/`, `%` (multiplicative)
+7. `!`, `-` (unary not, negation)
+
+Use parentheses to override: `{(a + b) * c}`
+
+### In Playtest vs Export
+
+| Context | Behavior |
+|---|---|
+| **Playtest mode** | Expressions are evaluated and text is interpolated in real time |
+| **Exported JSON** | `{...}` syntax is preserved as-is for game engines to evaluate |
+
+!!! tip
+    A hint below the dialogue text editor reminds you of the `{variable}` syntax.
+
 ## Variables in Export
 
 Variables are included in the exported JSON:

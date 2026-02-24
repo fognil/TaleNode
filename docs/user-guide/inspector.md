@@ -21,7 +21,7 @@ No editable properties. The Inspector shows a brief description of the Start nod
 | Field | Description |
 |---|---|
 | **Speaker** | Character name. Type freely or select from defined Characters. |
-| **Text** | Multi-line text area for the dialogue line. |
+| **Text** | Multi-line text area for the dialogue line. Supports `{variable}` interpolation syntax. |
 | **Emotion** | Dropdown: `neutral`, `happy`, `sad`, `angry`, `surprised`, `scared` |
 | **Audio Clip** | Optional file path for voice acting audio. |
 
