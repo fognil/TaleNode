@@ -12,6 +12,8 @@ const NODE_PORT_Y_SPACING: f32 = 22.0;
 const NODE_MIN_BODY_HEIGHT: f32 = 30.0;
 const NODE_ROUNDING: u8 = 6;
 const NODE_TEXT_PREVIEW_LINES: usize = 2;
+const BODY_TEXT_COLOR: Color32 = Color32::from_rgb(200, 200, 200);
+const DIM_TEXT_COLOR: Color32 = Color32::from_rgb(140, 140, 140);
 
 pub const PORT_RADIUS: f32 = NODE_PORT_RADIUS;
 
@@ -38,16 +40,28 @@ fn node_body_height(node: &Node) -> f32 {
         0.0
     };
 
-    // Extra height for dialogue text preview
-    let text_height = match &node.node_type {
+    // Extra content height depending on node type
+    let content_height = match &node.node_type {
         NodeType::Dialogue(data) if !data.text.is_empty() => {
             let line_count = data.text.lines().take(NODE_TEXT_PREVIEW_LINES).count();
             (line_count.max(1) as f32) * 16.0 + 8.0
         }
+        NodeType::Condition(data) => {
+            // Show "variable op value" summary
+            if !data.variable_name.is_empty() { 18.0 } else { 0.0 }
+        }
+        NodeType::Event(data) => {
+            // Show action count
+            if !data.actions.is_empty() {
+                (data.actions.len().min(3) as f32) * 16.0 + 4.0
+            } else {
+                0.0
+            }
+        }
         _ => 0.0,
     };
 
-    (ports_height + text_height).max(NODE_MIN_BODY_HEIGHT)
+    (ports_height + content_height).max(NODE_MIN_BODY_HEIGHT)
 }
 
 /// Get the bounding rect of a node in canvas coordinates.
@@ -121,78 +135,13 @@ pub fn draw_node(
         Color32::WHITE,
     );
 
-    // Dialogue text preview
-    if let NodeType::Dialogue(data) = &node.node_type {
-        if !data.text.is_empty() {
-            let preview: String = data
-                .text
-                .lines()
-                .take(NODE_TEXT_PREVIEW_LINES)
-                .collect::<Vec<_>>()
-                .join("\n");
-            let text_pos = Pos2::new(
-                screen_rect.min.x + 10.0 * canvas.zoom,
-                header_rect.max.y + 8.0 * canvas.zoom,
-            );
-            let text_font_size = 11.0 * canvas.zoom;
-            painter.text(
-                text_pos,
-                egui::Align2::LEFT_TOP,
-                &preview,
-                FontId::proportional(text_font_size),
-                Color32::from_rgb(200, 200, 200),
-            );
-        }
-    }
+    // Body content (type-specific)
+    draw_node_body(painter, node, canvas, &screen_rect, &header_rect);
 
     // Draw ports
-    let port_radius = NODE_PORT_RADIUS * canvas.zoom;
+    draw_ports(painter, node, canvas, color);
 
-    for (i, port) in node.inputs.iter().enumerate() {
-        let canvas_pos = port_position(node, i, false);
-        let screen_pos = canvas.canvas_to_screen(canvas_pos);
-        painter.circle_filled(screen_pos, port_radius, Color32::from_rgb(180, 180, 180));
-        painter.circle_stroke(
-            screen_pos,
-            port_radius,
-            Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
-        );
-
-        if !port.label.is_empty() {
-            let label_pos = Pos2::new(screen_pos.x + port_radius + 4.0 * canvas.zoom, screen_pos.y);
-            painter.text(
-                label_pos,
-                egui::Align2::LEFT_CENTER,
-                &port.label,
-                FontId::proportional(10.0 * canvas.zoom),
-                Color32::from_rgb(180, 180, 180),
-            );
-        }
-    }
-
-    for (i, port) in node.outputs.iter().enumerate() {
-        let canvas_pos = port_position(node, i, true);
-        let screen_pos = canvas.canvas_to_screen(canvas_pos);
-        painter.circle_filled(screen_pos, port_radius, color);
-        painter.circle_stroke(
-            screen_pos,
-            port_radius,
-            Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
-        );
-
-        if !port.label.is_empty() {
-            let label_pos = Pos2::new(screen_pos.x - port_radius - 4.0 * canvas.zoom, screen_pos.y);
-            painter.text(
-                label_pos,
-                egui::Align2::RIGHT_CENTER,
-                &port.label,
-                FontId::proportional(10.0 * canvas.zoom),
-                Color32::from_rgb(180, 180, 180),
-            );
-        }
-    }
-
-    // Selection border
+    // Border
     if is_selected {
         painter.rect_stroke(
             screen_rect,
@@ -207,5 +156,181 @@ pub fn draw_node(
             Stroke::new(1.0 * canvas.zoom, Color32::from_rgb(70, 70, 70)),
             StrokeKind::Inside,
         );
+    }
+}
+
+/// Draw type-specific body content inside the node.
+fn draw_node_body(
+    painter: &egui::Painter,
+    node: &Node,
+    canvas: &CanvasState,
+    screen_rect: &Rect,
+    header_rect: &Rect,
+) {
+    let small_font = FontId::proportional(11.0 * canvas.zoom);
+    let body_x = screen_rect.min.x + 10.0 * canvas.zoom;
+    let body_y_start = header_rect.max.y + 6.0 * canvas.zoom;
+
+    match &node.node_type {
+        NodeType::Dialogue(data) => {
+            if !data.text.is_empty() {
+                let preview: String = data
+                    .text
+                    .lines()
+                    .take(NODE_TEXT_PREVIEW_LINES)
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                painter.text(
+                    Pos2::new(body_x, body_y_start),
+                    egui::Align2::LEFT_TOP,
+                    &preview,
+                    small_font,
+                    BODY_TEXT_COLOR,
+                );
+            }
+        }
+        NodeType::Condition(data) => {
+            if !data.variable_name.is_empty() {
+                let op_str = match data.operator {
+                    crate::model::node::CompareOp::Eq => "==",
+                    crate::model::node::CompareOp::Neq => "!=",
+                    crate::model::node::CompareOp::Gt => ">",
+                    crate::model::node::CompareOp::Lt => "<",
+                    crate::model::node::CompareOp::Gte => ">=",
+                    crate::model::node::CompareOp::Lte => "<=",
+                    crate::model::node::CompareOp::Contains => "contains",
+                };
+                let val_str = format_variable_value(&data.value);
+                let summary = format!("{} {} {}", data.variable_name, op_str, val_str);
+                painter.text(
+                    Pos2::new(body_x, body_y_start),
+                    egui::Align2::LEFT_TOP,
+                    &summary,
+                    small_font,
+                    BODY_TEXT_COLOR,
+                );
+            } else {
+                painter.text(
+                    Pos2::new(body_x, body_y_start),
+                    egui::Align2::LEFT_TOP,
+                    "(no condition set)",
+                    small_font,
+                    DIM_TEXT_COLOR,
+                );
+            }
+        }
+        NodeType::Event(data) => {
+            if data.actions.is_empty() {
+                painter.text(
+                    Pos2::new(body_x, body_y_start),
+                    egui::Align2::LEFT_TOP,
+                    "(no actions)",
+                    small_font,
+                    DIM_TEXT_COLOR,
+                );
+            } else {
+                for (i, action) in data.actions.iter().take(3).enumerate() {
+                    let action_label = format!("{}: {}", action.key, format_variable_value(&action.value));
+                    painter.text(
+                        Pos2::new(body_x, body_y_start + i as f32 * 16.0 * canvas.zoom),
+                        egui::Align2::LEFT_TOP,
+                        &action_label,
+                        small_font.clone(),
+                        BODY_TEXT_COLOR,
+                    );
+                }
+                if data.actions.len() > 3 {
+                    painter.text(
+                        Pos2::new(body_x, body_y_start + 3.0 * 16.0 * canvas.zoom),
+                        egui::Align2::LEFT_TOP,
+                        format!("+{} more", data.actions.len() - 3),
+                        small_font,
+                        DIM_TEXT_COLOR,
+                    );
+                }
+            }
+        }
+        NodeType::End(data) => {
+            if !data.tag.is_empty() {
+                painter.text(
+                    Pos2::new(body_x, body_y_start),
+                    egui::Align2::LEFT_TOP,
+                    format!("tag: {}", data.tag),
+                    small_font,
+                    DIM_TEXT_COLOR,
+                );
+            }
+        }
+        _ => {}
+    }
+}
+
+/// Draw input and output ports on a node.
+fn draw_ports(
+    painter: &egui::Painter,
+    node: &Node,
+    canvas: &CanvasState,
+    accent_color: Color32,
+) {
+    let port_radius = NODE_PORT_RADIUS * canvas.zoom;
+    let label_font = FontId::proportional(10.0 * canvas.zoom);
+
+    for (i, port) in node.inputs.iter().enumerate() {
+        let canvas_pos = port_position(node, i, false);
+        let screen_pos = canvas.canvas_to_screen(canvas_pos);
+        painter.circle_filled(screen_pos, port_radius, Color32::from_rgb(180, 180, 180));
+        painter.circle_stroke(
+            screen_pos,
+            port_radius,
+            Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
+        );
+
+        if !port.label.is_empty() {
+            let label_pos = Pos2::new(
+                screen_pos.x + port_radius + 4.0 * canvas.zoom,
+                screen_pos.y,
+            );
+            painter.text(
+                label_pos,
+                egui::Align2::LEFT_CENTER,
+                &port.label,
+                label_font.clone(),
+                Color32::from_rgb(180, 180, 180),
+            );
+        }
+    }
+
+    for (i, port) in node.outputs.iter().enumerate() {
+        let canvas_pos = port_position(node, i, true);
+        let screen_pos = canvas.canvas_to_screen(canvas_pos);
+        painter.circle_filled(screen_pos, port_radius, accent_color);
+        painter.circle_stroke(
+            screen_pos,
+            port_radius,
+            Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
+        );
+
+        if !port.label.is_empty() {
+            let label_pos = Pos2::new(
+                screen_pos.x - port_radius - 4.0 * canvas.zoom,
+                screen_pos.y,
+            );
+            painter.text(
+                label_pos,
+                egui::Align2::RIGHT_CENTER,
+                &port.label,
+                label_font.clone(),
+                Color32::from_rgb(180, 180, 180),
+            );
+        }
+    }
+}
+
+fn format_variable_value(val: &crate::model::node::VariableValue) -> String {
+    match val {
+        crate::model::node::VariableValue::Bool(b) => b.to_string(),
+        crate::model::node::VariableValue::Int(i) => i.to_string(),
+        crate::model::node::VariableValue::Float(f) => format!("{f:.2}"),
+        crate::model::node::VariableValue::Text(s) => format!("\"{s}\""),
     }
 }
