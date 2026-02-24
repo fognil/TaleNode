@@ -1,6 +1,7 @@
 use egui::{Color32, Pos2, Rect, Sense, Stroke, StrokeKind};
 use uuid::Uuid;
 
+use crate::actions::history::UndoHistory;
 use crate::model::graph::DialogueGraph;
 use crate::model::node::Node;
 use crate::model::port::{PortDirection, PortId};
@@ -43,6 +44,14 @@ pub struct TaleNodeApp {
     interaction: InteractionState,
     /// Where to open the context menu (canvas coords).
     context_menu_pos: Option<[f32; 2]>,
+    /// Current project name.
+    project_name: String,
+    /// Path to the current .talenode file (None if unsaved).
+    project_path: Option<std::path::PathBuf>,
+    /// Whether the left panel is visible.
+    show_left_panel: bool,
+    /// Undo/redo history.
+    history: UndoHistory,
 }
 
 impl TaleNodeApp {
@@ -59,7 +68,16 @@ impl TaleNodeApp {
             selected_nodes: Vec::new(),
             interaction: InteractionState::Idle,
             context_menu_pos: None,
+            project_name: "Untitled".to_string(),
+            project_path: None,
+            show_left_panel: true,
+            history: UndoHistory::new(),
         }
+    }
+
+    /// Save a snapshot for undo before mutating the graph.
+    fn snapshot(&mut self) {
+        self.history.save_snapshot(&self.graph);
     }
 
     /// Hit-test: find node under screen position (topmost first).
@@ -206,7 +224,8 @@ impl TaleNodeApp {
                     self.selected_nodes.clear();
                     self.selected_nodes.push(node_id);
                 }
-                // Save start positions for undo
+                // Snapshot before dragging for undo
+                self.snapshot();
                 let start_positions: Vec<(Uuid, [f32; 2])> = self
                     .selected_nodes
                     .iter()
@@ -250,7 +269,8 @@ impl TaleNodeApp {
 
         // Release
         if response.drag_stopped_by(egui::PointerButton::Primary) {
-            match &self.interaction {
+            let interaction = self.interaction.clone();
+            match &interaction {
                 InteractionState::DraggingWire(drag) => {
                     // Try to connect to a port
                     if let Some((target_node, target_port, target_dir)) =
@@ -259,6 +279,7 @@ impl TaleNodeApp {
                         // Must connect output→input
                         match (drag.from_direction, target_dir) {
                             (PortDirection::Output, PortDirection::Input) => {
+                                self.snapshot();
                                 self.graph.add_connection(
                                     drag.from_node,
                                     drag.from_port,
@@ -267,6 +288,7 @@ impl TaleNodeApp {
                                 );
                             }
                             (PortDirection::Input, PortDirection::Output) => {
+                                self.snapshot();
                                 self.graph.add_connection(
                                     target_node,
                                     target_port,
@@ -308,6 +330,7 @@ impl TaleNodeApp {
                 i.key_pressed(egui::Key::Delete) || i.key_pressed(egui::Key::Backspace)
             });
             if delete_pressed {
+                self.snapshot();
                 let ids: Vec<Uuid> = self.selected_nodes.drain(..).collect();
                 for id in ids {
                     self.graph.remove_node(id);
@@ -347,6 +370,7 @@ impl TaleNodeApp {
                     ];
                     for (label, constructor) in items {
                         if ui.button(*label).clicked() {
+                            self.snapshot();
                             self.graph.add_node(constructor(ctx_pos));
                             close_menu = true;
                         }
@@ -360,15 +384,131 @@ impl TaleNodeApp {
         }
     }
 
+    fn show_menu_bar(&mut self, ui: &mut egui::Ui) {
+        egui::menu::bar(ui, |ui| {
+            ui.menu_button("File", |ui| {
+                if ui.button("New").clicked() {
+                    self.graph = DialogueGraph::new();
+                    self.graph.add_node(Node::new_start([100.0, 200.0]));
+                    self.selected_nodes.clear();
+                    self.project_name = "Untitled".to_string();
+                    self.project_path = None;
+                    ui.close_menu();
+                }
+                if ui.button("Open...").clicked() {
+                    self.do_open();
+                    ui.close_menu();
+                }
+                if ui.button("Save").clicked() {
+                    self.do_save(false);
+                    ui.close_menu();
+                }
+                if ui.button("Save As...").clicked() {
+                    self.do_save(true);
+                    ui.close_menu();
+                }
+                ui.separator();
+                if ui.button("Export JSON...").clicked() {
+                    self.do_export_json();
+                    ui.close_menu();
+                }
+            });
+            ui.menu_button("View", |ui| {
+                if ui.checkbox(&mut self.show_left_panel, "Left Panel").changed() {
+                    ui.close_menu();
+                }
+            });
+        });
+    }
+
+    fn do_open(&mut self) {
+        let file = rfd::FileDialog::new()
+            .add_filter("TaleNode Project", &["talenode"])
+            .pick_file();
+        if let Some(path) = file {
+            match std::fs::read_to_string(&path) {
+                Ok(contents) => {
+                    match crate::model::project::Project::load_from_string(&contents) {
+                        Ok(project) => {
+                            self.graph = project.graph;
+                            self.project_name = project.name;
+                            self.project_path = Some(path);
+                            self.selected_nodes.clear();
+                        }
+                        Err(e) => {
+                            eprintln!("Failed to parse project: {e}");
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Failed to read file: {e}");
+                }
+            }
+        }
+    }
+
+    fn do_save(&mut self, save_as: bool) {
+        let path = if save_as || self.project_path.is_none() {
+            rfd::FileDialog::new()
+                .add_filter("TaleNode Project", &["talenode"])
+                .set_file_name(format!("{}.talenode", self.project_name))
+                .save_file()
+        } else {
+            self.project_path.clone()
+        };
+
+        if let Some(path) = path {
+            let project = crate::model::project::Project {
+                version: "1.0".to_string(),
+                name: self.project_name.clone(),
+                graph: self.graph.clone(),
+            };
+            match project.save_to_string() {
+                Ok(json) => {
+                    if let Err(e) = std::fs::write(&path, json) {
+                        eprintln!("Failed to write file: {e}");
+                    } else {
+                        self.project_path = Some(path);
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Failed to serialize project: {e}");
+                }
+            }
+        }
+    }
+
+    fn do_export_json(&self) {
+        let path = rfd::FileDialog::new()
+            .add_filter("JSON", &["json"])
+            .set_file_name(format!("{}.json", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            match crate::export::json_export::export_json(&self.graph, &self.project_name) {
+                Ok(json) => {
+                    if let Err(e) = std::fs::write(&path, json) {
+                        eprintln!("Failed to write export: {e}");
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Failed to export JSON: {e}");
+                }
+            }
+        }
+    }
+
     fn show_status_bar(&self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
+            ui.label(&self.project_name);
+            ui.separator();
             ui.label(format!("Nodes: {}", self.graph.nodes.len()));
             ui.separator();
             ui.label(format!("Connections: {}", self.graph.connections.len()));
             ui.separator();
             ui.label(format!("Zoom: {:.0}%", self.canvas.zoom * 100.0));
-            ui.separator();
             if !self.selected_nodes.is_empty() {
+                ui.separator();
                 ui.label(format!("Selected: {}", self.selected_nodes.len()));
             }
         });
@@ -377,10 +517,47 @@ impl TaleNodeApp {
 
 impl eframe::App for TaleNodeApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // Keyboard shortcuts
+        if ctx.input(|i| i.modifiers.command && !i.modifiers.shift && i.key_pressed(egui::Key::S)) {
+            self.do_save(false);
+        }
+        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::O)) {
+            self.do_open();
+        }
+        if ctx.input(|i| i.modifiers.command && !i.modifiers.shift && i.key_pressed(egui::Key::Z)) {
+            if let Some(prev) = self.history.undo(&self.graph) {
+                self.graph = prev;
+                self.selected_nodes.clear();
+            }
+        }
+        if ctx.input(|i| i.modifiers.command && i.modifiers.shift && i.key_pressed(egui::Key::Z)) {
+            if let Some(next) = self.history.redo(&self.graph) {
+                self.graph = next;
+                self.selected_nodes.clear();
+            }
+        }
+
+        // Menu bar at top
+        egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+            self.show_menu_bar(ui);
+        });
+
         // Status bar at bottom
         egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
             self.show_status_bar(ui);
         });
+
+        // Left panel (variables, characters)
+        if self.show_left_panel {
+            egui::SidePanel::left("left_panel")
+                .default_width(200.0)
+                .min_width(150.0)
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        crate::ui::left_panel::show_left_panel(ui, &mut self.graph);
+                    });
+                });
+        }
 
         // Inspector panel (right side) — only when exactly 1 node selected
         if self.selected_nodes.len() == 1 {
