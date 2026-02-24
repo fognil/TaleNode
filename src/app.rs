@@ -121,6 +121,32 @@ impl TaleNodeApp {
         self.history.save_snapshot(&self.graph);
     }
 
+    /// Duplicate selected nodes with offset.
+    fn duplicate_selected(&mut self) {
+        if self.selected_nodes.is_empty() {
+            return;
+        }
+        self.snapshot();
+        let mut new_ids = Vec::new();
+        for &id in &self.selected_nodes.clone() {
+            if let Some(node) = self.graph.nodes.get(&id) {
+                let mut dup = node.clone();
+                dup.id = Uuid::new_v4();
+                dup.position[0] += 30.0;
+                dup.position[1] += 30.0;
+                for port in &mut dup.inputs {
+                    port.id = crate::model::port::PortId(Uuid::new_v4());
+                }
+                for port in &mut dup.outputs {
+                    port.id = crate::model::port::PortId(Uuid::new_v4());
+                }
+                new_ids.push(dup.id);
+                self.graph.add_node(dup);
+            }
+        }
+        self.selected_nodes = new_ids;
+    }
+
     /// Hit-test: find node under screen position (topmost first).
     fn node_at_screen_pos(&self, screen_pos: Pos2) -> Option<Uuid> {
         // Iterate in reverse insertion order so "top" nodes are checked first
@@ -449,9 +475,11 @@ impl TaleNodeApp {
     }
 
     fn show_menu_bar(&mut self, ui: &mut egui::Ui) {
+        let mod_key = if cfg!(target_os = "macos") { "Cmd" } else { "Ctrl" };
+
         egui::menu::bar(ui, |ui| {
             ui.menu_button("File", |ui| {
-                if ui.button("New").clicked() {
+                if ui.add(egui::Button::new("New").shortcut_text(format!("{mod_key}+N"))).clicked() {
                     self.graph = DialogueGraph::new();
                     self.graph.add_node(Node::new_start([100.0, 200.0]));
                     self.selected_nodes.clear();
@@ -459,11 +487,11 @@ impl TaleNodeApp {
                     self.project_path = None;
                     ui.close_menu();
                 }
-                if ui.button("Open...").clicked() {
+                if ui.add(egui::Button::new("Open...").shortcut_text(format!("{mod_key}+O"))).clicked() {
                     self.do_open();
                     ui.close_menu();
                 }
-                if ui.button("Save").clicked() {
+                if ui.add(egui::Button::new("Save").shortcut_text(format!("{mod_key}+S"))).clicked() {
                     self.do_save(false);
                     ui.close_menu();
                 }
@@ -478,14 +506,20 @@ impl TaleNodeApp {
                 }
             });
             ui.menu_button("Edit", |ui| {
-                if ui.add_enabled(self.history.can_undo(), egui::Button::new("Undo")).clicked() {
+                if ui.add_enabled(
+                    self.history.can_undo(),
+                    egui::Button::new("Undo").shortcut_text(format!("{mod_key}+Z")),
+                ).clicked() {
                     if let Some(prev) = self.history.undo(&self.graph) {
                         self.graph = prev;
                         self.selected_nodes.clear();
                     }
                     ui.close_menu();
                 }
-                if ui.add_enabled(self.history.can_redo(), egui::Button::new("Redo")).clicked() {
+                if ui.add_enabled(
+                    self.history.can_redo(),
+                    egui::Button::new("Redo").shortcut_text(format!("{mod_key}+Shift+Z")),
+                ).clicked() {
                     if let Some(next) = self.history.redo(&self.graph) {
                         self.graph = next;
                         self.selected_nodes.clear();
@@ -493,16 +527,43 @@ impl TaleNodeApp {
                     ui.close_menu();
                 }
                 ui.separator();
-                if ui.button("Select All").clicked() {
+                if ui.add(egui::Button::new("Select All").shortcut_text(format!("{mod_key}+A"))).clicked() {
                     self.selected_nodes = self.graph.nodes.keys().copied().collect();
                     ui.close_menu();
                 }
-                if ui.add_enabled(!self.selected_nodes.is_empty(), egui::Button::new("Delete Selected")).clicked() {
+                if ui.add_enabled(
+                    !self.selected_nodes.is_empty(),
+                    egui::Button::new("Duplicate").shortcut_text(format!("{mod_key}+D")),
+                ).clicked() {
+                    self.duplicate_selected();
+                    ui.close_menu();
+                }
+                if ui.add_enabled(
+                    !self.selected_nodes.is_empty(),
+                    egui::Button::new("Delete Selected").shortcut_text("Del"),
+                ).clicked() {
                     self.snapshot();
                     let ids: Vec<Uuid> = self.selected_nodes.drain(..).collect();
                     for id in ids {
                         self.graph.remove_node(id);
                     }
+                    ui.close_menu();
+                }
+                ui.separator();
+                let find_shortcut = format!("{mod_key}+F");
+                if ui.add(egui::Button::new("Find...").shortcut_text(&find_shortcut)).clicked() {
+                    self.show_search = true;
+                    self.show_replace = false;
+                    ui.close_menu();
+                }
+                let replace_shortcut = if cfg!(target_os = "macos") {
+                    format!("{mod_key}+Shift+H")
+                } else {
+                    format!("{mod_key}+H")
+                };
+                if ui.add(egui::Button::new("Find & Replace...").shortcut_text(&replace_shortcut)).clicked() {
+                    self.show_search = true;
+                    self.show_replace = true;
                     ui.close_menu();
                 }
             });
@@ -1100,26 +1161,7 @@ impl eframe::App for TaleNodeApp {
         }
         // Ctrl+D: duplicate selected nodes
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::D)) && !self.selected_nodes.is_empty() {
-            self.snapshot();
-            let mut new_ids = Vec::new();
-            for &id in &self.selected_nodes.clone() {
-                if let Some(node) = self.graph.nodes.get(&id) {
-                    let mut dup = node.clone();
-                    dup.id = Uuid::new_v4();
-                    dup.position[0] += 30.0;
-                    dup.position[1] += 30.0;
-                    // Give new UUIDs to all ports
-                    for port in &mut dup.inputs {
-                        port.id = crate::model::port::PortId(Uuid::new_v4());
-                    }
-                    for port in &mut dup.outputs {
-                        port.id = crate::model::port::PortId(Uuid::new_v4());
-                    }
-                    new_ids.push(dup.id);
-                    self.graph.add_node(dup);
-                }
-            }
-            self.selected_nodes = new_ids;
+            self.duplicate_selected();
         }
         if ctx.input(|i| i.key_pressed(egui::Key::Escape)) && self.show_search {
             self.show_search = false;
