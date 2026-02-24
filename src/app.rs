@@ -504,6 +504,14 @@ impl TaleNodeApp {
                     self.do_export_json();
                     ui.close_menu();
                 }
+                if ui.button("Export Godot Plugin...").clicked() {
+                    self.do_export_godot_plugin();
+                    ui.close_menu();
+                }
+                if ui.button("Export Unity Plugin...").clicked() {
+                    self.do_export_unity_plugin();
+                    ui.close_menu();
+                }
             });
             ui.menu_button("Edit", |ui| {
                 if ui.add_enabled(
@@ -660,6 +668,42 @@ impl TaleNodeApp {
                 }
                 Err(e) => {
                     eprintln!("Failed to export JSON: {e}");
+                }
+            }
+        }
+    }
+
+    fn do_export_godot_plugin(&mut self) {
+        let path = rfd::FileDialog::new()
+            .set_title("Select Godot project folder")
+            .pick_folder();
+
+        if let Some(dir) = path {
+            match crate::export::plugin_export::export_godot_plugin(&dir) {
+                Ok(()) => {
+                    self.status_message =
+                        Some(("Godot plugin exported".to_string(), Instant::now()));
+                }
+                Err(e) => {
+                    eprintln!("Failed to export Godot plugin: {e}");
+                }
+            }
+        }
+    }
+
+    fn do_export_unity_plugin(&mut self) {
+        let path = rfd::FileDialog::new()
+            .set_title("Select Unity Assets folder")
+            .pick_folder();
+
+        if let Some(dir) = path {
+            match crate::export::plugin_export::export_unity_plugin(&dir) {
+                Ok(()) => {
+                    self.status_message =
+                        Some(("Unity plugin exported".to_string(), Instant::now()));
+                }
+                Err(e) => {
+                    eprintln!("Failed to export Unity plugin: {e}");
                 }
             }
         }
