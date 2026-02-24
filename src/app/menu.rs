@@ -73,6 +73,10 @@ impl TaleNodeApp {
                     self.do_import_yarn();
                     ui.close_menu();
                 }
+                if ui.button("Import from Chat Mapper...").clicked() {
+                    self.do_import_chatmapper();
+                    ui.close_menu();
+                }
             });
             ui.menu_button("Edit", |ui| {
                 if ui

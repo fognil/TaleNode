@@ -14,6 +14,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4", "serde"] }
 rfd = "0.15"
+roxmltree = "0.20"
 
 [profile.release]
 opt-level = 3
