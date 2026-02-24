@@ -2,6 +2,7 @@ mod actions;
 mod app;
 mod export;
 mod model;
+mod scripting;
 mod ui;
 mod validation;
 

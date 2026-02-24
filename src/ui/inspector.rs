@@ -167,6 +167,10 @@ fn show_dialogue_inspector(
     ui.add_space(4.0);
     ui.label("Text:");
     ui.add(egui::TextEdit::multiline(&mut data.text).desired_rows(4));
+    ui.colored_label(
+        egui::Color32::from_rgb(140, 140, 140),
+        "Use {variable} for interpolation",
+    );
 
     ui.add_space(4.0);
     ui.label("Emotion:");
