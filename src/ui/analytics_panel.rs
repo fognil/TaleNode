@@ -2,8 +2,17 @@ use egui::Ui;
 
 use crate::validation::analytics::GraphAnalytics;
 
-/// Draw the analytics panel showing graph statistics.
-pub fn show_analytics_panel(ui: &mut Ui, stats: &GraphAnalytics) {
+/// Action returned by the analytics panel for app to handle.
+pub enum AnalyticsPanelAction {
+    None,
+    ExportCsv,
+    ExportText,
+}
+
+/// Draw the analytics panel showing graph statistics. Returns an action.
+pub fn show_analytics_panel(ui: &mut Ui, stats: &GraphAnalytics) -> AnalyticsPanelAction {
+    let mut action = AnalyticsPanelAction::None;
+
     ui.heading("Flow Analytics");
     ui.separator();
 
@@ -54,4 +63,18 @@ pub fn show_analytics_panel(ui: &mut Ui, stats: &GraphAnalytics) {
         ui.label(format!("Unreachable nodes: {}", stats.unreachable_count));
         ui.label(format!("Dead ends: {}", stats.dead_end_count));
     });
+
+    // Export buttons
+    ui.add_space(8.0);
+    ui.separator();
+    ui.horizontal(|ui| {
+        if ui.button("Export CSV").clicked() {
+            action = AnalyticsPanelAction::ExportCsv;
+        }
+        if ui.button("Export Report").clicked() {
+            action = AnalyticsPanelAction::ExportText;
+        }
+    });
+
+    action
 }
