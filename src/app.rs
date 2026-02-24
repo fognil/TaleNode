@@ -179,7 +179,7 @@ impl TaleNodeApp {
             if let Some(node) = self.graph.nodes.get(id) {
                 let is_selected = self.selected_nodes.contains(id);
                 let is_search_match = self.search_results.contains(id);
-                draw_node(&painter, node, &self.canvas, is_selected, is_search_match);
+                draw_node(&painter, node, &self.canvas, is_selected, is_search_match, &self.graph.characters);
             }
         }
 

@@ -1,6 +1,7 @@
 use egui::Ui;
 use uuid::Uuid;
 
+use crate::model::character::Character;
 use crate::model::graph::DialogueGraph;
 use crate::model::node::{
     CompareOp, EventAction, EventActionType, NodeType, VariableValue,
@@ -36,7 +37,8 @@ pub fn show_inspector(ui: &mut Ui, graph: &mut DialogueGraph, selected: Uuid) {
             }
 
             NodeType::Dialogue(data) => {
-                show_dialogue_inspector(ui, data);
+                let characters = graph.characters.clone();
+                show_dialogue_inspector(ui, data, &characters);
             }
 
             NodeType::Choice(data) => {
@@ -112,9 +114,55 @@ pub fn show_inspector(ui: &mut Ui, graph: &mut DialogueGraph, selected: Uuid) {
 fn show_dialogue_inspector(
     ui: &mut Ui,
     data: &mut crate::model::node::DialogueData,
+    characters: &[Character],
 ) {
     ui.label("Speaker:");
-    ui.text_edit_singleline(&mut data.speaker_name);
+
+    // Character dropdown: "(None)" + all defined characters
+    let current_label = if let Some(sid) = data.speaker_id {
+        characters
+            .iter()
+            .find(|c| c.id == sid)
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| data.speaker_name.clone())
+    } else if data.speaker_name.is_empty() {
+        "(None)".to_string()
+    } else {
+        format!("{} (custom)", data.speaker_name)
+    };
+
+    egui::ComboBox::from_id_salt("speaker_combo")
+        .selected_text(&current_label)
+        .show_ui(ui, |ui| {
+            // Option to clear
+            if ui
+                .selectable_label(data.speaker_id.is_none() && data.speaker_name.is_empty(), "(None)")
+                .clicked()
+            {
+                data.speaker_id = None;
+                data.speaker_name.clear();
+            }
+            // List characters
+            for ch in characters {
+                let selected = data.speaker_id == Some(ch.id);
+                if ui.selectable_label(selected, &ch.name).clicked() {
+                    data.speaker_id = Some(ch.id);
+                    data.speaker_name = ch.name.clone();
+                }
+            }
+        });
+
+    // Manual name override
+    ui.horizontal(|ui| {
+        ui.label("Name:");
+        if ui.text_edit_singleline(&mut data.speaker_name).changed() {
+            // If user types manually, clear speaker_id link
+            let matches_char = characters.iter().any(|c| c.name == data.speaker_name);
+            if !matches_char {
+                data.speaker_id = None;
+            }
+        }
+    });
 
     ui.add_space(4.0);
     ui.label("Text:");

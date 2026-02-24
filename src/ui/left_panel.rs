@@ -126,11 +126,10 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
             ui.horizontal(|ui| {
                 ui.label("Color:");
                 let mut color_arr = [ch.color[0], ch.color[1], ch.color[2]];
-                if ui.color_edit_button_srgb(&mut color_arr).changed() {
-                    ch.color[0] = color_arr[0];
-                    ch.color[1] = color_arr[1];
-                    ch.color[2] = color_arr[2];
-                }
+                ui.color_edit_button_srgb(&mut color_arr);
+                ch.color[0] = color_arr[0];
+                ch.color[1] = color_arr[1];
+                ch.color[2] = color_arr[2];
             });
 
             ui.horizontal(|ui| {
@@ -185,11 +184,10 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) {
                 ui.horizontal(|ui| {
                     ui.label("Color:");
                     let mut color_arr = [group.color[0], group.color[1], group.color[2]];
-                    if ui.color_edit_button_srgb(&mut color_arr).changed() {
-                        group.color[0] = color_arr[0];
-                        group.color[1] = color_arr[1];
-                        group.color[2] = color_arr[2];
-                    }
+                    ui.color_edit_button_srgb(&mut color_arr);
+                    group.color[0] = color_arr[0];
+                    group.color[1] = color_arr[1];
+                    group.color[2] = color_arr[2];
                 });
             });
 

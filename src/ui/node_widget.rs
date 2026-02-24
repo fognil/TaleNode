@@ -1,5 +1,6 @@
 use egui::{Color32, CornerRadius, FontId, Pos2, Rect, Stroke, StrokeKind, Vec2};
 
+use crate::model::character::Character;
 use crate::model::node::{Node, NodeType};
 use crate::ui::canvas::CanvasState;
 
@@ -92,6 +93,7 @@ pub fn draw_node(
     canvas: &CanvasState,
     is_selected: bool,
     is_search_match: bool,
+    characters: &[Character],
 ) {
     let rect = node_rect(node);
     let screen_rect = canvas.canvas_rect_to_screen(rect);
@@ -102,7 +104,8 @@ pub fn draw_node(
         return;
     }
 
-    let color = node_color(&node.node_type);
+    // Use character color for Dialogue nodes with a linked speaker
+    let color = resolve_node_color(node, characters);
     let body_color = Color32::from_rgb(50, 50, 50);
     let rounding = CornerRadius::same(NODE_ROUNDING);
 
@@ -178,6 +181,7 @@ fn draw_node_body(
     let small_font = FontId::proportional(11.0 * canvas.zoom);
     let body_x = screen_rect.min.x + 10.0 * canvas.zoom;
     let body_y_start = header_rect.max.y + 6.0 * canvas.zoom;
+    let max_text_w = screen_rect.width() - 20.0 * canvas.zoom;
 
     match &node.node_type {
         NodeType::Dialogue(data) => {
@@ -188,10 +192,11 @@ fn draw_node_body(
                     .take(NODE_TEXT_PREVIEW_LINES)
                     .collect::<Vec<_>>()
                     .join("\n");
+                let truncated = truncate_to_width(painter, &preview, &small_font, max_text_w);
                 painter.text(
                     Pos2::new(body_x, body_y_start),
                     egui::Align2::LEFT_TOP,
-                    &preview,
+                    &truncated,
                     small_font,
                     BODY_TEXT_COLOR,
                 );
@@ -210,10 +215,11 @@ fn draw_node_body(
                 };
                 let val_str = format_variable_value(&data.value);
                 let summary = format!("{} {} {}", data.variable_name, op_str, val_str);
+                let truncated = truncate_to_width(painter, &summary, &small_font, max_text_w);
                 painter.text(
                     Pos2::new(body_x, body_y_start),
                     egui::Align2::LEFT_TOP,
-                    &summary,
+                    &truncated,
                     small_font,
                     BODY_TEXT_COLOR,
                 );
@@ -239,10 +245,11 @@ fn draw_node_body(
             } else {
                 for (i, action) in data.actions.iter().take(3).enumerate() {
                     let action_label = format!("{}: {}", action.key, format_variable_value(&action.value));
+                    let truncated = truncate_to_width(painter, &action_label, &small_font, max_text_w);
                     painter.text(
                         Pos2::new(body_x, body_y_start + i as f32 * 16.0 * canvas.zoom),
                         egui::Align2::LEFT_TOP,
-                        &action_label,
+                        &truncated,
                         small_font.clone(),
                         BODY_TEXT_COLOR,
                     );
@@ -260,10 +267,12 @@ fn draw_node_body(
         }
         NodeType::End(data) => {
             if !data.tag.is_empty() {
+                let label = format!("tag: {}", data.tag);
+                let truncated = truncate_to_width(painter, &label, &small_font, max_text_w);
                 painter.text(
                     Pos2::new(body_x, body_y_start),
                     egui::Align2::LEFT_TOP,
-                    format!("tag: {}", data.tag),
+                    &truncated,
                     small_font,
                     DIM_TEXT_COLOR,
                 );
@@ -271,6 +280,26 @@ fn draw_node_body(
         }
         _ => {}
     }
+}
+
+/// Truncate text with "..." if it exceeds the available width.
+fn truncate_to_width(painter: &egui::Painter, text: &str, font: &FontId, max_width: f32) -> String {
+    let galley = painter.layout_no_wrap(text.to_string(), font.clone(), Color32::WHITE);
+    if galley.rect.width() <= max_width {
+        return text.to_string();
+    }
+    // Remove chars from end until it fits with ellipsis
+    let chars: Vec<char> = text.chars().collect();
+    let mut end = chars.len();
+    while end > 0 {
+        end -= 1;
+        let candidate: String = chars[..end].iter().collect::<String>() + "...";
+        let galley = painter.layout_no_wrap(candidate.clone(), font.clone(), Color32::WHITE);
+        if galley.rect.width() <= max_width {
+            return candidate;
+        }
+    }
+    "...".to_string()
 }
 
 /// Draw input and output ports on a node.
@@ -332,6 +361,19 @@ fn draw_ports(
             );
         }
     }
+}
+
+/// Resolve the header color for a node.
+/// Dialogue nodes with a linked character use that character's color.
+fn resolve_node_color(node: &Node, characters: &[Character]) -> Color32 {
+    if let NodeType::Dialogue(data) = &node.node_type {
+        if let Some(speaker_id) = data.speaker_id {
+            if let Some(ch) = characters.iter().find(|c| c.id == speaker_id) {
+                return Color32::from_rgb(ch.color[0], ch.color[1], ch.color[2]);
+            }
+        }
+    }
+    node_color(&node.node_type)
 }
 
 fn format_variable_value(val: &crate::model::node::VariableValue) -> String {
