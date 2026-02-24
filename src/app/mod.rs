@@ -86,6 +86,8 @@ pub struct TaleNodeApp {
     status_message: Option<(String, Instant)>,
     /// Batch audio assignment state.
     audio_manager: crate::ui::audio_manager::AudioManagerState,
+    /// Whether the analytics panel is visible.
+    show_analytics_panel: bool,
     /// Whether the bookmark panel is visible.
     show_bookmark_panel: bool,
     /// Tag filter for bookmark panel.
@@ -134,6 +136,7 @@ impl TaleNodeApp {
             last_auto_save: Instant::now(),
             status_message: None,
             audio_manager: Default::default(),
+            show_analytics_panel: false,
             show_bookmark_panel: false,
             bookmark_tag_filter: None,
             bookmark_new_tag_text: String::new(),

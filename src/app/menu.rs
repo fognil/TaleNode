@@ -187,6 +187,12 @@ impl TaleNodeApp {
                 {
                     ui.close_menu();
                 }
+                if ui
+                    .checkbox(&mut self.show_analytics_panel, "Analytics Panel")
+                    .changed()
+                {
+                    ui.close_menu();
+                }
                 ui.separator();
                 if ui
                     .button(if self.dark_theme {

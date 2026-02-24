@@ -1,10 +1,11 @@
 use super::TaleNodeApp;
 
 impl TaleNodeApp {
-    /// Render bottom panels (comments, bookmarks) and handle their actions.
+    /// Render bottom panels (comments, bookmarks, analytics) and handle their actions.
     pub(super) fn show_bottom_panels(&mut self, ctx: &egui::Context) {
         self.show_comments_bottom_panel(ctx);
         self.show_bookmark_bottom_panel(ctx);
+        self.show_analytics_bottom_panel(ctx);
     }
 
     fn show_comments_bottom_panel(&mut self, ctx: &egui::Context) {
@@ -91,6 +92,21 @@ impl TaleNodeApp {
                     }
                     crate::ui::bookmark_panel::BookmarkAction::None => {}
                 }
+            });
+    }
+
+    fn show_analytics_bottom_panel(&mut self, ctx: &egui::Context) {
+        if !self.show_analytics_panel {
+            return;
+        }
+        let stats = crate::validation::analytics::analyze_graph(&self.graph);
+        egui::TopBottomPanel::bottom("analytics_panel")
+            .resizable(true)
+            .default_height(200.0)
+            .show(ctx, |ui| {
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    crate::ui::analytics_panel::show_analytics_panel(ui, &stats);
+                });
             });
     }
 }

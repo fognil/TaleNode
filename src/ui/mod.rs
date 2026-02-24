@@ -1,3 +1,4 @@
+pub mod analytics_panel;
 pub mod audio_manager;
 pub mod bookmark_panel;
 pub mod canvas;
