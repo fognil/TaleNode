@@ -8,6 +8,8 @@ use crate::model::port::{PortDirection, PortId};
 use crate::ui::canvas::CanvasState;
 use crate::ui::connection_renderer::{draw_bezier_wire, draw_connections};
 use crate::ui::node_widget::{self, draw_node, PORT_RADIUS};
+use crate::ui::playtest::PlaytestState;
+use crate::validation::validator::{self, Severity, ValidationWarning};
 
 /// Which port the user started dragging from.
 #[derive(Debug, Clone)]
@@ -52,6 +54,24 @@ pub struct TaleNodeApp {
     show_left_panel: bool,
     /// Undo/redo history.
     history: UndoHistory,
+    /// Cached validation warnings.
+    validation_warnings: Vec<ValidationWarning>,
+    /// Whether the validation panel is open.
+    show_validation_panel: bool,
+    /// Search query for finding nodes.
+    search_query: String,
+    /// Whether the search bar is visible.
+    show_search: bool,
+    /// Node IDs matching the current search.
+    search_results: Vec<Uuid>,
+    /// Current index in search results for cycling through matches.
+    search_index: usize,
+    /// Whether to use dark theme (true) or light theme (false).
+    dark_theme: bool,
+    /// Playtest mode state.
+    playtest: PlaytestState,
+    /// Whether the playtest panel is visible.
+    show_playtest: bool,
 }
 
 impl TaleNodeApp {
@@ -72,6 +92,15 @@ impl TaleNodeApp {
             project_path: None,
             show_left_panel: true,
             history: UndoHistory::new(),
+            validation_warnings: Vec::new(),
+            show_validation_panel: false,
+            search_query: String::new(),
+            show_search: false,
+            search_results: Vec::new(),
+            search_index: 0,
+            dark_theme: true,
+            playtest: PlaytestState::new(),
+            show_playtest: false,
         }
     }
 
@@ -140,7 +169,8 @@ impl TaleNodeApp {
         for id in &node_ids {
             if let Some(node) = self.graph.nodes.get(id) {
                 let is_selected = self.selected_nodes.contains(id);
-                draw_node(&painter, node, &self.canvas, is_selected);
+                let is_search_match = self.search_results.contains(id);
+                draw_node(&painter, node, &self.canvas, is_selected, is_search_match);
             }
         }
 
@@ -190,6 +220,9 @@ impl TaleNodeApp {
                 );
             }
         }
+
+        // Draw minimap overlay
+        self.draw_minimap(&painter, canvas_rect);
 
         // === INTERACTION HANDLING ===
         self.handle_interactions(&response, canvas_rect);
@@ -417,6 +450,17 @@ impl TaleNodeApp {
                 if ui.checkbox(&mut self.show_left_panel, "Left Panel").changed() {
                     ui.close_menu();
                 }
+                if ui.checkbox(&mut self.show_validation_panel, "Validation Panel").changed() {
+                    ui.close_menu();
+                }
+                if ui.checkbox(&mut self.show_playtest, "Playtest Panel").changed() {
+                    ui.close_menu();
+                }
+                ui.separator();
+                if ui.button(if self.dark_theme { "Light Theme" } else { "Dark Theme" }).clicked() {
+                    self.dark_theme = !self.dark_theme;
+                    ui.close_menu();
+                }
             });
         });
     }
@@ -498,7 +542,193 @@ impl TaleNodeApp {
         }
     }
 
-    fn show_status_bar(&self, ui: &mut egui::Ui) {
+    /// Search nodes for matching text content.
+    fn update_search_results(&mut self) {
+        self.search_results.clear();
+        let query = self.search_query.to_lowercase();
+        if query.is_empty() {
+            return;
+        }
+        for node in self.graph.nodes.values() {
+            if self.node_matches_query(node, &query) {
+                self.search_results.push(node.id);
+            }
+        }
+        if self.search_index >= self.search_results.len() {
+            self.search_index = 0;
+        }
+    }
+
+    fn node_matches_query(&self, node: &Node, query: &str) -> bool {
+        use crate::model::node::NodeType;
+
+        if node.title().to_lowercase().contains(query) {
+            return true;
+        }
+        match &node.node_type {
+            NodeType::Dialogue(data) => {
+                data.text.to_lowercase().contains(query)
+                    || data.speaker_name.to_lowercase().contains(query)
+                    || data.emotion.to_lowercase().contains(query)
+            }
+            NodeType::Choice(data) => {
+                data.prompt.to_lowercase().contains(query)
+                    || data.choices.iter().any(|c| c.text.to_lowercase().contains(query))
+            }
+            NodeType::Condition(data) => data.variable_name.to_lowercase().contains(query),
+            NodeType::Event(data) => data.actions.iter().any(|a| {
+                a.key.to_lowercase().contains(query)
+            }),
+            NodeType::End(data) => data.tag.to_lowercase().contains(query),
+            _ => false,
+        }
+    }
+
+    fn focus_search_result(&mut self) {
+        if let Some(&node_id) = self.search_results.get(self.search_index) {
+            self.selected_nodes.clear();
+            self.selected_nodes.push(node_id);
+            if let Some(node) = self.graph.nodes.get(&node_id) {
+                self.canvas.pan_offset = egui::Vec2::new(
+                    -node.position[0] * self.canvas.zoom,
+                    -node.position[1] * self.canvas.zoom,
+                );
+            }
+        }
+    }
+
+    fn draw_minimap(&self, painter: &egui::Painter, canvas_rect: Rect) {
+        if self.graph.nodes.is_empty() {
+            return;
+        }
+
+        let minimap_size = 160.0;
+        let padding = 10.0;
+        let minimap_rect = Rect::from_min_size(
+            Pos2::new(
+                canvas_rect.max.x - minimap_size - padding,
+                canvas_rect.max.y - minimap_size - padding,
+            ),
+            egui::Vec2::splat(minimap_size),
+        );
+
+        // Background
+        painter.rect_filled(
+            minimap_rect,
+            4.0,
+            Color32::from_rgba_premultiplied(30, 30, 30, 200),
+        );
+        painter.rect_stroke(
+            minimap_rect,
+            4.0,
+            Stroke::new(1.0, Color32::from_rgb(80, 80, 80)),
+            StrokeKind::Inside,
+        );
+
+        // Compute bounding box of all nodes in canvas coords
+        let mut min_x = f32::MAX;
+        let mut min_y = f32::MAX;
+        let mut max_x = f32::MIN;
+        let mut max_y = f32::MIN;
+
+        for node in self.graph.nodes.values() {
+            let rect = node_widget::node_rect(node);
+            min_x = min_x.min(rect.min.x);
+            min_y = min_y.min(rect.min.y);
+            max_x = max_x.max(rect.max.x);
+            max_y = max_y.max(rect.max.y);
+        }
+
+        // Add margin
+        let margin = 200.0;
+        min_x -= margin;
+        min_y -= margin;
+        max_x += margin;
+        max_y += margin;
+
+        let world_w = max_x - min_x;
+        let world_h = max_y - min_y;
+        if world_w <= 0.0 || world_h <= 0.0 {
+            return;
+        }
+
+        let inner_margin = 4.0;
+        let inner_rect = minimap_rect.shrink(inner_margin);
+        let scale = (inner_rect.width() / world_w).min(inner_rect.height() / world_h);
+
+        let map = |canvas_pos: Pos2| -> Pos2 {
+            Pos2::new(
+                inner_rect.min.x + (canvas_pos.x - min_x) * scale,
+                inner_rect.min.y + (canvas_pos.y - min_y) * scale,
+            )
+        };
+
+        // Draw nodes as small colored rectangles
+        for node in self.graph.nodes.values() {
+            let rect = node_widget::node_rect(node);
+            let mapped_min = map(rect.min);
+            let mapped_max = map(rect.max);
+            let mapped_rect = Rect::from_min_max(mapped_min, mapped_max);
+            let color = node_widget::node_color(&node.node_type);
+            painter.rect_filled(mapped_rect, 1.0, color);
+        }
+
+        // Draw viewport rectangle
+        let vp_min = self.canvas.screen_to_canvas(canvas_rect.min);
+        let vp_max = self.canvas.screen_to_canvas(canvas_rect.max);
+        let vp_mapped_min = map(vp_min);
+        let vp_mapped_max = map(vp_max);
+        let vp_rect = Rect::from_min_max(vp_mapped_min, vp_mapped_max).intersect(inner_rect);
+        painter.rect_stroke(
+            vp_rect,
+            1.0,
+            Stroke::new(1.0, Color32::from_rgb(200, 200, 200)),
+            StrokeKind::Inside,
+        );
+    }
+
+    fn show_search_bar(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.label("Find:");
+            let changed = ui
+                .text_edit_singleline(&mut self.search_query)
+                .changed();
+            if changed {
+                self.update_search_results();
+            }
+
+            let count = self.search_results.len();
+            if !self.search_query.is_empty() {
+                if count > 0 {
+                    ui.label(format!("{}/{count}", self.search_index + 1));
+                    if ui.small_button("<").clicked() {
+                        self.search_index = if self.search_index == 0 {
+                            count - 1
+                        } else {
+                            self.search_index - 1
+                        };
+                        self.focus_search_result();
+                    }
+                    if ui.small_button(">").clicked() {
+                        self.search_index = (self.search_index + 1) % count;
+                        self.focus_search_result();
+                    }
+                } else {
+                    ui.colored_label(Color32::from_rgb(255, 100, 100), "No matches");
+                }
+            }
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.small_button("X").clicked() {
+                    self.show_search = false;
+                    self.search_query.clear();
+                    self.search_results.clear();
+                }
+            });
+        });
+    }
+
+    fn show_status_bar(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             ui.label(&self.project_name);
             ui.separator();
@@ -511,12 +741,92 @@ impl TaleNodeApp {
                 ui.separator();
                 ui.label(format!("Selected: {}", self.selected_nodes.len()));
             }
+
+            // Validation indicator (right-aligned)
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let errors = self.validation_warnings.iter().filter(|w| w.severity == Severity::Error).count();
+                let warns = self.validation_warnings.iter().filter(|w| w.severity == Severity::Warning).count();
+
+                let label = if errors > 0 {
+                    format!("{errors} error(s), {warns} warning(s)")
+                } else if warns > 0 {
+                    format!("{warns} warning(s)")
+                } else {
+                    "No issues".to_string()
+                };
+
+                let color = if errors > 0 {
+                    Color32::from_rgb(255, 100, 100)
+                } else if warns > 0 {
+                    Color32::from_rgb(255, 200, 100)
+                } else {
+                    Color32::from_rgb(100, 200, 100)
+                };
+
+                if ui.add(egui::Label::new(egui::RichText::new(label).color(color)).sense(Sense::click())).clicked() {
+                    self.show_validation_panel = !self.show_validation_panel;
+                }
+            });
         });
+    }
+
+    fn show_validation_panel(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.heading("Validation");
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.small_button("X").clicked() {
+                    self.show_validation_panel = false;
+                }
+            });
+        });
+        ui.separator();
+
+        if self.validation_warnings.is_empty() {
+            ui.label("No issues found.");
+        } else {
+            egui::ScrollArea::vertical().max_height(200.0).show(ui, |ui| {
+                for warning in &self.validation_warnings {
+                    let (icon, color) = match warning.severity {
+                        Severity::Error => ("E", Color32::from_rgb(255, 100, 100)),
+                        Severity::Warning => ("!", Color32::from_rgb(255, 200, 100)),
+                    };
+
+                    ui.horizontal(|ui| {
+                        ui.colored_label(color, icon);
+                        let resp = ui.label(&warning.message);
+                        // Click to select the node
+                        if let Some(node_id) = warning.node_id {
+                            if resp.interact(Sense::click()).clicked() {
+                                self.selected_nodes.clear();
+                                self.selected_nodes.push(node_id);
+                                // Center canvas on the node
+                                if let Some(node) = self.graph.nodes.get(&node_id) {
+                                    self.canvas.pan_offset = egui::Vec2::new(
+                                        -node.position[0] * self.canvas.zoom,
+                                        -node.position[1] * self.canvas.zoom,
+                                    );
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 }
 
 impl eframe::App for TaleNodeApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // Apply theme
+        ctx.set_visuals(if self.dark_theme {
+            egui::Visuals::dark()
+        } else {
+            egui::Visuals::light()
+        });
+
+        // Run validation each frame (cheap for typical graph sizes)
+        self.validation_warnings = validator::validate(&self.graph);
+
         // Keyboard shortcuts
         if ctx.input(|i| i.modifiers.command && !i.modifiers.shift && i.key_pressed(egui::Key::S)) {
             self.do_save(false);
@@ -536,16 +846,100 @@ impl eframe::App for TaleNodeApp {
                 self.selected_nodes.clear();
             }
         }
+        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::F)) {
+            self.show_search = true;
+        }
+        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::N)) {
+            self.graph = DialogueGraph::new();
+            self.graph.add_node(Node::new_start([100.0, 200.0]));
+            self.selected_nodes.clear();
+            self.project_name = "Untitled".to_string();
+            self.project_path = None;
+            self.history = UndoHistory::new();
+        }
+        // Ctrl+A: select all nodes
+        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::A)) {
+            self.selected_nodes = self.graph.nodes.keys().copied().collect();
+        }
+        // Ctrl+D: duplicate selected nodes
+        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::D)) && !self.selected_nodes.is_empty() {
+            self.snapshot();
+            let mut new_ids = Vec::new();
+            for &id in &self.selected_nodes.clone() {
+                if let Some(node) = self.graph.nodes.get(&id) {
+                    let mut dup = node.clone();
+                    dup.id = Uuid::new_v4();
+                    dup.position[0] += 30.0;
+                    dup.position[1] += 30.0;
+                    // Give new UUIDs to all ports
+                    for port in &mut dup.inputs {
+                        port.id = crate::model::port::PortId(Uuid::new_v4());
+                    }
+                    for port in &mut dup.outputs {
+                        port.id = crate::model::port::PortId(Uuid::new_v4());
+                    }
+                    new_ids.push(dup.id);
+                    self.graph.add_node(dup);
+                }
+            }
+            self.selected_nodes = new_ids;
+        }
+        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
+            if self.show_search {
+                self.show_search = false;
+                self.search_query.clear();
+                self.search_results.clear();
+            }
+        }
+        // Enter cycles through search results
+        if self.show_search && !self.search_results.is_empty() {
+            if ctx.input(|i| i.key_pressed(egui::Key::Enter)) {
+                self.search_index = (self.search_index + 1) % self.search_results.len();
+                self.focus_search_result();
+            }
+        }
 
         // Menu bar at top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             self.show_menu_bar(ui);
         });
 
+        // Search bar (below menu bar)
+        if self.show_search {
+            egui::TopBottomPanel::top("search_bar").show(ctx, |ui| {
+                self.show_search_bar(ui);
+            });
+        }
+
         // Status bar at bottom
         egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
             self.show_status_bar(ui);
         });
+
+        // Validation panel (above status bar)
+        if self.show_validation_panel {
+            egui::TopBottomPanel::bottom("validation_panel")
+                .resizable(true)
+                .default_height(150.0)
+                .show(ctx, |ui| {
+                    self.show_validation_panel(ui);
+                });
+        }
+
+        // Playtest panel
+        if self.show_playtest {
+            egui::TopBottomPanel::bottom("playtest_panel")
+                .resizable(true)
+                .default_height(250.0)
+                .show(ctx, |ui| {
+                    crate::ui::playtest::show_playtest_panel(
+                        ui,
+                        &mut self.playtest,
+                        &self.graph,
+                        &mut self.selected_nodes,
+                    );
+                });
+        }
 
         // Left panel (variables, characters)
         if self.show_left_panel {

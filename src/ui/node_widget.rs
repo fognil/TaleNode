@@ -18,7 +18,7 @@ const DIM_TEXT_COLOR: Color32 = Color32::from_rgb(140, 140, 140);
 pub const PORT_RADIUS: f32 = NODE_PORT_RADIUS;
 
 /// Get the color associated with each node type.
-fn node_color(node_type: &NodeType) -> Color32 {
+pub fn node_color(node_type: &NodeType) -> Color32 {
     match node_type {
         NodeType::Start => Color32::from_rgb(76, 175, 80),       // green
         NodeType::Dialogue(_) => Color32::from_rgb(66, 133, 244), // blue
@@ -91,6 +91,7 @@ pub fn draw_node(
     node: &Node,
     canvas: &CanvasState,
     is_selected: bool,
+    is_search_match: bool,
 ) {
     let rect = node_rect(node);
     let screen_rect = canvas.canvas_rect_to_screen(rect);
@@ -147,6 +148,13 @@ pub fn draw_node(
             screen_rect,
             rounding,
             Stroke::new(2.0 * canvas.zoom, Color32::from_rgb(255, 255, 100)),
+            StrokeKind::Outside,
+        );
+    } else if is_search_match {
+        painter.rect_stroke(
+            screen_rect,
+            rounding,
+            Stroke::new(2.0 * canvas.zoom, Color32::from_rgb(100, 200, 255)),
             StrokeKind::Outside,
         );
     } else {
