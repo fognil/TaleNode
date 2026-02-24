@@ -1,0 +1,113 @@
+/* TaleNode docs — dark-first game dev aesthetic */
+
+/* Hero section on landing page */
+.tx-hero {
+  margin: 0 -0.8rem;
+  padding: 4rem 1rem;
+  text-align: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: 0.4rem;
+  margin-bottom: 2rem;
+}
+
+.tx-hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #7c8cf8, #e8b931);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tx-hero .tx-hero__tagline {
+  font-size: 1.25rem;
+  opacity: 0.85;
+  margin-bottom: 2rem;
+}
+
+.tx-hero .md-button {
+  margin: 0.25rem;
+}
+
+/* Feature grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.2rem;
+  margin: 2rem 0;
+}
+
+.feature-card {
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.feature-card:hover {
+  border-color: var(--md-accent-fg-color);
+  transform: translateY(-2px);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.feature-card p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0;
+}
+
+/* Node color badges used in docs */
+.node-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.node-badge--start     { background: #4CAF50; }
+.node-badge--dialogue  { background: #4285F4; }
+.node-badge--choice    { background: #FBBC04; color: #1a1a1a; }
+.node-badge--condition { background: #FF9800; }
+.node-badge--event     { background: #AB47BC; }
+.node-badge--random    { background: #9E9E9E; }
+.node-badge--end       { background: #F44336; }
+
+/* Keyboard shortcut styling */
+.shortcut-table td:first-child {
+  white-space: nowrap;
+}
+
+/* Tighter admonition spacing */
+.md-typeset .admonition {
+  margin-bottom: 1rem;
+}
+
+/* Port direction indicators */
+.port-in::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #aaa;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.port-out::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6cf;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}

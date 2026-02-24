@@ -1,0 +1,94 @@
+# Canvas & Navigation
+
+The canvas is the main workspace where you build your dialogue graph. It's an infinite 2D surface with pan, zoom, and a grid background.
+
+## Panning
+
+Move around the canvas using any of these methods:
+
+| Method | Action |
+|---|---|
+| Middle mouse drag | Hold middle button and drag |
+| Space + left mouse drag | Hold Space, then click and drag |
+| Scroll wheel | Scroll to pan vertically and horizontally |
+
+## Zooming
+
+| Method | Action |
+|---|---|
+| ++ctrl++ + scroll wheel | Zoom in/out at cursor position |
+| Trackpad pinch (macOS) | Pinch to zoom |
+
+- **Zoom range**: 25% to 400%
+- The current zoom level is displayed in the status bar at the bottom.
+
+## Grid
+
+The canvas displays a grid to help align nodes:
+
+- **Grid spacing**: 40px (canvas units)
+- **Major gridlines**: Every 5th line is drawn slightly brighter
+- The grid fades out automatically when zoomed out far enough (below 4px effective spacing)
+
+## Coordinate System
+
+TaleNode uses two coordinate systems internally:
+
+- **Screen coordinates**: Pixel position on your monitor
+- **Canvas coordinates**: Logical position on the infinite canvas
+
+The conversion is: `canvas_pos = (screen_pos - pan_offset) / zoom`
+
+All node positions are stored in canvas coordinates, so they stay consistent regardless of how you pan or zoom.
+
+## Selecting Nodes
+
+| Action | Result |
+|---|---|
+| Left-click a node | Select that node (deselects others) |
+| Left-click empty canvas | Deselect all nodes |
+| Left-click drag on empty canvas | Box selection — selects all nodes within the rectangle |
+| ++ctrl+a++ | Select all nodes |
+
+Selected nodes are highlighted with a bright border.
+
+## Moving Nodes
+
+Click and drag a selected node to move it. If multiple nodes are selected, they all move together.
+
+!!! tip
+    Node movement supports undo — the position change is recorded when you release the mouse button.
+
+## Deleting Nodes
+
+Select one or more nodes and press ++delete++ or ++backspace++. All connections to/from deleted nodes are automatically removed.
+
+## Duplicating Nodes
+
+Select nodes and press ++ctrl+d++. Duplicated nodes appear offset by 30px down and to the right. Connections are not duplicated — only the node structure is copied.
+
+## Minimap
+
+A minimap is displayed in the bottom-right corner of the canvas (160x160 pixels). It shows:
+
+- All nodes as small colored rectangles matching their type color
+- The current viewport as a white rectangle outline
+
+Click or drag on the minimap to quickly navigate to a different part of your graph.
+
+## Search
+
+Press ++ctrl+f++ to open the search bar. Search finds matches across:
+
+- Node titles and types
+- Dialogue text and speaker names
+- Choice option text and prompts
+- Condition variable names
+- Event action keys
+- End tags
+
+Navigate through results with the **<** / **>** buttons or press ++enter++ to cycle. The canvas auto-centers on each result. Press ++escape++ to close search.
+
+## Background Color
+
+The canvas background is dark gray (`rgb(30, 30, 30)`) by default. Switch to light theme via **View > Light/Dark Theme**.
