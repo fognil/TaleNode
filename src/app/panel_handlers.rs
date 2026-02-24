@@ -105,9 +105,20 @@ impl TaleNodeApp {
             .resizable(true)
             .default_height(200.0)
             .show(ctx, |ui| {
-                egui::ScrollArea::vertical().show(ui, |ui| {
-                    crate::ui::analytics_panel::show_analytics_panel(ui, &stats);
-                });
+                let action = egui::ScrollArea::vertical()
+                    .show(ui, |ui| {
+                        crate::ui::analytics_panel::show_analytics_panel(ui, &stats)
+                    })
+                    .inner;
+                match action {
+                    crate::ui::analytics_panel::AnalyticsPanelAction::ExportCsv => {
+                        self.do_export_analytics_csv(&stats);
+                    }
+                    crate::ui::analytics_panel::AnalyticsPanelAction::ExportText => {
+                        self.do_export_analytics_text(&stats);
+                    }
+                    crate::ui::analytics_panel::AnalyticsPanelAction::None => {}
+                }
             });
     }
 
@@ -123,6 +134,8 @@ impl TaleNodeApp {
                     ui,
                     &self.versions,
                     &mut self.version_new_desc,
+                    &mut self.version_compare_selection,
+                    self.version_diff_result.as_ref(),
                 );
                 match action {
                     crate::ui::version_panel::VersionPanelAction::CreateVersion(desc) => {
@@ -144,8 +157,17 @@ impl TaleNodeApp {
                         };
                         if let Some(old_graph) = project.restore_version(id) {
                             self.snapshot();
-                            let _ = old_graph; // old graph is for undo (snapshot already saved)
+                            let _ = old_graph;
                             self.graph = project.graph;
+                        }
+                    }
+                    crate::ui::version_panel::VersionPanelAction::CompareVersions(a, b) => {
+                        let va = self.versions.iter().find(|v| v.id == a);
+                        let vb = self.versions.iter().find(|v| v.id == b);
+                        if let (Some(va), Some(vb)) = (va, vb) {
+                            self.version_diff_result = Some(
+                                crate::model::graph_diff::diff_graphs(&va.graph, &vb.graph),
+                            );
                         }
                     }
                     crate::ui::version_panel::VersionPanelAction::None => {}

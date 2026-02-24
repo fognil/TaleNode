@@ -2,6 +2,7 @@ pub mod character;
 pub mod connection;
 mod example_project;
 pub mod graph;
+pub mod graph_diff;
 pub mod group;
 pub mod node;
 pub mod node_types;

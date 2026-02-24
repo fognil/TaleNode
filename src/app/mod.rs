@@ -92,6 +92,10 @@ pub struct TaleNodeApp {
     version_new_desc: String,
     /// Saved version snapshots.
     versions: Vec<crate::model::project::VersionSnapshot>,
+    /// Version compare checkbox selection [slot_a, slot_b].
+    version_compare_selection: [Option<usize>; 2],
+    /// Cached diff result from comparing two versions.
+    version_diff_result: Option<crate::model::graph_diff::GraphDiff>,
     /// Whether the analytics panel is visible.
     show_analytics_panel: bool,
     /// Whether the bookmark panel is visible.
@@ -145,6 +149,8 @@ impl TaleNodeApp {
             show_version_panel: false,
             version_new_desc: String::new(),
             versions: Vec::new(),
+            version_compare_selection: [None; 2],
+            version_diff_result: None,
             show_analytics_panel: false,
             show_bookmark_panel: false,
             bookmark_tag_filter: None,
