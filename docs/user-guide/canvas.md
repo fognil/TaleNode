@@ -89,6 +89,20 @@ Press ++ctrl+f++ to open the search bar. Search finds matches across:
 
 Navigate through results with the **<** / **>** buttons or press ++enter++ to cycle. The canvas auto-centers on each result. Press ++escape++ to close search.
 
+## Search & Replace
+
+Press ++ctrl+h++ to open the search bar with the replace row, or click **Replace** in the search bar to toggle it.
+
+| Button | Action |
+|---|---|
+| **Replace** | Replace the match in the currently focused node |
+| **Replace All** | Replace all matches across all matching nodes |
+
+Replace works on the same text fields as search: dialogue text, speaker names, choice text, prompts, condition variable names, event action keys, and end tags. The search is **case-insensitive**.
+
+!!! tip
+    Replace operations support undo — press ++ctrl+z++ to revert any replacement.
+
 ## Background Color
 
 The canvas background is dark gray (`rgb(30, 30, 30)`) by default. Switch to light theme via **View > Light/Dark Theme**.

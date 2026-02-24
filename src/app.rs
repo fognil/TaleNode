@@ -66,6 +66,10 @@ pub struct TaleNodeApp {
     search_results: Vec<Uuid>,
     /// Current index in search results for cycling through matches.
     search_index: usize,
+    /// Replace query text.
+    replace_query: String,
+    /// Whether the replace row is visible.
+    show_replace: bool,
     /// Whether to use dark theme (true) or light theme (false).
     dark_theme: bool,
     /// Playtest mode state.
@@ -102,6 +106,8 @@ impl TaleNodeApp {
             show_search: false,
             search_results: Vec::new(),
             search_index: 0,
+            replace_query: String::new(),
+            show_replace: false,
             dark_theme: true,
             playtest: PlaytestState::new(),
             show_playtest: false,
@@ -859,11 +865,77 @@ impl TaleNodeApp {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui.small_button("X").clicked() {
                     self.show_search = false;
+                    self.show_replace = false;
                     self.search_query.clear();
                     self.search_results.clear();
+                    self.replace_query.clear();
+                }
+                let toggle_label = if self.show_replace { "Hide Replace" } else { "Replace" };
+                if ui.small_button(toggle_label).clicked() {
+                    self.show_replace = !self.show_replace;
                 }
             });
         });
+
+        if self.show_replace {
+            ui.horizontal(|ui| {
+                ui.label("Replace:");
+                ui.text_edit_singleline(&mut self.replace_query);
+
+                let has_matches = !self.search_query.is_empty() && !self.search_results.is_empty();
+                if ui.add_enabled(has_matches, egui::Button::new("Replace")).clicked() {
+                    self.replace_in_current();
+                }
+                if ui.add_enabled(has_matches, egui::Button::new("Replace All")).clicked() {
+                    self.replace_all();
+                }
+            });
+        }
+    }
+
+    /// Replace the search query in the currently focused search result node.
+    fn replace_in_current(&mut self) {
+        let Some(&node_id) = self.search_results.get(self.search_index) else {
+            return;
+        };
+        self.snapshot();
+        let query = self.search_query.clone();
+        let replacement = self.replace_query.clone();
+        if let Some(node) = self.graph.nodes.get_mut(&node_id) {
+            replace_in_node(node, &query, &replacement);
+        }
+        self.update_search_results();
+        // Keep index in bounds
+        if !self.search_results.is_empty() {
+            if self.search_index >= self.search_results.len() {
+                self.search_index = 0;
+            }
+            self.focus_search_result();
+        }
+        self.status_message = Some(("Replaced in current node".to_string(), Instant::now()));
+    }
+
+    /// Replace the search query in all matching nodes.
+    fn replace_all(&mut self) {
+        if self.search_results.is_empty() {
+            return;
+        }
+        self.snapshot();
+        let query = self.search_query.clone();
+        let replacement = self.replace_query.clone();
+        let ids: Vec<Uuid> = self.search_results.clone();
+        let mut count = 0;
+        for id in &ids {
+            if let Some(node) = self.graph.nodes.get_mut(id) {
+                count += replace_in_node(node, &query, &replacement);
+            }
+        }
+        self.update_search_results();
+        self.search_index = 0;
+        self.status_message = Some((
+            format!("{count} replacement(s) across {} node(s)", ids.len()),
+            Instant::now(),
+        ));
     }
 
     fn show_status_bar(&mut self, ui: &mut egui::Ui) {
@@ -1002,6 +1074,10 @@ impl eframe::App for TaleNodeApp {
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::F)) {
             self.show_search = true;
         }
+        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::H)) {
+            self.show_search = true;
+            self.show_replace = true;
+        }
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::N)) {
             self.graph = DialogueGraph::new();
             self.graph.add_node(Node::new_start([100.0, 200.0]));
@@ -1037,19 +1113,20 @@ impl eframe::App for TaleNodeApp {
             }
             self.selected_nodes = new_ids;
         }
-        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
-            if self.show_search {
-                self.show_search = false;
-                self.search_query.clear();
-                self.search_results.clear();
-            }
+        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) && self.show_search {
+            self.show_search = false;
+            self.show_replace = false;
+            self.search_query.clear();
+            self.search_results.clear();
+            self.replace_query.clear();
         }
         // Enter cycles through search results
-        if self.show_search && !self.search_results.is_empty() {
-            if ctx.input(|i| i.key_pressed(egui::Key::Enter)) {
-                self.search_index = (self.search_index + 1) % self.search_results.len();
-                self.focus_search_result();
-            }
+        if self.show_search
+            && !self.search_results.is_empty()
+            && ctx.input(|i| i.key_pressed(egui::Key::Enter))
+        {
+            self.search_index = (self.search_index + 1) % self.search_results.len();
+            self.focus_search_result();
         }
 
         // Menu bar at top
@@ -1130,4 +1207,69 @@ impl eframe::App for TaleNodeApp {
                 self.show_canvas(ui);
             });
     }
+}
+
+/// Replace all case-insensitive occurrences of `query` in a node's text fields.
+/// Returns the number of individual string replacements made.
+fn replace_in_node(node: &mut Node, query: &str, replacement: &str) -> usize {
+    use crate::model::node::NodeType;
+    let mut count = 0;
+
+    match &mut node.node_type {
+        NodeType::Dialogue(data) => {
+            count += replace_in_string(&mut data.text, query, replacement);
+            count += replace_in_string(&mut data.speaker_name, query, replacement);
+            count += replace_in_string(&mut data.emotion, query, replacement);
+        }
+        NodeType::Choice(data) => {
+            count += replace_in_string(&mut data.prompt, query, replacement);
+            for choice in &mut data.choices {
+                count += replace_in_string(&mut choice.text, query, replacement);
+            }
+        }
+        NodeType::Condition(data) => {
+            count += replace_in_string(&mut data.variable_name, query, replacement);
+        }
+        NodeType::Event(data) => {
+            for action in &mut data.actions {
+                count += replace_in_string(&mut action.key, query, replacement);
+            }
+        }
+        NodeType::End(data) => {
+            count += replace_in_string(&mut data.tag, query, replacement);
+        }
+        _ => {}
+    }
+
+    // Sync port labels for Choice nodes after replacement
+    if let NodeType::Choice(data) = &node.node_type {
+        for (i, choice) in data.choices.iter().enumerate() {
+            if let Some(port) = node.outputs.get_mut(i) {
+                port.label.clone_from(&choice.text);
+            }
+        }
+    }
+
+    count
+}
+
+/// Case-insensitive replace of all occurrences in a string.
+/// Returns 1 if any replacement was made, 0 otherwise.
+fn replace_in_string(s: &mut String, query: &str, replacement: &str) -> usize {
+    let lower = s.to_lowercase();
+    let query_lower = query.to_lowercase();
+    if !lower.contains(&query_lower) {
+        return 0;
+    }
+    // Build result preserving structure but replacing case-insensitively
+    let mut result = String::with_capacity(s.len());
+    let mut remaining = s.as_str();
+    while let Some(pos) = remaining.to_lowercase().find(&query_lower) {
+        result.push_str(&remaining[..pos]);
+        result.push_str(replacement);
+        remaining = &remaining[pos + query.len()..];
+    }
+    result.push_str(remaining);
+    *s = result;
+    1
 }

@@ -33,11 +33,12 @@ Complete list of keyboard shortcuts in TaleNode.
 | ++ctrl++ + scroll wheel | Zoom in/out |
 | Trackpad pinch (macOS) | Zoom in/out |
 
-## Search
+## Search & Replace
 
 | Shortcut | Action |
 |---|---|
 | ++ctrl+f++ | Open search bar |
+| ++ctrl+h++ | Open search bar with replace |
 | ++escape++ | Close search bar |
 | ++enter++ | Next search result |
 
