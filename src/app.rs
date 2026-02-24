@@ -231,7 +231,7 @@ impl TaleNodeApp {
         }
 
         // Draw minimap overlay
-        self.draw_minimap(&painter, canvas_rect);
+        self.draw_minimap(ui, &painter, canvas_rect);
 
         // === INTERACTION HANDLING ===
         self.handle_interactions(&response, canvas_rect);
@@ -711,7 +711,7 @@ impl TaleNodeApp {
         }
     }
 
-    fn draw_minimap(&self, painter: &egui::Painter, canvas_rect: Rect) {
+    fn draw_minimap(&mut self, ui: &egui::Ui, painter: &egui::Painter, canvas_rect: Rect) {
         if self.graph.nodes.is_empty() {
             return;
         }
@@ -777,6 +777,14 @@ impl TaleNodeApp {
             )
         };
 
+        // Inverse: minimap screen position → canvas position
+        let unmap = |screen_pos: Pos2| -> Pos2 {
+            Pos2::new(
+                (screen_pos.x - inner_rect.min.x) / scale + min_x,
+                (screen_pos.y - inner_rect.min.y) / scale + min_y,
+            )
+        };
+
         // Draw nodes as small colored rectangles
         for node in self.graph.nodes.values() {
             let rect = node_widget::node_rect(node);
@@ -799,6 +807,22 @@ impl TaleNodeApp {
             Stroke::new(1.0, Color32::from_rgb(200, 200, 200)),
             StrokeKind::Inside,
         );
+
+        // Handle click/drag on minimap to navigate
+        let pointer_pos = ui.input(|i| i.pointer.interact_pos()).unwrap_or(Pos2::ZERO);
+        let pointer_down = ui.input(|i| i.pointer.primary_down());
+
+        if pointer_down && minimap_rect.contains(pointer_pos) {
+            let canvas_target = unmap(pointer_pos);
+            let canvas_center = egui::Vec2::new(
+                canvas_rect.width() * 0.5,
+                canvas_rect.height() * 0.5,
+            );
+            self.canvas.pan_offset = egui::Vec2::new(
+                canvas_center.x + canvas_rect.min.x - canvas_target.x * self.canvas.zoom,
+                canvas_center.y + canvas_rect.min.y - canvas_target.y * self.canvas.zoom,
+            );
+        }
     }
 
     fn show_search_bar(&mut self, ui: &mut egui::Ui) {
