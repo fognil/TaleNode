@@ -9,5 +9,6 @@ pub mod node_types;
 pub mod port;
 pub mod project;
 pub mod review;
+pub mod template;
 pub mod variable;
 pub mod version;

@@ -321,7 +321,7 @@ impl TaleNodeApp {
                         }
                     }
 
-                    // Group actions
+                    // Group / template actions
                     if !self.selected_nodes.is_empty() {
                         ui.separator();
                         if ui.button("Group Selected").clicked() {
@@ -340,6 +340,28 @@ impl TaleNodeApp {
                                 !self.selected_nodes.iter().any(|id| g.node_ids.contains(id))
                             });
                             close_menu = true;
+                        }
+                        if ui.button("Save as Template").clicked() {
+                            self.show_template_panel = true;
+                            close_menu = true;
+                        }
+                    }
+
+                    // Insert template
+                    if !self.template_library.templates.is_empty() {
+                        ui.separator();
+                        ui.label("Insert Template");
+                        let templates: Vec<_> = self.template_library.templates
+                            .iter().map(|t| (t.id, t.name.clone())).collect();
+                        for (tid, tname) in templates {
+                            if ui.button(&tname).clicked() {
+                                if let Some(t) = self.template_library.templates
+                                    .iter().find(|t| t.id == tid).cloned()
+                                {
+                                    self.insert_template(&t, ctx_pos);
+                                }
+                                close_menu = true;
+                            }
                         }
                     }
                 });
@@ -363,38 +385,16 @@ impl TaleNodeApp {
                 dup.id = Uuid::new_v4();
                 dup.position[0] += 30.0;
                 dup.position[1] += 30.0;
-                for port in &mut dup.inputs {
-                    port.id = crate::model::port::PortId(Uuid::new_v4());
-                }
-                for port in &mut dup.outputs {
-                    port.id = crate::model::port::PortId(Uuid::new_v4());
+                for p in dup.inputs.iter_mut().chain(dup.outputs.iter_mut()) {
+                    p.id = crate::model::port::PortId(Uuid::new_v4());
                 }
                 if let crate::model::node::NodeType::SubGraph(ref mut data) = dup.node_type {
-                    regenerate_child_ids(&mut data.child_graph);
+                    super::templates::regenerate_child_ids(&mut data.child_graph);
                 }
                 new_ids.push(dup.id);
                 self.graph.add_node(dup);
             }
         }
         self.selected_nodes = new_ids;
-    }
-}
-fn regenerate_child_ids(g: &mut crate::model::graph::DialogueGraph) {
-    let (mut ids, mut ports) = (std::collections::HashMap::new(), std::collections::HashMap::new());
-    for (oid, mut n) in g.nodes.drain().collect::<Vec<_>>() {
-        let nid = Uuid::new_v4();
-        ids.insert(oid, nid);
-        n.id = nid;
-        for p in n.inputs.iter_mut().chain(n.outputs.iter_mut()) {
-            let np = PortId(Uuid::new_v4()); ports.insert(p.id, np); p.id = np;
-        }
-        g.nodes.insert(nid, n);
-    }
-    for c in &mut g.connections {
-        c.id = Uuid::new_v4();
-        c.from_node = ids.get(&c.from_node).copied().unwrap_or(c.from_node);
-        c.to_node = ids.get(&c.to_node).copied().unwrap_or(c.to_node);
-        c.from_port = ports.get(&c.from_port).copied().unwrap_or(c.from_port);
-        c.to_port = ports.get(&c.to_port).copied().unwrap_or(c.to_port);
     }
 }

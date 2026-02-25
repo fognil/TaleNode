@@ -1,12 +1,13 @@
 use super::TaleNodeApp;
 
 impl TaleNodeApp {
-    /// Render bottom panels (comments, bookmarks, analytics, version) and handle their actions.
+    /// Render bottom panels and handle their actions.
     pub(super) fn show_bottom_panels(&mut self, ctx: &egui::Context) {
         self.show_comments_bottom_panel(ctx);
         self.show_bookmark_bottom_panel(ctx);
         self.show_analytics_bottom_panel(ctx);
         self.show_version_bottom_panel(ctx);
+        self.show_template_bottom_panel(ctx);
     }
 
     fn show_comments_bottom_panel(&mut self, ctx: &egui::Context) {
@@ -171,6 +172,48 @@ impl TaleNodeApp {
                         }
                     }
                     crate::ui::version_panel::VersionPanelAction::None => {}
+                }
+            });
+    }
+
+    fn show_template_bottom_panel(&mut self, ctx: &egui::Context) {
+        if !self.show_template_panel {
+            return;
+        }
+        let has_selection = !self.selected_nodes.is_empty();
+        egui::TopBottomPanel::bottom("template_panel")
+            .resizable(true)
+            .default_height(180.0)
+            .show(ctx, |ui| {
+                let action = crate::ui::template_panel::show_template_panel(
+                    ui,
+                    &self.template_library,
+                    &mut self.template_new_name,
+                    has_selection,
+                );
+                match action {
+                    crate::ui::template_panel::TemplatePanelAction::Insert(tid) => {
+                        if let Some(t) = self
+                            .template_library
+                            .templates
+                            .iter()
+                            .find(|t| t.id == tid)
+                            .cloned()
+                        {
+                            let center = [
+                                -self.canvas.pan_offset.x / self.canvas.zoom,
+                                -self.canvas.pan_offset.y / self.canvas.zoom,
+                            ];
+                            self.insert_template(&t, center);
+                        }
+                    }
+                    crate::ui::template_panel::TemplatePanelAction::Delete(tid) => {
+                        self.delete_template(tid);
+                    }
+                    crate::ui::template_panel::TemplatePanelAction::SaveSelection(name) => {
+                        self.save_selection_as_template(name);
+                    }
+                    crate::ui::template_panel::TemplatePanelAction::None => {}
                 }
             });
     }

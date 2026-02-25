@@ -50,10 +50,10 @@
   - Auto-generate response variants
   - Tone/emotion suggestions
 
-- [ ] **Template system**
-  - Luu node patterns thanh template
-  - Template library (shop encounter, quest giver, guard check, ...)
-  - Drag-drop template vao canvas
+- [x] **Template system**
+  - [x] Luu node patterns thanh template
+  - [x] Template library (shop encounter, quest giver, guard check, ...)
+  - [x] Insert template vao canvas
 
 - [ ] **Dual editor view**
   - Text/script view song song voi node view

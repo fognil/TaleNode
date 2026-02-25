@@ -5,6 +5,7 @@ mod panel_handlers;
 mod panels;
 mod search;
 mod subgraph_nav;
+mod templates;
 
 use egui::Pos2;
 use std::time::Instant;
@@ -117,6 +118,12 @@ pub struct TaleNodeApp {
     new_comment_text: String,
     /// Navigation stack for sub-graph editing.
     subgraph_stack: Vec<subgraph_nav::SubGraphFrame>,
+    /// Reusable node pattern library.
+    template_library: crate::model::template::TemplateLibrary,
+    /// Whether the template panel is visible.
+    show_template_panel: bool,
+    /// Text input for new template name.
+    template_new_name: String,
 }
 
 impl TaleNodeApp {
@@ -164,6 +171,9 @@ impl TaleNodeApp {
             comment_target_node: None,
             new_comment_text: String::new(),
             subgraph_stack: Vec::new(),
+            template_library: Self::load_template_library(),
+            show_template_panel: false,
+            template_new_name: String::new(),
         }
     }
 
