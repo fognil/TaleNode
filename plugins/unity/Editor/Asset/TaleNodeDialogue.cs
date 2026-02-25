@@ -98,13 +98,13 @@ namespace TaleNode.Editor
             {
                 switch (node.NodeType)
                 {
-                    case "start": StartCount++; break;
-                    case "dialogue": DialogueNodeCount++; break;
-                    case "choice": ChoiceCount++; break;
-                    case "condition": ConditionCount++; break;
-                    case "event": EventCount++; break;
-                    case "random": RandomCount++; break;
-                    case "end": EndCount++; break;
+                    case TaleNodeTypes.Start: StartCount++; break;
+                    case TaleNodeTypes.Dialogue: DialogueNodeCount++; break;
+                    case TaleNodeTypes.Choice: ChoiceCount++; break;
+                    case TaleNodeTypes.Condition: ConditionCount++; break;
+                    case TaleNodeTypes.Event: EventCount++; break;
+                    case TaleNodeTypes.Random: RandomCount++; break;
+                    case TaleNodeTypes.End: EndCount++; break;
                 }
             }
         }

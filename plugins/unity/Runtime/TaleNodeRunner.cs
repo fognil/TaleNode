@@ -71,6 +71,7 @@ namespace TaleNode
         private Dictionary<string, JObject> _characters = new Dictionary<string, JObject>();
         private string _currentNodeId = "";
         private bool _running;
+        private readonly Random _rng = new Random();
 
         // Cached filtered options for the current choice node
         private List<JObject> _currentFilteredOptions;
@@ -171,7 +172,7 @@ namespace TaleNode
                 _currentNodeId = "";
                 foreach (var kv in _nodeMap)
                 {
-                    if (kv.Value["type"]?.ToString() == "start")
+                    if (kv.Value["type"]?.ToString() == TaleNodeTypes.Start)
                     {
                         _currentNodeId = kv.Key;
                         break;
@@ -203,7 +204,7 @@ namespace TaleNode
         {
             if (!_running) return;
             var node = GetCurrentNode();
-            if (node == null || node["type"]?.ToString() != "choice") return;
+            if (node == null || node["type"]?.ToString() != TaleNodeTypes.Choice) return;
 
             if (_currentFilteredOptions == null) return;
             if (optionIndex < 0 || optionIndex >= _currentFilteredOptions.Count)
@@ -216,10 +217,10 @@ namespace TaleNode
             GoTo(chosen["next"]?.ToString());
         }
 
-        /// <summary>Get a runtime variable value.</summary>
+        /// <summary>Get a runtime variable value. Returns default (0) if not found.</summary>
         public TaleValue GetVariable(string name)
         {
-            return _variables.TryGetValue(name, out var val) ? val : null;
+            return _variables.TryGetValue(name, out var val) ? val : TaleValue.FromInt(0);
         }
 
         /// <summary>Set a runtime variable value.</summary>
@@ -274,32 +275,38 @@ namespace TaleNode
 
             switch (nodeType)
             {
-                case "start":
+                case TaleNodeTypes.Start:
                     GoTo(node["next"]?.ToString());
                     break;
 
-                case "dialogue":
+                case TaleNodeTypes.Dialogue:
                     ProcessDialogue(node);
                     break;
 
-                case "choice":
+                case TaleNodeTypes.Choice:
                     ProcessChoice(node);
                     break;
 
-                case "condition":
+                case TaleNodeTypes.Condition:
                     ProcessCondition(node);
                     break;
 
-                case "event":
+                case TaleNodeTypes.Event:
                     ProcessEvent(node);
                     break;
 
-                case "random":
+                case TaleNodeTypes.Random:
                     ProcessRandom(node);
                     break;
 
-                case "end":
+                case TaleNodeTypes.End:
                     End(node["tag"]?.ToString() ?? "");
+                    break;
+
+                case TaleNodeTypes.SubGraph:
+                    // SubGraphs are flattened at export, but handle gracefully
+                    // by following the next pointer (passthrough).
+                    GoTo(node["next"]?.ToString());
                     break;
 
                 default:
@@ -436,14 +443,12 @@ namespace TaleNode
 
             if (totalWeight <= 0)
             {
-                var rng = new Random();
-                int idx = rng.Next(branches.Count);
+                int idx = _rng.Next(branches.Count);
                 GoTo((branches[idx] as JObject)?["next"]?.ToString());
                 return;
             }
 
-            var rand = new Random();
-            double roll = rand.NextDouble() * totalWeight;
+            double roll = _rng.NextDouble() * totalWeight;
             double cumulative = 0;
             foreach (var b in branches)
             {

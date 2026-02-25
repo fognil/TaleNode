@@ -122,14 +122,14 @@ namespace TaleNode.Editor
         {
             switch (nodeData.NodeType)
             {
-                case "start":
-                case "dialogue":
-                case "event":
-                case "subgraph":
+                case TaleNodeTypes.Start:
+                case TaleNodeTypes.Dialogue:
+                case TaleNodeTypes.Event:
+                case TaleNodeTypes.SubGraph:
                     ConnectPorts(nodeData.Id, "output", nodeData.Next);
                     break;
 
-                case "choice":
+                case TaleNodeTypes.Choice:
                     if (nodeData.Options != null)
                     {
                         for (int i = 0; i < nodeData.Options.Count; i++)
@@ -140,12 +140,12 @@ namespace TaleNode.Editor
                     }
                     break;
 
-                case "condition":
+                case TaleNodeTypes.Condition:
                     ConnectPorts(nodeData.Id, "true", nodeData.TrueNext);
                     ConnectPorts(nodeData.Id, "false", nodeData.FalseNext);
                     break;
 
-                case "random":
+                case TaleNodeTypes.Random:
                     if (nodeData.Branches != null)
                     {
                         for (int i = 0; i < nodeData.Branches.Count; i++)

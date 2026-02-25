@@ -7,6 +7,19 @@ using Newtonsoft.Json;
 
 namespace TaleNode
 {
+    /// <summary>Constant strings for dialogue node types.</summary>
+    public static class TaleNodeTypes
+    {
+        public const string Start = "start";
+        public const string Dialogue = "dialogue";
+        public const string Choice = "choice";
+        public const string Condition = "condition";
+        public const string Event = "event";
+        public const string Random = "random";
+        public const string End = "end";
+        public const string SubGraph = "subgraph";
+    }
+
     [Serializable]
     public class TaleNodeDialogueData
     {

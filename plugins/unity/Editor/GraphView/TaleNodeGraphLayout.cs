@@ -118,7 +118,7 @@ namespace TaleNode.Editor
             // Seed BFS from all start nodes
             foreach (var node in data.Nodes)
             {
-                if (node.NodeType == "start")
+                if (node.NodeType == TaleNodeTypes.Start)
                 {
                     depths[node.Id] = 0;
                     queue.Enqueue(node.Id);

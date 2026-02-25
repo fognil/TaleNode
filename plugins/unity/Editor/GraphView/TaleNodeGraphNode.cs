@@ -56,7 +56,8 @@ namespace TaleNode.Editor
             titleContainer.style.backgroundColor = color;
 
             // Light text on dark backgrounds, dark text on yellow
-            bool darkText = nodeType == "choice" || nodeType == "random";
+            bool darkText = nodeType == TaleNodeTypes.Choice
+                || nodeType == TaleNodeTypes.Random;
             var titleLabel = titleContainer.Q<Label>("title-label");
             if (titleLabel != null)
                 titleLabel.style.color = darkText
@@ -68,13 +69,14 @@ namespace TaleNode.Editor
         {
             return nodeType switch
             {
-                "start" => FromHex("#4CAF50"),
-                "dialogue" => FromHex("#4285F4"),
-                "choice" => FromHex("#FBBC04"),
-                "condition" => FromHex("#FF9800"),
-                "event" => FromHex("#AB47BC"),
-                "random" => FromHex("#9E9E9E"),
-                "end" => FromHex("#F44336"),
+                TaleNodeTypes.Start => FromHex("#4CAF50"),
+                TaleNodeTypes.Dialogue => FromHex("#4285F4"),
+                TaleNodeTypes.Choice => FromHex("#FBBC04"),
+                TaleNodeTypes.Condition => FromHex("#FF9800"),
+                TaleNodeTypes.Event => FromHex("#AB47BC"),
+                TaleNodeTypes.Random => FromHex("#9E9E9E"),
+                TaleNodeTypes.End => FromHex("#F44336"),
+                TaleNodeTypes.SubGraph => FromHex("#00ACC1"),
                 _ => FromHex("#607D8B"),
             };
         }
@@ -89,7 +91,7 @@ namespace TaleNode.Editor
             TaleNodeNodeData data)
         {
             // Input port (all except start)
-            if (data.NodeType != "start")
+            if (data.NodeType != TaleNodeTypes.Start)
             {
                 var input = Port.Create<Edge>(
                     Orientation.Horizontal, Direction.Input,
@@ -102,14 +104,14 @@ namespace TaleNode.Editor
             // Output ports
             switch (data.NodeType)
             {
-                case "start":
-                case "dialogue":
-                case "event":
-                case "subgraph":
+                case TaleNodeTypes.Start:
+                case TaleNodeTypes.Dialogue:
+                case TaleNodeTypes.Event:
+                case TaleNodeTypes.SubGraph:
                     AddOutputPort(node, "output", "Out");
                     break;
 
-                case "choice":
+                case TaleNodeTypes.Choice:
                     if (data.Options != null)
                     {
                         for (int i = 0; i < data.Options.Count; i++)
@@ -121,12 +123,12 @@ namespace TaleNode.Editor
                     }
                     break;
 
-                case "condition":
+                case TaleNodeTypes.Condition:
                     AddOutputPort(node, "true", "True");
                     AddOutputPort(node, "false", "False");
                     break;
 
-                case "random":
+                case TaleNodeTypes.Random:
                     if (data.Branches != null)
                     {
                         for (int i = 0; i < data.Branches.Count; i++)
@@ -177,7 +179,7 @@ namespace TaleNode.Editor
         {
             switch (data.NodeType)
             {
-                case "dialogue":
+                case TaleNodeTypes.Dialogue:
                     string speaker = ResolveSpeaker(data.Speaker, dialogue);
                     string text = ResolveLocalizedText(
                         data.Id, data.Text, dialogue, locale);
@@ -185,16 +187,16 @@ namespace TaleNode.Editor
                         ? "" : $" [{data.Emotion}]";
                     return $"{speaker}{emo}:\n{TruncateText(text, 80)}";
 
-                case "choice":
+                case TaleNodeTypes.Choice:
                     string prompt = ResolveLocalizedText(
                         data.Id, data.Prompt, dialogue, locale);
                     return string.IsNullOrEmpty(prompt)
                         ? null : TruncateText(prompt, 60);
 
-                case "condition":
+                case TaleNodeTypes.Condition:
                     return $"{data.Variable} {data.Operator} {data.Value}";
 
-                case "event":
+                case TaleNodeTypes.Event:
                     if (data.Actions == null || data.Actions.Count == 0)
                         return null;
                     var lines = new List<string>();
@@ -205,9 +207,13 @@ namespace TaleNode.Editor
                     }
                     return string.Join("\n", lines);
 
-                case "end":
+                case TaleNodeTypes.End:
                     return string.IsNullOrEmpty(data.Tag)
                         ? null : $"Tag: {data.Tag}";
+
+                case TaleNodeTypes.SubGraph:
+                    return string.IsNullOrEmpty(data.SubGraphName)
+                        ? null : data.SubGraphName;
 
                 default:
                     return null;
