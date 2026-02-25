@@ -96,8 +96,9 @@ impl TaleNodeApp {
         if let Some(dir) = path {
             match crate::export::plugin_export::export_godot_plugin(&dir) {
                 Ok(()) => {
+                    self.write_dialogue_json(&dir);
                     self.status_message =
-                        Some(("Godot plugin exported".to_string(), Instant::now()));
+                        Some(("Godot plugin + JSON exported".to_string(), Instant::now()));
                 }
                 Err(e) => {
                     eprintln!("Failed to export Godot plugin: {e}");
@@ -114,8 +115,9 @@ impl TaleNodeApp {
         if let Some(dir) = path {
             match crate::export::plugin_export::export_unity_plugin(&dir) {
                 Ok(()) => {
+                    self.write_dialogue_json(&dir);
                     self.status_message =
-                        Some(("Unity plugin exported".to_string(), Instant::now()));
+                        Some(("Unity plugin + JSON exported".to_string(), Instant::now()));
                 }
                 Err(e) => {
                     eprintln!("Failed to export Unity plugin: {e}");
@@ -132,12 +134,29 @@ impl TaleNodeApp {
         if let Some(dir) = path {
             match crate::export::plugin_export::export_unreal_plugin(&dir) {
                 Ok(()) => {
+                    self.write_dialogue_json(&dir);
                     self.status_message =
-                        Some(("Unreal plugin exported".to_string(), Instant::now()));
+                        Some(("Unreal plugin + JSON exported".to_string(), Instant::now()));
                 }
                 Err(e) => {
                     eprintln!("Failed to export Unreal plugin: {e}");
                 }
+            }
+        }
+    }
+
+    /// Write dialogue JSON into the given directory alongside plugin files.
+    fn write_dialogue_json(&self, dir: &std::path::Path) {
+        let graph = self.root_graph_for_export();
+        let filename = format!("{}.json", self.project_name);
+        match crate::export::json_export::export_json(&graph, &self.project_name) {
+            Ok(json) => {
+                if let Err(e) = std::fs::write(dir.join(filename), json) {
+                    eprintln!("Failed to write dialogue JSON: {e}");
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to serialize dialogue JSON: {e}");
             }
         }
     }
