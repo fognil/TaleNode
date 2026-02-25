@@ -224,6 +224,12 @@ impl eframe::App for TaleNodeApp {
         {
             self.duplicate_selected();
         }
+        if !self.show_search
+            && ctx.input(|i| !i.modifiers.command && i.key_pressed(egui::Key::F))
+        {
+            let size = ctx.screen_rect().size();
+            self.canvas.zoom_to_fit(&self.graph.nodes, size);
+        }
         if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
             if self.show_search {
                 self.show_search = false;

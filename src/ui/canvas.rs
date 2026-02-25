@@ -98,6 +98,40 @@ impl CanvasState {
         }
     }
 
+    /// Set pan and zoom to fit all nodes in view.
+    pub fn zoom_to_fit(
+        &mut self,
+        nodes: &std::collections::HashMap<uuid::Uuid, crate::model::node::Node>,
+        screen_size: Vec2,
+    ) {
+        if nodes.is_empty() {
+            return;
+        }
+        let mut min_x = f32::MAX;
+        let mut min_y = f32::MAX;
+        let mut max_x = f32::MIN;
+        let mut max_y = f32::MIN;
+        for node in nodes.values() {
+            let rect = crate::ui::node_widget::node_rect(node);
+            min_x = min_x.min(rect.min.x);
+            min_y = min_y.min(rect.min.y);
+            max_x = max_x.max(rect.max.x);
+            max_y = max_y.max(rect.max.y);
+        }
+        let margin = 80.0;
+        let content_w = (max_x - min_x).max(1.0);
+        let content_h = (max_y - min_y).max(1.0);
+        let zoom_x = (screen_size.x - margin * 2.0) / content_w;
+        let zoom_y = (screen_size.y - margin * 2.0) / content_h;
+        self.zoom = zoom_x.min(zoom_y).clamp(ZOOM_MIN, ZOOM_MAX);
+        let center_x = (min_x + max_x) / 2.0;
+        let center_y = (min_y + max_y) / 2.0;
+        self.pan_offset = Vec2::new(
+            screen_size.x / 2.0 - center_x * self.zoom,
+            screen_size.y / 2.0 - center_y * self.zoom,
+        );
+    }
+
     /// Draw the background grid.
     pub fn draw_grid(&self, painter: &egui::Painter, canvas_rect: Rect) {
         let bg_color = Color32::from_rgb(30, 30, 30);

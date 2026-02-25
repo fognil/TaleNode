@@ -233,6 +233,14 @@ impl TaleNodeApp {
                 }
                 ui.separator();
                 if ui
+                    .add(egui::Button::new("Zoom to Fit").shortcut_text("F"))
+                    .clicked()
+                {
+                    let size = ui.ctx().screen_rect().size();
+                    self.canvas.zoom_to_fit(&self.graph.nodes, size);
+                    ui.close_menu();
+                }
+                if ui
                     .button(if self.dark_theme {
                         "Light Theme"
                     } else {
