@@ -98,10 +98,8 @@ pub struct TaleNodeApp {
     locale_new_name: String,
     settings: settings::AppSettings,
     settings_open: bool,
-    #[allow(dead_code)]
     tokio_runtime: tokio::runtime::Runtime,
     async_rx: std::sync::mpsc::Receiver<async_runtime::AsyncResult>,
-    #[allow(dead_code)]
     async_tx: std::sync::mpsc::Sender<async_runtime::AsyncResult>,
     translation_in_progress: bool,
     voice_generation_in_progress: bool,

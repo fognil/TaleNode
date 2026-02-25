@@ -16,6 +16,9 @@ pub enum LocalePanelAction {
         text: String,
     },
     Navigate(Uuid),
+    AutoTranslate {
+        locale: String,
+    },
 }
 
 pub fn show_locale_panel(
@@ -24,6 +27,7 @@ pub fn show_locale_panel(
     active_locale: &mut Option<String>,
     filter_untranslated: &mut bool,
     new_locale_name: &mut String,
+    translation_in_progress: bool,
 ) -> LocalePanelAction {
     let mut action = LocalePanelAction::None;
     let locale = &graph.locale;
@@ -55,6 +59,22 @@ pub fn show_locale_panel(
         }
         if ui.button("Import CSV").clicked() {
             action = LocalePanelAction::ImportCsv;
+        }
+        ui.separator();
+        if !locale.extra_locales.is_empty() {
+            let label = if translation_in_progress {
+                "Translating..."
+            } else {
+                "Auto-Translate"
+            };
+            let enabled = !translation_in_progress && active_locale.is_some();
+            if ui.add_enabled(enabled, egui::Button::new(label)).clicked() {
+                if let Some(ref loc) = active_locale {
+                    action = LocalePanelAction::AutoTranslate {
+                        locale: loc.clone(),
+                    };
+                }
+            }
         }
     });
 
