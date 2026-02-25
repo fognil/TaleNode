@@ -1,4 +1,5 @@
 mod canvas;
+mod context_menu;
 mod file_io;
 mod menu;
 mod panel_handlers;
