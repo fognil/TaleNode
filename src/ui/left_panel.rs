@@ -12,223 +12,216 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) -> bool {
     let mut snapshot_needed = false;
 
     // --- Variables section ---
-    ui.heading("Variables");
-    ui.separator();
-
-    let mut remove_var = None;
-    for (i, var) in graph.variables.iter_mut().enumerate() {
-        ui.horizontal(|ui| {
-            ui.label(&var.name);
-            if ui.small_button("X").clicked() {
-                remove_var = Some(i);
-                snapshot_needed = true;
-            }
-        });
-
-        ui.indent(var.id, |ui| {
-            ui.horizontal(|ui| {
-                ui.label("Name:");
-                if ui.text_edit_singleline(&mut var.name).gained_focus() {
-                    snapshot_needed = true;
-                }
-            });
-
-            // Type selector
-            let type_labels = ["Bool", "Int", "Float", "Text"];
-            let current = match var.var_type {
-                VariableType::Bool => 0,
-                VariableType::Int => 1,
-                VariableType::Float => 2,
-                VariableType::Text => 3,
-            };
-            let mut selected = current;
-            egui::ComboBox::from_id_salt(format!("var_type_{}", var.id))
-                .selected_text(type_labels[selected])
-                .show_ui(ui, |ui| {
-                    for (idx, label) in type_labels.iter().enumerate() {
-                        if ui.selectable_label(selected == idx, *label).clicked() {
-                            selected = idx;
-                            snapshot_needed = true;
-                        }
+    egui::CollapsingHeader::new("Variables")
+        .default_open(true)
+        .show(ui, |ui| {
+            let mut remove_var = None;
+            for (i, var) in graph.variables.iter_mut().enumerate() {
+                ui.horizontal(|ui| {
+                    ui.label(&var.name);
+                    if ui.small_button("X").clicked() {
+                        remove_var = Some(i);
+                        snapshot_needed = true;
                     }
                 });
 
-            if selected != current {
-                let (new_type, new_val) = match selected {
-                    0 => (VariableType::Bool, VariableValue::Bool(false)),
-                    1 => (VariableType::Int, VariableValue::Int(0)),
-                    2 => (VariableType::Float, VariableValue::Float(0.0)),
-                    _ => (VariableType::Text, VariableValue::Text(String::new())),
-                };
-                var.var_type = new_type;
-                var.default_value = new_val;
+                ui.indent(var.id, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Name:");
+                        if ui.text_edit_singleline(&mut var.name).gained_focus() {
+                            snapshot_needed = true;
+                        }
+                    });
+
+                    let type_labels = ["Bool", "Int", "Float", "Text"];
+                    let current = match var.var_type {
+                        VariableType::Bool => 0,
+                        VariableType::Int => 1,
+                        VariableType::Float => 2,
+                        VariableType::Text => 3,
+                    };
+                    let mut selected = current;
+                    egui::ComboBox::from_id_salt(format!("var_type_{}", var.id))
+                        .selected_text(type_labels[selected])
+                        .show_ui(ui, |ui| {
+                            for (idx, label) in type_labels.iter().enumerate() {
+                                if ui.selectable_label(selected == idx, *label).clicked() {
+                                    selected = idx;
+                                    snapshot_needed = true;
+                                }
+                            }
+                        });
+
+                    if selected != current {
+                        let (new_type, new_val) = match selected {
+                            0 => (VariableType::Bool, VariableValue::Bool(false)),
+                            1 => (VariableType::Int, VariableValue::Int(0)),
+                            2 => (VariableType::Float, VariableValue::Float(0.0)),
+                            _ => (VariableType::Text, VariableValue::Text(String::new())),
+                        };
+                        var.var_type = new_type;
+                        var.default_value = new_val;
+                    }
+
+                    ui.horizontal(|ui| {
+                        ui.label("Default:");
+                        match &mut var.default_value {
+                            VariableValue::Bool(b) => {
+                                if ui.checkbox(b, "").changed() {
+                                    snapshot_needed = true;
+                                }
+                            }
+                            VariableValue::Int(i) => {
+                                if ui.add(egui::DragValue::new(i)).drag_started() {
+                                    snapshot_needed = true;
+                                }
+                            }
+                            VariableValue::Float(f) => {
+                                if ui.add(egui::DragValue::new(f).speed(0.1)).drag_started() {
+                                    snapshot_needed = true;
+                                }
+                            }
+                            VariableValue::Text(s) => {
+                                if ui.text_edit_singleline(s).gained_focus() {
+                                    snapshot_needed = true;
+                                }
+                            }
+                        }
+                    });
+                });
+
+                ui.add_space(4.0);
             }
 
-            // Default value
-            ui.horizontal(|ui| {
-                ui.label("Default:");
-                match &mut var.default_value {
-                    VariableValue::Bool(b) => {
-                        if ui.checkbox(b, "").changed() {
-                            snapshot_needed = true;
-                        }
-                    }
-                    VariableValue::Int(i) => {
-                        if ui.add(egui::DragValue::new(i)).drag_started() {
-                            snapshot_needed = true;
-                        }
-                    }
-                    VariableValue::Float(f) => {
-                        if ui.add(egui::DragValue::new(f).speed(0.1)).drag_started() {
-                            snapshot_needed = true;
-                        }
-                    }
-                    VariableValue::Text(s) => {
-                        if ui.text_edit_singleline(s).gained_focus() {
-                            snapshot_needed = true;
-                        }
-                    }
-                }
-            });
+            if let Some(idx) = remove_var {
+                graph.variables.remove(idx);
+            }
+
+            if ui.button("+ Add Variable").clicked() {
+                snapshot_needed = true;
+                graph.variables.push(Variable {
+                    id: Uuid::new_v4(),
+                    name: format!("var_{}", graph.variables.len() + 1),
+                    var_type: VariableType::Bool,
+                    default_value: VariableValue::Bool(false),
+                });
+            }
         });
-
-        ui.add_space(4.0);
-    }
-
-    if let Some(idx) = remove_var {
-        graph.variables.remove(idx);
-    }
-
-    if ui.button("+ Add Variable").clicked() {
-        snapshot_needed = true;
-        graph.variables.push(Variable {
-            id: Uuid::new_v4(),
-            name: format!("var_{}", graph.variables.len() + 1),
-            var_type: VariableType::Bool,
-            default_value: VariableValue::Bool(false),
-        });
-    }
-
-    ui.add_space(16.0);
 
     // --- Characters section ---
-    ui.heading("Characters");
-    ui.separator();
+    egui::CollapsingHeader::new("Characters")
+        .default_open(true)
+        .show(ui, |ui| {
+            let mut remove_char = None;
+            for (i, ch) in graph.characters.iter_mut().enumerate() {
+                ui.horizontal(|ui| {
+                    let color = egui::Color32::from_rgba_premultiplied(
+                        ch.color[0], ch.color[1], ch.color[2], ch.color[3],
+                    );
+                    let (rect, _) = ui.allocate_exact_size(
+                        egui::Vec2::new(12.0, 12.0),
+                        egui::Sense::hover(),
+                    );
+                    ui.painter().rect_filled(rect, 2.0, color);
+                    ui.label(&ch.name);
+                    if ui.small_button("X").clicked() {
+                        remove_char = Some(i);
+                        snapshot_needed = true;
+                    }
+                });
 
-    let mut remove_char = None;
-    for (i, ch) in graph.characters.iter_mut().enumerate() {
-        ui.horizontal(|ui| {
-            let color = egui::Color32::from_rgba_premultiplied(
-                ch.color[0], ch.color[1], ch.color[2], ch.color[3],
-            );
-            let (rect, _) = ui.allocate_exact_size(
-                egui::Vec2::new(12.0, 12.0),
-                egui::Sense::hover(),
-            );
-            ui.painter().rect_filled(rect, 2.0, color);
+                ui.indent(ch.id, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Name:");
+                        if ui.text_edit_singleline(&mut ch.name).gained_focus() {
+                            snapshot_needed = true;
+                        }
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Color:");
+                        let mut color_arr = [ch.color[0], ch.color[1], ch.color[2]];
+                        if ui.color_edit_button_srgb(&mut color_arr).changed() {
+                            snapshot_needed = true;
+                        }
+                        ch.color[0] = color_arr[0];
+                        ch.color[1] = color_arr[1];
+                        ch.color[2] = color_arr[2];
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Portrait:");
+                        if ui.text_edit_singleline(&mut ch.portrait_path).gained_focus() {
+                            snapshot_needed = true;
+                        }
+                    });
+                });
 
-            ui.label(&ch.name);
-            if ui.small_button("X").clicked() {
-                remove_char = Some(i);
+                ui.add_space(4.0);
+            }
+
+            if let Some(idx) = remove_char {
+                graph.characters.remove(idx);
+            }
+
+            if ui.button("+ Add Character").clicked() {
                 snapshot_needed = true;
+                graph.characters.push(Character::new(format!(
+                    "Character {}",
+                    graph.characters.len() + 1
+                )));
             }
         });
-
-        ui.indent(ch.id, |ui| {
-            ui.horizontal(|ui| {
-                ui.label("Name:");
-                if ui.text_edit_singleline(&mut ch.name).gained_focus() {
-                    snapshot_needed = true;
-                }
-            });
-
-            ui.horizontal(|ui| {
-                ui.label("Color:");
-                let mut color_arr = [ch.color[0], ch.color[1], ch.color[2]];
-                if ui.color_edit_button_srgb(&mut color_arr).changed() {
-                    snapshot_needed = true;
-                }
-                ch.color[0] = color_arr[0];
-                ch.color[1] = color_arr[1];
-                ch.color[2] = color_arr[2];
-            });
-
-            ui.horizontal(|ui| {
-                ui.label("Portrait:");
-                if ui.text_edit_singleline(&mut ch.portrait_path).gained_focus() {
-                    snapshot_needed = true;
-                }
-            });
-        });
-
-        ui.add_space(4.0);
-    }
-
-    if let Some(idx) = remove_char {
-        graph.characters.remove(idx);
-    }
-
-    if ui.button("+ Add Character").clicked() {
-        snapshot_needed = true;
-        graph.characters.push(Character::new(format!(
-            "Character {}",
-            graph.characters.len() + 1
-        )));
-    }
 
     // --- Groups section ---
     if !graph.groups.is_empty() {
-        ui.add_space(16.0);
-        ui.heading("Groups");
-        ui.separator();
+        egui::CollapsingHeader::new("Groups")
+            .default_open(true)
+            .show(ui, |ui| {
+                let mut remove_group = None;
+                for (i, group) in graph.groups.iter_mut().enumerate() {
+                    ui.horizontal(|ui| {
+                        let color = egui::Color32::from_rgba_premultiplied(
+                            group.color[0], group.color[1], group.color[2],
+                            group.color[3].max(100),
+                        );
+                        let (rect, _) = ui.allocate_exact_size(
+                            egui::Vec2::new(12.0, 12.0),
+                            egui::Sense::hover(),
+                        );
+                        ui.painter().rect_filled(rect, 2.0, color);
+                        ui.label(format!("{} ({})", group.name, group.node_ids.len()));
+                        if ui.small_button("X").clicked() {
+                            remove_group = Some(i);
+                            snapshot_needed = true;
+                        }
+                    });
 
-        let mut remove_group = None;
-        for (i, group) in graph.groups.iter_mut().enumerate() {
-            ui.horizontal(|ui| {
-                let color = egui::Color32::from_rgba_premultiplied(
-                    group.color[0],
-                    group.color[1],
-                    group.color[2],
-                    group.color[3].max(100),
-                );
-                let (rect, _) = ui.allocate_exact_size(
-                    egui::Vec2::new(12.0, 12.0),
-                    egui::Sense::hover(),
-                );
-                ui.painter().rect_filled(rect, 2.0, color);
+                    ui.indent(group.id, |ui| {
+                        ui.horizontal(|ui| {
+                            ui.label("Name:");
+                            if ui.text_edit_singleline(&mut group.name).gained_focus() {
+                                snapshot_needed = true;
+                            }
+                        });
+                        ui.horizontal(|ui| {
+                            ui.label("Color:");
+                            let mut color_arr =
+                                [group.color[0], group.color[1], group.color[2]];
+                            if ui.color_edit_button_srgb(&mut color_arr).changed() {
+                                snapshot_needed = true;
+                            }
+                            group.color[0] = color_arr[0];
+                            group.color[1] = color_arr[1];
+                            group.color[2] = color_arr[2];
+                        });
+                    });
 
-                ui.label(format!("{} ({})", group.name, group.node_ids.len()));
-                if ui.small_button("X").clicked() {
-                    remove_group = Some(i);
-                    snapshot_needed = true;
+                    ui.add_space(4.0);
+                }
+
+                if let Some(idx) = remove_group {
+                    graph.groups.remove(idx);
                 }
             });
-
-            ui.indent(group.id, |ui| {
-                ui.horizontal(|ui| {
-                    ui.label("Name:");
-                    if ui.text_edit_singleline(&mut group.name).gained_focus() {
-                        snapshot_needed = true;
-                    }
-                });
-                ui.horizontal(|ui| {
-                    ui.label("Color:");
-                    let mut color_arr = [group.color[0], group.color[1], group.color[2]];
-                    if ui.color_edit_button_srgb(&mut color_arr).changed() {
-                        snapshot_needed = true;
-                    }
-                    group.color[0] = color_arr[0];
-                    group.color[1] = color_arr[1];
-                    group.color[2] = color_arr[2];
-                });
-            });
-
-            ui.add_space(4.0);
-        }
-
-        if let Some(idx) = remove_group {
-            graph.groups.remove(idx);
-        }
     }
 
     snapshot_needed

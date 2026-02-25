@@ -74,6 +74,11 @@ impl TaleNodeApp {
         }
 
         // Draw nodes
+        let playtest_node = if self.playtest.running {
+            self.playtest.current_node
+        } else {
+            None
+        };
         let node_ids: Vec<Uuid> = self.graph.nodes.keys().copied().collect();
         for id in &node_ids {
             if let Some(node) = self.graph.nodes.get(id) {
@@ -91,6 +96,7 @@ impl TaleNodeApp {
                     &self.graph.characters,
                     review_status,
                     hover_port,
+                    playtest_node == Some(*id),
                 );
             }
         }
@@ -140,6 +146,11 @@ impl TaleNodeApp {
                     StrokeKind::Outside,
                 );
             }
+        }
+
+        // Request continuous repaint for playtest glow animation
+        if self.playtest.running {
+            ui.ctx().request_repaint();
         }
 
         // Draw minimap overlay

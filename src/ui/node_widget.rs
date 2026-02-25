@@ -97,6 +97,7 @@ pub fn draw_node(
     characters: &[Character],
     review_status: ReviewStatus,
     hovered_port: Option<PortId>,
+    playtest_active: bool,
 ) {
     let rect = node_rect(node);
     let screen_rect = canvas.canvas_rect_to_screen(rect);
@@ -143,7 +144,10 @@ pub fn draw_node(
     draw_ports(painter, node, canvas, color, hovered_port);
 
     // Border
-    draw_border(painter, &screen_rect, rounding, canvas.zoom, is_selected, is_search_match);
+    draw_border(
+        painter, &screen_rect, rounding, canvas.zoom,
+        is_selected, is_search_match, playtest_active,
+    );
 
     // Review status badge
     if review_status != ReviewStatus::Draft {
@@ -157,6 +161,7 @@ pub fn draw_node(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_border(
     painter: &egui::Painter,
     rect: &Rect,
@@ -164,7 +169,22 @@ fn draw_border(
     zoom: f32,
     is_selected: bool,
     is_search_match: bool,
+    playtest_active: bool,
 ) {
+    // Playtest glow (drawn underneath other borders)
+    if playtest_active {
+        let t = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis() as f32;
+        let alpha = ((t / 500.0).sin() * 0.3 + 0.7) * 255.0;
+        let green = Color32::from_rgba_unmultiplied(76, 175, 80, alpha as u8);
+        painter.rect_stroke(
+            rect.expand(3.0 * zoom), rounding,
+            Stroke::new(3.0 * zoom, green),
+            StrokeKind::Outside,
+        );
+    }
     if is_selected {
         painter.rect_stroke(
             *rect, rounding,
