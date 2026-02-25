@@ -59,6 +59,11 @@ Dual-view editing — visual node graph and text-based Yarn script side by side 
 </div>
 
 <div class="feature-card" markdown>
+### Localization
+Define multiple locales, edit translations per-node or in bulk, export/import CSV for translators, and include a string table in your JSON export.
+</div>
+
+<div class="feature-card" markdown>
 ### Review & Collaboration
 Comments per node, review status tracking (Draft/Needs Review/Approved), version history with diff comparison.
 </div>

@@ -9,6 +9,7 @@ The Inspector panel appears on the right side of the screen when exactly one nod
 All node types show:
 
 - **Node ID**: The first 8 characters of the node's UUID (for debugging/reference)
+- **Locale Switcher**: A dropdown to switch between default and translation locales (only visible when extra locales are defined — see [Localization](localization.md))
 
 ## Per-Type Editors
 
@@ -103,6 +104,12 @@ Every node has a **Review** section at the bottom of the Inspector:
 | **Comments** | Shows the comment count for this node |
 
 Review statuses appear as colored badges on nodes in the canvas. Use the [Comments Panel](comments-review.md) to manage comments and filter by review status.
+
+## Locale Editing
+
+When extra locales are configured and a non-default locale is selected in the Locale dropdown, translatable text fields (dialogue text, choice prompts, choice options) show an additional translation input labeled with the locale code (e.g., `[fr]`). Type the translation directly — untranslated fields show a dim "(untranslated)" placeholder.
+
+See [Localization](localization.md) for full details on managing translations.
 
 ## Tips
 

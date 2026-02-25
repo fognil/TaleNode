@@ -116,6 +116,18 @@ Opens the Batch Audio Assignment window for matching audio files to dialogue nod
 
 Click **Re-scan** after adding files to the folder to refresh the match list.
 
+### Export Locale CSV
+
+- **Menu**: File > Export Locale CSV... (also available from the Localization panel)
+
+Exports all translatable strings and their translations to a CSV file. The CSV includes columns for each defined locale, ready for professional translators. See [Localization](localization.md) for details.
+
+### Import Locale CSV
+
+- **Menu**: File > Import Locale CSV... (also available from the Localization panel)
+
+Imports translations from a CSV file. Matches rows by string key and updates translations for all locales found in the CSV headers.
+
 ## Import
 
 ### Import from Yarn

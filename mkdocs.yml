@@ -78,6 +78,7 @@ nav:
     - Analytics: user-guide/analytics.md
     - Validation: user-guide/validation.md
     - Playtest Mode: user-guide/playtest.md
+    - Localization: user-guide/localization.md
     - File Operations: user-guide/file-operations.md
   - Export & Integration:
     - JSON Export Format: export/json-format.md

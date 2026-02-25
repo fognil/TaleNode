@@ -209,6 +209,38 @@ IDs are assigned deterministically, sorted by node position (top-to-bottom, left
 }
 ```
 
+## Localization
+
+When the project has extra locales defined, three additional top-level fields appear:
+
+```json
+{
+  "version": "1.0",
+  "name": "My Dialogue",
+  "default_locale": "en",
+  "locales": ["en", "fr", "ja"],
+  "strings": {
+    "dlg_1": { "en": "Hello!", "fr": "Bonjour!", "ja": "こんにちは！" },
+    "choice_1": { "en": "What next?", "fr": "Et maintenant?", "ja": "次は？" },
+    "opt_choice_1_0": { "en": "Fight", "fr": "Combattre", "ja": "戦う" }
+  },
+  "variables": [...],
+  "characters": [...],
+  "nodes": [...]
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `default_locale` | string | The primary language code (e.g., `"en"`) |
+| `locales` | array | All locale codes including the default |
+| `strings` | object | String table mapping readable IDs to locale→text |
+
+- These fields are **omitted entirely** when no extra locales are defined
+- String keys in `strings` use the same readable IDs as nodes (`dlg_1`, `choice_1`, `opt_choice_1_0`)
+- The `text` fields in nodes still contain the default locale text
+- See [Localization](../user-guide/localization.md) for the full localization workflow
+
 ## Key Design Decisions
 
 | Decision | Rationale |
