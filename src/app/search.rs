@@ -52,7 +52,7 @@ impl TaleNodeApp {
             if !self.search_query.is_empty() {
                 if count > 0 {
                     ui.label(format!("{}/{count}", self.search_index + 1));
-                    if ui.small_button("<").clicked() {
+                    if ui.small_button("<").on_hover_text("Previous match").clicked() {
                         self.search_index = if self.search_index == 0 {
                             count - 1
                         } else {
@@ -60,7 +60,7 @@ impl TaleNodeApp {
                         };
                         self.focus_search_result();
                     }
-                    if ui.small_button(">").clicked() {
+                    if ui.small_button(">").on_hover_text("Next match").clicked() {
                         self.search_index = (self.search_index + 1) % count;
                         self.focus_search_result();
                     }
@@ -70,7 +70,7 @@ impl TaleNodeApp {
             }
 
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.small_button("X").clicked() {
+                if ui.small_button("X").on_hover_text("Close search").clicked() {
                     self.show_search = false;
                     self.show_replace = false;
                     self.search_query.clear();
@@ -97,12 +97,14 @@ impl TaleNodeApp {
                     !self.search_query.is_empty() && !self.search_results.is_empty();
                 if ui
                     .add_enabled(has_matches, egui::Button::new("Replace"))
+                    .on_hover_text("Replace in current match")
                     .clicked()
                 {
                     self.replace_in_current();
                 }
                 if ui
                     .add_enabled(has_matches, egui::Button::new("Replace All"))
+                    .on_hover_text("Replace in all matches")
                     .clicked()
                 {
                     self.replace_all();

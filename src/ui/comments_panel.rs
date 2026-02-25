@@ -127,7 +127,7 @@ pub fn show_comments_panel(
                                     Color32::from_rgb(200, 200, 200),
                                     &comment.text,
                                 );
-                                if ui.small_button("X").clicked() {
+                                if ui.small_button("X").on_hover_text("Delete comment").clicked() {
                                     action = CommentsPanelAction::DeleteComment(comment.id);
                                 }
                             });
@@ -155,7 +155,7 @@ pub fn show_comments_panel(
 
         let resp = ui.text_edit_singleline(new_comment_text);
         if (resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter))
-            || ui.button("Add").clicked())
+            || ui.button("Add").on_hover_text("Add comment").clicked())
             && !new_comment_text.trim().is_empty()
         {
             if let Some(node_id) = *comment_target_node {

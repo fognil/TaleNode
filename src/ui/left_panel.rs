@@ -19,7 +19,7 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) -> bool {
             for (i, var) in graph.variables.iter_mut().enumerate() {
                 ui.horizontal(|ui| {
                     ui.label(&var.name);
-                    if ui.small_button("X").clicked() {
+                    if ui.small_button("X").on_hover_text("Delete variable").clicked() {
                         remove_var = Some(i);
                         snapshot_needed = true;
                     }
@@ -124,7 +124,7 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) -> bool {
                     );
                     ui.painter().rect_filled(rect, 2.0, color);
                     ui.label(&ch.name);
-                    if ui.small_button("X").clicked() {
+                    if ui.small_button("X").on_hover_text("Delete character").clicked() {
                         remove_char = Some(i);
                         snapshot_needed = true;
                     }
@@ -189,7 +189,7 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) -> bool {
                         );
                         ui.painter().rect_filled(rect, 2.0, color);
                         ui.label(format!("{} ({})", group.name, group.node_ids.len()));
-                        if ui.small_button("X").clicked() {
+                        if ui.small_button("X").on_hover_text("Delete group").clicked() {
                             remove_group = Some(i);
                             snapshot_needed = true;
                         }

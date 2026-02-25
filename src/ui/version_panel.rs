@@ -75,7 +75,7 @@ pub fn show_version_panel(
                     ui.label(&version.timestamp);
                     ui.label("-");
                     ui.label(&version.description);
-                    if ui.small_button("Restore").clicked() {
+                    if ui.small_button("Restore").on_hover_text("Restore this version").clicked() {
                         action = VersionPanelAction::RestoreVersion(version.id);
                     }
                 });
@@ -88,6 +88,7 @@ pub fn show_version_panel(
             compare_selection[0].is_some() && compare_selection[1].is_some();
         if ui
             .add_enabled(both_selected, egui::Button::new("Compare Selected"))
+            .on_hover_text("Compare two selected versions")
             .clicked()
         {
             if let (Some(a), Some(b)) = (compare_selection[0], compare_selection[1]) {
@@ -120,7 +121,7 @@ pub fn show_version_panel(
         ui.label("Description:");
         let resp = ui.text_edit_singleline(new_desc_text);
         let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-        if (enter || ui.button("Save Version").clicked())
+        if (enter || ui.button("Save Version").on_hover_text("Save current state as version").clicked())
             && !new_desc_text.trim().is_empty()
         {
             let desc = new_desc_text.trim().to_string();

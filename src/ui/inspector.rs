@@ -155,7 +155,7 @@ pub fn show_inspector(
         let mut tag_to_remove = None;
         for tag in &tags {
             ui.label(tag.as_str());
-            if ui.small_button("x").clicked() {
+            if ui.small_button("x").on_hover_text("Remove tag").clicked() {
                 tag_to_remove = Some(tag.clone());
                 snapshot_needed = true;
             }
@@ -166,7 +166,7 @@ pub fn show_inspector(
     });
     ui.horizontal(|ui| {
         ui.text_edit_singleline(new_tag_text);
-        if ui.button("+").clicked() && !new_tag_text.trim().is_empty() {
+        if ui.button("+").on_hover_text("Add tag").clicked() && !new_tag_text.trim().is_empty() {
             graph.add_tag(selected, new_tag_text.trim().to_string());
             *new_tag_text = String::new();
             snapshot_needed = true;
@@ -234,7 +234,7 @@ fn show_choice_inspector(
             if ui.text_edit_singleline(&mut choice.text).gained_focus() {
                 snapshot_needed = true;
             }
-            if choice_count > 1 && ui.small_button("X").clicked() {
+            if choice_count > 1 && ui.small_button("X").on_hover_text("Remove choice").clicked() {
                 remove_idx = Some(i);
             }
         });
@@ -274,7 +274,7 @@ fn show_random_inspector(
             if resp.changed() {
                 branch.weight = pct / 100.0;
             }
-            if branch_count > 1 && ui.small_button("X").clicked() {
+            if branch_count > 1 && ui.small_button("X").on_hover_text("Remove branch").clicked() {
                 remove_idx = Some(i);
             }
         });

@@ -103,7 +103,7 @@ pub(super) fn show_dialogue_inspector(
         if resp.changed() {
             data.audio_clip = if audio.is_empty() { None } else { Some(audio) };
         }
-        if ui.button("Browse").clicked() {
+        if ui.button("Browse").on_hover_text("Browse for audio file").clicked() {
             snapshot_needed = true;
             if let Some(path) = rfd::FileDialog::new()
                 .add_filter("Audio", &["wav", "ogg", "mp3"])
@@ -184,7 +184,7 @@ pub(super) fn show_event_inspector(
         ui.group(|ui| {
             ui.horizontal(|ui| {
                 ui.label(format!("#{}", i + 1));
-                if ui.small_button("X").clicked() {
+                if ui.small_button("X").on_hover_text("Remove action").clicked() {
                     remove_idx = Some(i);
                     snapshot_needed = true;
                 }
@@ -205,7 +205,7 @@ pub(super) fn show_event_inspector(
         data.actions.remove(idx);
     }
 
-    if ui.button("+ Add Action").clicked() {
+    if ui.button("+ Add Action").on_hover_text("Add a new event action").clicked() {
         snapshot_needed = true;
         data.actions.push(EventAction {
             action_type: EventActionType::SetVariable,

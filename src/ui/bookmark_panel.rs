@@ -108,7 +108,7 @@ pub fn show_bookmark_panel(
                             Color32::from_rgb(100, 180, 255),
                             format!(" {tag} "),
                         );
-                        if ui.small_button("x").clicked() {
+                        if ui.small_button("x").on_hover_text("Remove tag").clicked() {
                             action =
                                 BookmarkAction::RemoveTag(*node_id, tag.clone());
                         }
@@ -135,7 +135,7 @@ pub fn show_bookmark_panel(
         let resp = ui.text_edit_singleline(new_tag_text);
         let enter_pressed =
             resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-        if (enter_pressed || ui.button("Add").clicked())
+        if (enter_pressed || ui.button("Add").on_hover_text("Add tag to node").clicked())
             && !new_tag_text.trim().is_empty()
         {
             if let Some(node_id) = selected_node {

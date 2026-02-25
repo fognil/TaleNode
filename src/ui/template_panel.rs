@@ -29,7 +29,7 @@ pub fn show_template_panel(
             ui.label("Name:");
             let resp = ui.text_edit_singleline(new_name);
             let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-            if (enter || ui.button("Save Selection").clicked()) && !new_name.trim().is_empty() {
+            if (enter || ui.button("Save Selection").on_hover_text("Save selected nodes as template").clicked()) && !new_name.trim().is_empty() {
                 action = TemplatePanelAction::SaveSelection(new_name.trim().to_string());
                 *new_name = String::new();
             }
@@ -72,11 +72,11 @@ pub fn show_template_panel(
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         // Delete button (user-saved only)
-                        if !template.is_builtin && ui.small_button("Delete").clicked() {
+                        if !template.is_builtin && ui.small_button("Delete").on_hover_text("Delete template").clicked() {
                             action = TemplatePanelAction::Delete(template.id);
                         }
                         // Insert button
-                        if ui.small_button("Insert").clicked() {
+                        if ui.small_button("Insert").on_hover_text("Insert template into canvas").clicked() {
                             action = TemplatePanelAction::Insert(template.id);
                         }
                     });
