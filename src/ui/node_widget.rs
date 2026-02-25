@@ -2,6 +2,7 @@ use egui::{Color32, CornerRadius, FontId, Pos2, Rect, Stroke, StrokeKind, Vec2};
 
 use crate::model::character::Character;
 use crate::model::node::{Node, NodeType};
+use crate::model::port::PortId;
 use crate::model::review::ReviewStatus;
 use crate::ui::canvas::CanvasState;
 use super::node_body::draw_node_body;
@@ -86,6 +87,7 @@ pub fn port_position(node: &Node, port_index: usize, is_output: bool) -> Pos2 {
 }
 
 /// Draw a single node on the canvas.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_node(
     painter: &egui::Painter,
     node: &Node,
@@ -94,6 +96,7 @@ pub fn draw_node(
     is_search_match: bool,
     characters: &[Character],
     review_status: ReviewStatus,
+    hovered_port: Option<PortId>,
 ) {
     let rect = node_rect(node);
     let screen_rect = canvas.canvas_rect_to_screen(rect);
@@ -137,7 +140,7 @@ pub fn draw_node(
     draw_node_body(painter, node, canvas, &screen_rect, &header_rect);
 
     // Draw ports
-    draw_ports(painter, node, canvas, color);
+    draw_ports(painter, node, canvas, color, hovered_port);
 
     // Border
     draw_border(painter, &screen_rect, rounding, canvas.zoom, is_selected, is_search_match);
@@ -189,16 +192,26 @@ fn draw_ports(
     node: &Node,
     canvas: &CanvasState,
     accent_color: Color32,
+    hovered_port: Option<PortId>,
 ) {
     let port_radius = NODE_PORT_RADIUS * canvas.zoom;
+    let hover_radius = (NODE_PORT_RADIUS + 3.0) * canvas.zoom;
     let label_font = FontId::proportional(10.0 * canvas.zoom);
 
     for (i, port) in node.inputs.iter().enumerate() {
         let canvas_pos = port_position(node, i, false);
         let screen_pos = canvas.canvas_to_screen(canvas_pos);
-        painter.circle_filled(screen_pos, port_radius, Color32::from_rgb(180, 180, 180));
+        let is_hovered = hovered_port == Some(port.id);
+        if is_hovered {
+            painter.circle_filled(
+                screen_pos, hover_radius,
+                Color32::from_rgba_premultiplied(180, 180, 180, 60),
+            );
+        }
+        let r = if is_hovered { hover_radius } else { port_radius };
+        painter.circle_filled(screen_pos, r, Color32::from_rgb(180, 180, 180));
         painter.circle_stroke(
-            screen_pos, port_radius,
+            screen_pos, r,
             Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
         );
         if !port.label.is_empty() {
@@ -213,9 +226,17 @@ fn draw_ports(
     for (i, port) in node.outputs.iter().enumerate() {
         let canvas_pos = port_position(node, i, true);
         let screen_pos = canvas.canvas_to_screen(canvas_pos);
-        painter.circle_filled(screen_pos, port_radius, accent_color);
+        let is_hovered = hovered_port == Some(port.id);
+        if is_hovered {
+            painter.circle_filled(
+                screen_pos, hover_radius,
+                Color32::from_rgba_premultiplied(255, 255, 100, 60),
+            );
+        }
+        let r = if is_hovered { hover_radius } else { port_radius };
+        painter.circle_filled(screen_pos, r, accent_color);
         painter.circle_stroke(
-            screen_pos, port_radius,
+            screen_pos, r,
             Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
         );
         if !port.label.is_empty() {

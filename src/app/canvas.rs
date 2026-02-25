@@ -63,6 +63,16 @@ impl TaleNodeApp {
         // Draw connections (below nodes)
         draw_connections(&painter, &self.graph, &self.canvas, None);
 
+        // Detect port hover for visual feedback
+        let hovered_port_info = if response.hovered() {
+            response.hover_pos().and_then(|hp| self.port_at_screen_pos(hp))
+        } else {
+            None
+        };
+        if hovered_port_info.is_some() {
+            ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
+        }
+
         // Draw nodes
         let node_ids: Vec<Uuid> = self.graph.nodes.keys().copied().collect();
         for id in &node_ids {
@@ -70,6 +80,8 @@ impl TaleNodeApp {
                 let is_selected = self.selected_nodes.contains(id);
                 let is_search_match = self.search_results.contains(id);
                 let review_status = self.graph.get_review_status(*id);
+                let hover_port = hovered_port_info
+                    .and_then(|(nid, pid, _)| if nid == *id { Some(pid) } else { None });
                 draw_node(
                     &painter,
                     node,
@@ -78,6 +90,7 @@ impl TaleNodeApp {
                     is_search_match,
                     &self.graph.characters,
                     review_status,
+                    hover_port,
                 );
             }
         }
