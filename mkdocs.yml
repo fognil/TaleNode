@@ -84,6 +84,7 @@ nav:
     - JSON Export Format: export/json-format.md
     - Plugin Export: export/plugin-export.md
     - Engine Integration: export/integration-guide.md
+    - Unity Editor Tools: export/unity-editor.md
   - Reference:
     - Keyboard Shortcuts: reference/keyboard-shortcuts.md
     - Node Reference: reference/node-reference.md

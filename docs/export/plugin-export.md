@@ -34,15 +34,49 @@ Enable the plugin in **Project > Project Settings > Plugins**.
 
 ## Unity Plugin
 
-The Unity plugin exports to a `TaleNode/` folder and includes:
+The Unity plugin is a full UPM (Unity Package Manager) package for Unity 6+. It includes both a runtime dialogue runner and an editor toolkit.
 
-- `TaleNodeRunner.cs` — MonoBehaviour dialogue runner
-- `TaleNodeExpression.cs` — Expression parser and evaluator
+### Installation
 
-Add the scripts to your Unity project's `Assets/` folder.
+=== "Git URL (recommended)"
+
+    In Unity: **Window > Package Manager > + > Add package from git URL**:
+
+    ```
+    https://github.com/fognil/TaleNode.git?path=plugins/unity
+    ```
+
+=== "Export from TaleNode"
+
+    Use **File > Export Unity Plugin...** and select your Unity project root. TaleNode writes the full package to the target directory.
+
+=== "Local disk"
+
+    **Window > Package Manager > + > Add package from disk...** and select `plugins/unity/package.json` from the TaleNode repository.
+
+### What's Included
+
+**Runtime** (works in builds):
+
+- `TaleNodeRunner.cs` — Dialogue execution engine with events
+- `TaleNodeExpression.cs` — Expression parser, evaluator, and text interpolation
+- `TaleNodeDialogueData.cs` — Serializable data classes for dialogue JSON
+
+**Editor** (Unity Editor only):
+
+- **ScriptedImporter** — Auto-imports `.talenode.json` files as assets
+- **Custom Inspector** — Node stats, characters, variables, locale coverage
+- **Graph View** — Visual read-only dialogue graph with auto-layout
+- **Playtest Panel** — Run dialogues inside the editor with variable watch
+
+See the [Unity Editor Tools](unity-editor.md) guide for detailed usage.
+
+### File Extension
+
+Name your exported JSON files with the `.talenode.json` compound extension (e.g. `intro.talenode.json`). The ScriptedImporter only matches this extension — regular `.json` files are not affected.
 
 ## Usage
 
-After exporting the plugin, also export your dialogue as JSON (File > Export JSON). Place the JSON file in your game project, then use the runtime plugin to load and play it.
+After installing the plugin, export your dialogue as JSON (File > Export JSON), rename it to `*.talenode.json`, and drop it into your Unity project's `Assets/` folder. The file is auto-imported as a `TaleNodeDialogue` asset.
 
-Refer to the [Engine Integration](integration-guide.md) guide for detailed setup instructions per engine.
+Refer to the [Engine Integration](integration-guide.md) guide for runtime API details, or the [Unity Editor Tools](unity-editor.md) guide for the editor workflow.

@@ -28,173 +28,102 @@ This guide shows how to load and play TaleNode dialogue JSON in your game engine
 
 ## Unity (C#)
 
-### Data Classes
+The TaleNode Unity package includes a ready-to-use `TaleNodeRunner` class. You don't need to write your own data classes or traversal logic.
+
+### Quick Start
 
 ```csharp
-[System.Serializable]
-public class TaleNodeDialogue
+using TaleNode;
+using UnityEngine;
+
+public class DialogueUI : MonoBehaviour
 {
-    public string version;
-    public string name;
-    public TaleNodeVariable[] variables;
-    public TaleNodeCharacter[] characters;
-    public TaleNodeNode[] nodes;
-}
+    private TaleNodeRunner runner;
 
-[System.Serializable]
-public class TaleNodeNode
-{
-    public string id;
-    public string type;
-
-    // Dialogue fields
-    public string speaker;
-    public string text;
-    public string emotion;
-    public string portrait;
-    public string audio;
-
-    // Shared
-    public string next;
-
-    // Choice fields
-    public string prompt;
-    public TaleNodeOption[] options;
-
-    // Condition fields
-    public string variable;
-    public string @operator;  // "operator" is a reserved word
-    public object value;
-    public string true_next;
-    public string false_next;
-
-    // Event fields
-    public TaleNodeAction[] actions;
-
-    // Random fields
-    public TaleNodeBranch[] branches;
-
-    // End fields
-    public string tag;
-}
-
-[System.Serializable]
-public class TaleNodeOption
-{
-    public string text;
-    public string next;
-    public TaleNodeCondition condition;
-}
-
-[System.Serializable]
-public class TaleNodeCondition
-{
-    public string variable;
-    public string @operator;
-    public object value;
-}
-
-[System.Serializable]
-public class TaleNodeAction
-{
-    public string action;
-    public string key;
-    public object value;
-}
-
-[System.Serializable]
-public class TaleNodeBranch
-{
-    public float weight;
-    public string next;
-}
-
-[System.Serializable]
-public class TaleNodeVariable
-{
-    public string name;
-    public string type;
-    public object @default;
-}
-
-[System.Serializable]
-public class TaleNodeCharacter
-{
-    public string id;
-    public string name;
-    public string color;
-    public string portrait;
-}
-```
-
-### Loading and Running
-
-```csharp
-public class DialogueRunner : MonoBehaviour
-{
-    private TaleNodeDialogue dialogue;
-    private Dictionary<string, TaleNodeNode> nodeMap;
-    private Dictionary<string, object> variables;
-
-    public void LoadDialogue(string jsonPath)
+    void Start()
     {
-        string json = File.ReadAllText(jsonPath);
-        dialogue = JsonUtility.FromJson<TaleNodeDialogue>(json);
+        runner = new TaleNodeRunner();
 
-        // Build lookup map
-        nodeMap = new Dictionary<string, TaleNodeNode>();
-        foreach (var node in dialogue.nodes)
-            nodeMap[node.id] = node;
-
-        // Initialize variables
-        variables = new Dictionary<string, object>();
-        foreach (var v in dialogue.variables)
-            variables[v.name] = v.@default;
-    }
-
-    public void StartDialogue()
-    {
-        var startNode = dialogue.nodes.First(n => n.type == "start");
-        ProcessNode(nodeMap[startNode.next]);
-    }
-
-    private void ProcessNode(TaleNodeNode node)
-    {
-        switch (node.type)
+        runner.OnDialogueLine += (s, e) =>
         {
-            case "dialogue":
-                ShowDialogue(node.speaker, node.text, node.emotion);
-                // On continue: ProcessNode(nodeMap[node.next]);
-                break;
+            Debug.Log($"{e.Speaker}: {e.Text}");
+            // Show in your UI, then call runner.Advance() when player clicks
+        };
 
-            case "choice":
-                ShowChoices(node.prompt, node.options);
-                // On selection: ProcessNode(nodeMap[selectedOption.next]);
-                break;
+        runner.OnChoicePresented += (s, e) =>
+        {
+            Debug.Log($"Prompt: {e.Prompt}");
+            for (int i = 0; i < e.Options.Count; i++)
+                Debug.Log($"  {i}: {e.Options[i]}");
+            // Show choices in UI, then call runner.Choose(index)
+        };
 
-            case "condition":
-                bool result = EvaluateCondition(node.variable, node.@operator, node.value);
-                string nextId = result ? node.true_next : node.false_next;
-                ProcessNode(nodeMap[nextId]);
-                break;
+        runner.OnDialogueEnded += (s, e) =>
+        {
+            Debug.Log($"Ended with tag: {e.Tag}");
+        };
 
-            case "event":
-                ExecuteActions(node.actions);
-                ProcessNode(nodeMap[node.next]);
-                break;
+        runner.OnEventTriggered += (s, e) =>
+        {
+            Debug.Log($"Event: {e.Action} {e.Key}={e.Value}");
+        };
 
-            case "random":
-                var branch = PickWeightedRandom(node.branches);
-                ProcessNode(nodeMap[branch.next]);
-                break;
+        runner.OnVariableChanged += (s, e) =>
+        {
+            Debug.Log($"Variable {e.Key} = {e.Value}");
+        };
 
-            case "end":
-                EndDialogue(node.tag);
-                break;
-        }
+        runner.LoadDialogue("Assets/Dialogues/intro.talenode.json");
+        runner.Start();
     }
 }
 ```
+
+### TaleNodeRunner API
+
+| Method | Description |
+|---|---|
+| `LoadDialogue(string path)` | Load dialogue from a JSON file path |
+| `LoadFromString(string json)` | Load dialogue from a JSON string |
+| `Start(string startNodeId = null)` | Start the dialogue (optionally from a specific node) |
+| `Advance()` | Continue to the next node after a dialogue line |
+| `Choose(int index)` | Select a choice option by index |
+| `GetVariable(string name)` | Get a runtime variable value |
+| `SetVariable(string name, TaleValue value)` | Set a runtime variable value |
+| `Stop()` | Stop the dialogue immediately |
+| `IsRunning` | Whether a dialogue is currently active |
+
+### Events
+
+| Event | Args | When |
+|---|---|---|
+| `OnDialogueStarted` | `EventArgs` | Dialogue begins |
+| `OnDialogueLine` | `Speaker`, `Text`, `Emotion`, `Portrait`, `Audio`, `NodeId` | A dialogue line is reached |
+| `OnChoicePresented` | `Prompt`, `Options` (List&lt;string&gt;) | A choice node is reached |
+| `OnDialogueEnded` | `Tag` | Dialogue ends (at an End node or dead end) |
+| `OnEventTriggered` | `Action`, `Key`, `Value` | A non-variable event action fires |
+| `OnVariableChanged` | `Key`, `Value` | A variable is set or modified |
+
+### Expression Interpolation
+
+The runner automatically interpolates `{variable}` expressions in dialogue text and choice prompts. You can also use the expression engine directly:
+
+```csharp
+using TaleNode;
+
+// Evaluate an expression
+TaleValue result = TaleNodeExpression.Evaluate("gold >= 100", variables);
+
+// Evaluate as boolean
+bool check = TaleNodeExpression.EvaluateBool("has_key && level > 5", variables);
+
+// Interpolate text
+string text = TaleNodeExpression.InterpolateText("You have {gold} gold.", variables);
+```
+
+### Editor Tools
+
+The Unity package also includes editor tools for viewing and testing dialogues inside Unity. See the [Unity Editor Tools](unity-editor.md) guide.
 
 ## Godot (GDScript)
 
