@@ -20,11 +20,16 @@ impl TaleNodeApp {
                 ui.label(format!("Selected: {}", self.selected_nodes.len()));
             }
 
-            // Status message (auto-save, etc.)
-            if let Some((ref msg, when)) = self.status_message {
-                if when.elapsed().as_secs() < 3 {
+            // Status message (auto-save, errors, etc.)
+            if let Some((ref msg, when, is_error)) = self.status_message {
+                if when.elapsed().as_secs() < 5 {
                     ui.separator();
-                    ui.colored_label(Color32::from_rgb(100, 200, 100), msg);
+                    let color = if is_error {
+                        Color32::from_rgb(255, 100, 100)
+                    } else {
+                        Color32::from_rgb(100, 200, 100)
+                    };
+                    ui.colored_label(color, msg);
                 }
             }
 

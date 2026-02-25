@@ -1,6 +1,3 @@
-use crate::model::graph::DialogueGraph;
-use crate::model::node::Node;
-
 use super::TaleNodeApp;
 
 impl TaleNodeApp {
@@ -17,11 +14,7 @@ impl TaleNodeApp {
                     .add(egui::Button::new("New").shortcut_text(format!("{mod_key}+N")))
                     .clicked()
                 {
-                    self.graph = DialogueGraph::new();
-                    self.graph.add_node(Node::new_start([100.0, 200.0]));
-                    self.selected_nodes.clear();
-                    self.project_name = "Untitled".to_string();
-                    self.project_path = None;
+                    self.do_new_project();
                     ui.close_menu();
                 }
                 if ui

@@ -129,7 +129,7 @@ impl TaleNodeApp {
             }
             self.focus_search_result();
         }
-        self.status_message = Some(("Replaced in current node".to_string(), Instant::now()));
+        self.status_message = Some(("Replaced in current node".to_string(), Instant::now(), false));
     }
 
     /// Replace the search query in all matching nodes.
@@ -152,6 +152,7 @@ impl TaleNodeApp {
         self.status_message = Some((
             format!("{count} replacement(s) across {} node(s)", ids.len()),
             Instant::now(),
+            false,
         ));
     }
 }

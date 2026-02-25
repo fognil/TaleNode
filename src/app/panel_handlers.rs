@@ -244,12 +244,14 @@ impl TaleNodeApp {
                                 self.status_message = Some((
                                     "Script committed to graph".to_string(),
                                     std::time::Instant::now(),
+                                    false,
                                 ));
                             }
                             Err(e) => {
                                 self.status_message = Some((
                                     format!("Script error: {e}"),
                                     std::time::Instant::now(),
+                                    true,
                                 ));
                             }
                         }

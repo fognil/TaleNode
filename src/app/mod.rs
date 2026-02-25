@@ -68,7 +68,7 @@ pub struct TaleNodeApp {
     playtest: PlaytestState,
     show_playtest: bool,
     last_auto_save: Instant,
-    status_message: Option<(String, Instant)>,
+    status_message: Option<(String, Instant, bool)>,
     audio_manager: crate::ui::audio_manager::AudioManagerState,
     show_version_panel: bool,
     version_new_desc: String,
@@ -172,7 +172,7 @@ impl eframe::App for TaleNodeApp {
         if self.project_path.is_some() && self.last_auto_save.elapsed().as_secs() >= 60 {
             self.last_auto_save = Instant::now();
             self.do_save(false);
-            self.status_message = Some(("Auto-saved".to_string(), Instant::now()));
+            self.status_message = Some(("Auto-saved".to_string(), Instant::now(), false));
         }
 
         // Keyboard shortcuts

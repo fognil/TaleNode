@@ -22,12 +22,14 @@ impl TaleNodeApp {
                             self.selected_nodes.clear();
                         }
                         Err(e) => {
-                            eprintln!("Failed to parse project: {e}");
+                            self.status_message =
+                                Some((format!("Failed to parse project: {e}"), Instant::now(), true));
                         }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to read file: {e}");
+                    self.status_message =
+                        Some((format!("Failed to read file: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -53,21 +55,24 @@ impl TaleNodeApp {
             match project.save_to_string() {
                 Ok(json) => {
                     if let Err(e) = std::fs::write(&path, json) {
-                        eprintln!("Failed to write file: {e}");
+                        self.status_message =
+                            Some((format!("Failed to write file: {e}"), Instant::now(), true));
                     } else {
                         self.project_path = Some(path);
-                        self.status_message = Some(("Saved".to_string(), Instant::now()));
+                        self.status_message =
+                            Some(("Saved".to_string(), Instant::now(), false));
                         self.last_auto_save = Instant::now();
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to serialize project: {e}");
+                    self.status_message =
+                        Some((format!("Failed to serialize project: {e}"), Instant::now(), true));
                 }
             }
         }
     }
 
-    pub(super) fn do_export_json(&self) {
+    pub(super) fn do_export_json(&mut self) {
         let path = rfd::FileDialog::new()
             .add_filter("JSON", &["json"])
             .set_file_name(format!("{}.json", self.project_name))
@@ -78,11 +83,16 @@ impl TaleNodeApp {
             match crate::export::json_export::export_json(&graph, &self.project_name) {
                 Ok(json) => {
                     if let Err(e) = std::fs::write(&path, json) {
-                        eprintln!("Failed to write export: {e}");
+                        self.status_message =
+                            Some((format!("Failed to write export: {e}"), Instant::now(), true));
+                    } else {
+                        self.status_message =
+                            Some(("JSON exported".to_string(), Instant::now(), false));
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to export JSON: {e}");
+                    self.status_message =
+                        Some((format!("Failed to export JSON: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -98,10 +108,11 @@ impl TaleNodeApp {
                 Ok(()) => {
                     self.write_dialogue_json(&dir);
                     self.status_message =
-                        Some(("Godot plugin + JSON exported".to_string(), Instant::now()));
+                        Some(("Godot plugin + JSON exported".to_string(), Instant::now(), false));
                 }
                 Err(e) => {
-                    eprintln!("Failed to export Godot plugin: {e}");
+                    self.status_message =
+                        Some((format!("Failed to export Godot plugin: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -117,10 +128,11 @@ impl TaleNodeApp {
                 Ok(()) => {
                     self.write_dialogue_json(&dir);
                     self.status_message =
-                        Some(("Unity plugin + JSON exported".to_string(), Instant::now()));
+                        Some(("Unity plugin + JSON exported".to_string(), Instant::now(), false));
                 }
                 Err(e) => {
-                    eprintln!("Failed to export Unity plugin: {e}");
+                    self.status_message =
+                        Some((format!("Failed to export Unity plugin: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -136,27 +148,32 @@ impl TaleNodeApp {
                 Ok(()) => {
                     self.write_dialogue_json(&dir);
                     self.status_message =
-                        Some(("Unreal plugin + JSON exported".to_string(), Instant::now()));
+                        Some(("Unreal plugin + JSON exported".to_string(), Instant::now(), false));
                 }
                 Err(e) => {
-                    eprintln!("Failed to export Unreal plugin: {e}");
+                    self.status_message = Some((
+                        format!("Failed to export Unreal plugin: {e}"),
+                        Instant::now(),
+                        true,
+                    ));
                 }
             }
         }
     }
 
-    /// Write dialogue JSON into the given directory alongside plugin files.
-    fn write_dialogue_json(&self, dir: &std::path::Path) {
+    fn write_dialogue_json(&mut self, dir: &std::path::Path) {
         let graph = self.root_graph_for_export();
         let filename = format!("{}.json", self.project_name);
         match crate::export::json_export::export_json(&graph, &self.project_name) {
             Ok(json) => {
                 if let Err(e) = std::fs::write(dir.join(filename), json) {
-                    eprintln!("Failed to write dialogue JSON: {e}");
+                    self.status_message =
+                        Some((format!("Failed to write dialogue JSON: {e}"), Instant::now(), true));
                 }
             }
             Err(e) => {
-                eprintln!("Failed to serialize dialogue JSON: {e}");
+                self.status_message =
+                    Some((format!("Failed to serialize dialogue JSON: {e}"), Instant::now(), true));
             }
         }
     }
@@ -169,15 +186,13 @@ impl TaleNodeApp {
 
         if let Some(path) = path {
             let graph = self.root_graph_for_export();
-            let csv = crate::export::voice_export::export_voice_csv(
-                &graph,
-                &self.project_name,
-            );
+            let csv = crate::export::voice_export::export_voice_csv(&graph, &self.project_name);
             if let Err(e) = std::fs::write(&path, csv) {
-                eprintln!("Failed to write voice script: {e}");
+                self.status_message =
+                    Some((format!("Failed to write voice script: {e}"), Instant::now(), true));
             } else {
                 self.status_message =
-                    Some(("Voice script exported".to_string(), Instant::now()));
+                    Some(("Voice script exported".to_string(), Instant::now(), false));
             }
         }
     }
@@ -193,14 +208,16 @@ impl TaleNodeApp {
             match crate::export::xml_export::export_xml(&graph, &self.project_name) {
                 Ok(xml) => {
                     if let Err(e) = std::fs::write(&path, xml) {
-                        eprintln!("Failed to write XML export: {e}");
+                        self.status_message =
+                            Some((format!("Failed to write XML: {e}"), Instant::now(), true));
                     } else {
                         self.status_message =
-                            Some(("XML exported".to_string(), Instant::now()));
+                            Some(("XML exported".to_string(), Instant::now(), false));
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to export XML: {e}");
+                    self.status_message =
+                        Some((format!("Failed to export XML: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -224,15 +241,17 @@ impl TaleNodeApp {
                             self.project_path = None;
                             self.history.clear();
                             self.status_message =
-                                Some(("Imported from Yarn".to_string(), Instant::now()));
+                                Some(("Imported from Yarn".to_string(), Instant::now(), false));
                         }
                         Err(e) => {
-                            eprintln!("Failed to import Yarn: {e}");
+                            self.status_message =
+                                Some((format!("Failed to import Yarn: {e}"), Instant::now(), true));
                         }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to read file: {e}");
+                    self.status_message =
+                        Some((format!("Failed to read file: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -255,16 +274,24 @@ impl TaleNodeApp {
                                 .unwrap_or_else(|| "Imported".to_string());
                             self.project_path = None;
                             self.history.clear();
-                            self.status_message =
-                                Some(("Imported from Chat Mapper".to_string(), Instant::now()));
+                            self.status_message = Some((
+                                "Imported from Chat Mapper".to_string(),
+                                Instant::now(),
+                                false,
+                            ));
                         }
                         Err(e) => {
-                            eprintln!("Failed to import Chat Mapper: {e}");
+                            self.status_message = Some((
+                                format!("Failed to import Chat Mapper: {e}"),
+                                Instant::now(),
+                                true,
+                            ));
                         }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to read file: {e}");
+                    self.status_message =
+                        Some((format!("Failed to read file: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -288,15 +315,20 @@ impl TaleNodeApp {
                             self.project_path = None;
                             self.history.clear();
                             self.status_message =
-                                Some(("Imported from articy".to_string(), Instant::now()));
+                                Some(("Imported from articy".to_string(), Instant::now(), false));
                         }
                         Err(e) => {
-                            eprintln!("Failed to import articy: {e}");
+                            self.status_message = Some((
+                                format!("Failed to import articy: {e}"),
+                                Instant::now(),
+                                true,
+                            ));
                         }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to read file: {e}");
+                    self.status_message =
+                        Some((format!("Failed to read file: {e}"), Instant::now(), true));
                 }
             }
         }
@@ -317,10 +349,11 @@ impl TaleNodeApp {
                 &self.project_name,
             );
             if let Err(e) = std::fs::write(&path, csv) {
-                eprintln!("Failed to write analytics CSV: {e}");
+                self.status_message =
+                    Some((format!("Failed to write analytics CSV: {e}"), Instant::now(), true));
             } else {
                 self.status_message =
-                    Some(("Analytics CSV exported".to_string(), Instant::now()));
+                    Some(("Analytics CSV exported".to_string(), Instant::now(), false));
             }
         }
     }
@@ -340,15 +373,18 @@ impl TaleNodeApp {
                 &self.project_name,
             );
             if let Err(e) = std::fs::write(&path, text) {
-                eprintln!("Failed to write analytics report: {e}");
+                self.status_message = Some((
+                    format!("Failed to write analytics report: {e}"),
+                    Instant::now(),
+                    true,
+                ));
             } else {
                 self.status_message =
-                    Some(("Analytics report exported".to_string(), Instant::now()));
+                    Some(("Analytics report exported".to_string(), Instant::now(), false));
             }
         }
     }
 
-    /// Handle New Project: reset graph, clear state.
     pub(super) fn do_new_project(&mut self) {
         self.graph = DialogueGraph::new();
         self.graph.add_node(Node::new_start([100.0, 200.0]));

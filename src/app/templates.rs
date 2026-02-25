@@ -98,7 +98,7 @@ impl TaleNodeApp {
         };
         self.template_library.templates.push(template);
         self.save_template_library();
-        self.status_message = Some(("Template saved".to_string(), Instant::now()));
+        self.status_message = Some(("Template saved".to_string(), Instant::now(), false));
     }
 
     /// Delete a user-saved template by ID.
