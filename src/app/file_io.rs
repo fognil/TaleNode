@@ -7,30 +7,32 @@ use super::TaleNodeApp;
 
 impl TaleNodeApp {
     pub(super) fn do_open(&mut self) {
-        let file = rfd::FileDialog::new()
+        let path = rfd::FileDialog::new()
             .add_filter("TaleNode Project", &["talenode"])
             .pick_file();
-        if let Some(path) = file {
-            match std::fs::read_to_string(&path) {
-                Ok(contents) => {
-                    match crate::model::project::Project::load_from_string(&contents) {
-                        Ok(project) => {
-                            self.graph = project.graph;
-                            self.project_name = project.name;
-                            self.versions = project.versions;
-                            self.project_path = Some(path);
-                            self.selected_nodes.clear();
-                        }
-                        Err(e) => {
-                            self.status_message =
-                                Some((format!("Failed to parse project: {e}"), Instant::now(), true));
-                        }
-                    }
+        let Some(path) = path else { return };
+        let contents = match std::fs::read_to_string(&path) {
+            Ok(c) => c,
+            Err(e) => {
+                self.status_message =
+                    Some((format!("Failed to read file: {e}"), Instant::now(), true));
+                return;
+            }
+        };
+        match crate::model::project::Project::load_from_string(&contents) {
+            Ok(project) => {
+                self.graph = project.graph;
+                self.project_name = project.name;
+                self.versions = project.versions;
+                self.project_path = Some(path);
+                self.selected_nodes.clear();
+                if let Some(ref layout) = project.dock_layout {
+                    self.dock_state_from_json(layout);
                 }
-                Err(e) => {
-                    self.status_message =
-                        Some((format!("Failed to read file: {e}"), Instant::now(), true));
-                }
+            }
+            Err(e) => {
+                self.status_message =
+                    Some((format!("Failed to parse project: {e}"), Instant::now(), true));
             }
         }
     }
@@ -51,6 +53,7 @@ impl TaleNodeApp {
                 name: self.project_name.clone(),
                 graph: self.graph.clone(),
                 versions: self.versions.clone(),
+                dock_layout: self.dock_state_to_json(),
             };
             match project.save_to_string() {
                 Ok(json) => {
@@ -224,35 +227,33 @@ impl TaleNodeApp {
     }
 
     pub(super) fn do_import_yarn(&mut self) {
-        let file = rfd::FileDialog::new()
+        let Some(path) = rfd::FileDialog::new()
             .add_filter("Yarn Spinner", &["yarn"])
-            .pick_file();
-        if let Some(path) = file {
-            match std::fs::read_to_string(&path) {
-                Ok(contents) => {
-                    match crate::import::yarn_import::import_yarn(&contents) {
-                        Ok(graph) => {
-                            self.graph = graph;
-                            self.selected_nodes.clear();
-                            self.project_name = path
-                                .file_stem()
-                                .map(|s| s.to_string_lossy().to_string())
-                                .unwrap_or_else(|| "Imported".to_string());
-                            self.project_path = None;
-                            self.history.clear();
-                            self.status_message =
-                                Some(("Imported from Yarn".to_string(), Instant::now(), false));
-                        }
-                        Err(e) => {
-                            self.status_message =
-                                Some((format!("Failed to import Yarn: {e}"), Instant::now(), true));
-                        }
-                    }
-                }
-                Err(e) => {
-                    self.status_message =
-                        Some((format!("Failed to read file: {e}"), Instant::now(), true));
-                }
+            .pick_file() else { return };
+        let contents = match std::fs::read_to_string(&path) {
+            Ok(c) => c,
+            Err(e) => {
+                self.status_message =
+                    Some((format!("Failed to read file: {e}"), Instant::now(), true));
+                return;
+            }
+        };
+        match crate::import::yarn_import::import_yarn(&contents) {
+            Ok(graph) => {
+                self.graph = graph;
+                self.selected_nodes.clear();
+                self.project_name = path
+                    .file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or_else(|| "Imported".to_string());
+                self.project_path = None;
+                self.history.clear();
+                self.status_message =
+                    Some(("Imported from Yarn".to_string(), Instant::now(), false));
+            }
+            Err(e) => {
+                self.status_message =
+                    Some((format!("Failed to import Yarn: {e}"), Instant::now(), true));
             }
         }
     }
@@ -393,5 +394,7 @@ impl TaleNodeApp {
         self.project_path = None;
         self.versions.clear();
         self.history.clear();
+        self.dock_reset_layout();
     }
+
 }

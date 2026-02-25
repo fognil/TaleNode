@@ -87,6 +87,7 @@ pub struct TaleNodeApp {
     script_panel_dirty: bool,
     script_panel_stale: bool,
     pending_confirmation: Option<confirm::PendingAction>,
+    last_inspector_focus_count: usize,
 }
 
 impl TaleNodeApp {
@@ -134,6 +135,7 @@ impl TaleNodeApp {
             script_panel_dirty: false,
             script_panel_stale: false,
             pending_confirmation: None,
+            last_inspector_focus_count: 0,
         }
     }
 
@@ -213,7 +215,15 @@ impl eframe::App for TaleNodeApp {
         );
 
         // Dockable panel layout (replaces all SidePanel/CentralPanel calls)
+        let prev_sel = self.last_inspector_focus_count;
         self.show_dock(ctx);
+
+        // Auto-focus Inspector tab when selection transitions to exactly 1 node
+        let cur_sel = self.selected_nodes.len();
+        if cur_sel == 1 && prev_sel != 1 {
+            self.focus_dock_tab(dock::DockTab::Inspector);
+        }
+        self.last_inspector_focus_count = cur_sel;
     }
 }
 

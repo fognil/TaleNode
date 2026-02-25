@@ -1,9 +1,10 @@
-use egui_dock::{DockArea, DockState, NodeIndex, TabViewer};
+use egui_dock::{DockArea, DockState, NodeIndex, SurfaceIndex, TabViewer};
+use serde::{Deserialize, Serialize};
 
 use super::TaleNodeApp;
 
 /// Each dockable panel in the application.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub(super) enum DockTab {
     Canvas,
     LeftPanel,
@@ -34,7 +35,6 @@ impl DockTab {
             Self::Templates => "Templates",
         }
     }
-
 }
 
 /// Build the default dock layout matching the Unity-style arrangement.
@@ -140,7 +140,7 @@ impl TaleNodeApp {
         }
     }
 
-    /// Add a tab to the dock (into the bottom-center tab group by default).
+    /// Add a tab to the dock. Inserts into the first leaf on the main surface.
     pub(super) fn dock_add_tab(&mut self, tab: DockTab) {
         if self.dock_has_tab(tab) {
             return;
@@ -155,8 +155,7 @@ impl TaleNodeApp {
         }
 
         if let Some(ref mut ds) = self.dock_state {
-            // Try to find an existing leaf to add to; just push to main surface root
-            DockState::add_window(ds, vec![tab]);
+            ds.main_surface_mut().push_to_first_leaf(tab);
         }
     }
 
@@ -169,7 +168,6 @@ impl TaleNodeApp {
         let mut to_remove = Vec::new();
         for ((surface_idx, node_idx), t) in ds.iter_all_tabs() {
             if *t == tab {
-                // Find the tab index within this leaf node
                 let tree = &ds[surface_idx];
                 if let egui_dock::Node::Leaf { tabs, .. } = &tree[node_idx] {
                     if let Some(pos) = tabs.iter().position(|t| *t == tab) {
@@ -178,9 +176,21 @@ impl TaleNodeApp {
                 }
             }
         }
-        // Remove in reverse to keep indices valid
         for (surface_idx, node_idx, tab_idx) in to_remove.into_iter().rev() {
             ds[surface_idx].remove_tab((node_idx, tab_idx));
+        }
+    }
+
+    /// Set a tab as the active tab in its leaf (auto-focus).
+    pub(super) fn focus_dock_tab(&mut self, tab: DockTab) {
+        let Some(ref mut ds) = self.dock_state else {
+            return;
+        };
+        let tree = &mut ds[SurfaceIndex::main()];
+        if let Some((node_idx, tab_idx)) = tree.find_tab(&tab) {
+            if let egui_dock::Node::Leaf { active, .. } = &mut tree[node_idx] {
+                *active = tab_idx;
+            }
         }
     }
 
@@ -217,4 +227,17 @@ impl TaleNodeApp {
         self.dock_has_tab(DockTab::ScriptEditor)
     }
 
+    /// Serialize dock state to JSON Value for project save.
+    pub(super) fn dock_state_to_json(&self) -> Option<serde_json::Value> {
+        self.dock_state
+            .as_ref()
+            .and_then(|ds| serde_json::to_value(ds).ok())
+    }
+
+    /// Restore dock state from JSON Value loaded from project.
+    pub(super) fn dock_state_from_json(&mut self, value: &serde_json::Value) {
+        if let Ok(ds) = serde_json::from_value::<DockState<DockTab>>(value.clone()) {
+            self.dock_state = Some(ds);
+        }
+    }
 }

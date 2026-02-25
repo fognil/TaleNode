@@ -386,6 +386,7 @@ mod tests {
             name: "Dragon's Lair".to_string(),
             graph: g,
             versions: vec![version],
+            dock_layout: None,
         };
 
         let json = project.save_to_string().unwrap();

@@ -61,6 +61,7 @@ impl TaleNodeApp {
                     name: self.project_name.clone(),
                     graph: self.graph.clone(),
                     versions: self.versions.clone(),
+                    dock_layout: None,
                 };
                 if let Some(_old_graph) = project.restore_version(*id) {
                     self.snapshot();

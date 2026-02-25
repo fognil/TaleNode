@@ -182,6 +182,7 @@ impl TaleNodeApp {
                     name: self.project_name.clone(),
                     graph: self.graph.clone(),
                     versions: self.versions.clone(),
+                    dock_layout: None,
                 };
                 project.create_version(desc);
                 self.versions = project.versions;

@@ -12,6 +12,8 @@ pub struct Project {
     pub graph: DialogueGraph,
     #[serde(default)]
     pub versions: Vec<VersionSnapshot>,
+    #[serde(default)]
+    pub dock_layout: Option<serde_json::Value>,
 }
 
 impl Default for Project {
@@ -21,6 +23,7 @@ impl Default for Project {
             name: "Untitled".to_string(),
             graph: DialogueGraph::new(),
             versions: Vec::new(),
+            dock_layout: None,
         }
     }
 }
