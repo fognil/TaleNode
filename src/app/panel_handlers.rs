@@ -27,6 +27,7 @@ impl TaleNodeApp {
                 &mut self.graph,
                 selected_id,
                 &mut self.inspector_new_tag_text,
+                &mut self.active_locale,
             );
             if changed {
                 self.history.push_undo(pre_graph);

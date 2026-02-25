@@ -1,6 +1,7 @@
 use egui::Ui;
 
 use crate::model::character::Character;
+use crate::model::locale::LocaleSettings;
 use crate::model::node::{
     CompareOp, EventAction, EventActionType, VariableValue,
 };
@@ -9,6 +10,9 @@ pub(super) fn show_dialogue_inspector(
     ui: &mut Ui,
     data: &mut crate::model::node::DialogueData,
     characters: &[Character],
+    editing_locale: &Option<String>,
+    locale: &LocaleSettings,
+    uuid8: &str,
 ) -> bool {
     let mut snapshot_needed = false;
 
@@ -67,6 +71,9 @@ pub(super) fn show_dialogue_inspector(
 
     ui.add_space(4.0);
     ui.label("Text:");
+    if editing_locale.is_some() {
+        locale_text_field(ui, &data.text, &format!("dlg_{uuid8}"), editing_locale, locale, true);
+    }
     if ui
         .add(egui::TextEdit::multiline(&mut data.text).desired_rows(4))
         .gained_focus()
@@ -278,4 +285,70 @@ pub(super) fn show_variable_value_editor(
     }
 
     snapshot_needed
+}
+
+/// Sync output port labels with choice text.
+pub(super) fn sync_choice_labels(node: &mut crate::model::node::Node) {
+    if let crate::model::node::NodeType::Choice(data) = &node.node_type {
+        for (i, choice) in data.choices.iter().enumerate() {
+            if let Some(port) = node.outputs.get_mut(i) {
+                port.label = choice.text.clone();
+            }
+        }
+    }
+}
+
+/// Sync output port labels with random branch weights.
+pub(super) fn sync_random_labels(node: &mut crate::model::node::Node) {
+    if let crate::model::node::NodeType::Random(data) = &node.node_type {
+        for (i, branch) in data.branches.iter().enumerate() {
+            if let Some(port) = node.outputs.get_mut(i) {
+                port.label = format!("{:.0}%", branch.weight * 100.0);
+            }
+        }
+    }
+}
+
+/// Render a translation field for a translatable string.
+/// Shows the current translation with a hint if untranslated.
+/// Edits are buffered in egui memory and applied by `apply_locale_edits`.
+pub(super) fn locale_text_field(
+    ui: &mut Ui,
+    _default_text: &str,
+    key: &str,
+    editing_locale: &Option<String>,
+    locale: &LocaleSettings,
+    multiline: bool,
+) {
+    let Some(ref loc) = editing_locale else {
+        return;
+    };
+    let current = locale
+        .get_translation(key, loc)
+        .unwrap_or("")
+        .to_string();
+    let mut text = current.clone();
+
+    ui.horizontal(|ui| {
+        ui.label(format!("[{loc}]"));
+        let resp = if multiline {
+            ui.add(
+                egui::TextEdit::multiline(&mut text)
+                    .hint_text("(untranslated)")
+                    .desired_rows(3),
+            )
+        } else {
+            ui.add(egui::TextEdit::singleline(&mut text).hint_text("(untranslated)"))
+        };
+        if resp.changed() && text != current {
+            ui.ctx().memory_mut(|mem| {
+                let edits = mem
+                    .data
+                    .get_temp_mut_or_default::<Vec<(String, String)>>(
+                        egui::Id::new("locale_edits"),
+                    );
+                edits.push((key.to_string(), text));
+            });
+        }
+    });
 }

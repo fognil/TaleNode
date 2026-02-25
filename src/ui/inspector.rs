@@ -2,11 +2,13 @@ use egui::Ui;
 use uuid::Uuid;
 
 use crate::model::graph::DialogueGraph;
+use crate::model::locale::LocaleSettings;
 use crate::model::node::NodeType;
 use crate::model::review::ReviewStatus;
 
 use super::inspector_widgets::{
     show_condition_inspector, show_dialogue_inspector, show_event_inspector,
+    sync_choice_labels, sync_random_labels,
 };
 
 /// Deferred mutation to apply after the inspector UI pass.
@@ -20,16 +22,19 @@ enum DeferredAction {
 
 /// Draw the inspector panel for the currently selected node.
 /// Returns `true` when an undo-worthy event starts (caller should snapshot).
+#[allow(clippy::too_many_arguments)]
 pub fn show_inspector(
     ui: &mut Ui,
     graph: &mut DialogueGraph,
     selected: Uuid,
     new_tag_text: &mut String,
+    active_locale: &mut Option<String>,
 ) -> bool {
     let mut deferred = DeferredAction::None;
     let mut snapshot_needed = false;
 
     // First pass: draw UI and collect deferred actions
+    let locale = graph.locale.clone();
     if let Some(node) = graph.nodes.get_mut(&selected) {
         ui.heading(node.title());
         ui.separator();
@@ -38,7 +43,15 @@ pub fn show_inspector(
             ui.label("ID:");
             ui.monospace(node.id.to_string().chars().take(8).collect::<String>());
         });
+
+        // Locale switcher (only if extra locales exist)
+        if locale.has_extra_locales() {
+            show_locale_switcher(ui, &locale, active_locale);
+        }
         ui.add_space(8.0);
+
+        let uuid8 = node.id.to_string()[..8].to_string();
+        let editing_locale = active_locale.clone();
 
         match &mut node.node_type {
             NodeType::Start => {
@@ -47,13 +60,15 @@ pub fn show_inspector(
 
             NodeType::Dialogue(data) => {
                 let characters = graph.characters.clone();
-                if show_dialogue_inspector(ui, data, &characters) {
+                if show_dialogue_inspector(ui, data, &characters, &editing_locale, &locale, &uuid8)
+                {
                     snapshot_needed = true;
                 }
             }
 
             NodeType::Choice(data) => {
-                let (action, changed) = show_choice_inspector(ui, data);
+                let (action, changed) =
+                    show_choice_inspector(ui, data, &editing_locale, &locale, &uuid8);
                 deferred = action;
                 if changed {
                     snapshot_needed = true;
@@ -101,6 +116,11 @@ pub fn show_inspector(
                 ui.label("Double-click to enter sub-graph.");
             }
         }
+    }
+
+    // Apply locale translations from inspector widgets back to graph
+    if let Some(ref loc) = active_locale {
+        apply_locale_edits(ui, &mut graph.locale, loc, &mut snapshot_needed);
     }
 
     // Second pass: apply deferred mutations that need &mut Node (not &mut NodeType)
@@ -211,13 +231,74 @@ pub fn show_inspector(
     snapshot_needed
 }
 
+fn show_locale_switcher(
+    ui: &mut Ui,
+    locale: &LocaleSettings,
+    active_locale: &mut Option<String>,
+) {
+    ui.horizontal(|ui| {
+        ui.label("Locale:");
+        let label = active_locale
+            .as_deref()
+            .map_or_else(|| format!("Default ({})", locale.default_locale), String::from);
+        egui::ComboBox::from_id_salt("inspector_locale")
+            .selected_text(&label)
+            .show_ui(ui, |ui| {
+                let is_default = active_locale.is_none();
+                if ui
+                    .selectable_label(is_default, format!("Default ({})", locale.default_locale))
+                    .clicked()
+                {
+                    *active_locale = None;
+                }
+                for loc in &locale.extra_locales {
+                    let selected = active_locale.as_deref() == Some(loc.as_str());
+                    if ui.selectable_label(selected, loc).clicked() {
+                        *active_locale = Some(loc.clone());
+                    }
+                }
+            });
+    });
+}
+
+fn apply_locale_edits(
+    ui: &mut Ui,
+    locale: &mut LocaleSettings,
+    loc: &str,
+    snapshot_needed: &mut bool,
+) {
+    // Read locale edits stored in egui memory by locale_text_field
+    let edits: Vec<(String, String)> = ui.ctx().memory_mut(|mem| {
+        mem.data
+            .remove_temp::<Vec<(String, String)>>(egui::Id::new("locale_edits"))
+            .unwrap_or_default()
+    });
+    for (key, text) in edits {
+        *snapshot_needed = true;
+        locale.set_translation(key, loc.to_string(), text);
+    }
+}
+
 fn show_choice_inspector(
     ui: &mut Ui,
     data: &mut crate::model::node::ChoiceData,
+    editing_locale: &Option<String>,
+    locale: &LocaleSettings,
+    uuid8: &str,
 ) -> (DeferredAction, bool) {
     let mut snapshot_needed = false;
 
     ui.label("Prompt:");
+    if editing_locale.is_some() {
+        super::inspector_widgets::locale_text_field(
+            ui,
+            &data.prompt,
+            &format!("choice_{uuid8}"),
+            editing_locale,
+            locale,
+            false,
+        );
+    }
     if ui.text_edit_singleline(&mut data.prompt).gained_focus() {
         snapshot_needed = true;
     }
@@ -238,6 +319,16 @@ fn show_choice_inspector(
                 remove_idx = Some(i);
             }
         });
+        if editing_locale.is_some() {
+            super::inspector_widgets::locale_text_field(
+                ui,
+                &choice.text,
+                &format!("opt_{uuid8}_{i}"),
+                editing_locale,
+                locale,
+                false,
+            );
+        }
     }
 
     if let Some(idx) = remove_idx {
@@ -301,26 +392,4 @@ fn show_random_inspector(
     }
 
     (DeferredAction::None, snapshot_needed)
-}
-
-/// Sync output port labels with choice text.
-fn sync_choice_labels(node: &mut crate::model::node::Node) {
-    if let NodeType::Choice(data) = &node.node_type {
-        for (i, choice) in data.choices.iter().enumerate() {
-            if let Some(port) = node.outputs.get_mut(i) {
-                port.label = choice.text.clone();
-            }
-        }
-    }
-}
-
-/// Sync output port labels with random branch weights.
-fn sync_random_labels(node: &mut crate::model::node::Node) {
-    if let NodeType::Random(data) = &node.node_type {
-        for (i, branch) in data.branches.iter().enumerate() {
-            if let Some(port) = node.outputs.get_mut(i) {
-                port.label = format!("{:.0}%", branch.weight * 100.0);
-            }
-        }
-    }
 }
