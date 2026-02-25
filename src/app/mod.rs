@@ -3,6 +3,7 @@ mod confirm;
 mod context_menu;
 mod dock;
 mod file_io;
+mod file_io_locale;
 mod menu;
 mod panel_handlers;
 mod panels;
@@ -88,6 +89,9 @@ pub struct TaleNodeApp {
     script_panel_stale: bool,
     pending_confirmation: Option<confirm::PendingAction>,
     last_inspector_focus_count: usize,
+    active_locale: Option<String>,
+    locale_filter_untranslated: bool,
+    locale_new_name: String,
 }
 
 impl TaleNodeApp {
@@ -136,6 +140,9 @@ impl TaleNodeApp {
             script_panel_stale: false,
             pending_confirmation: None,
             last_inspector_focus_count: 0,
+            active_locale: None,
+            locale_filter_untranslated: false,
+            locale_new_name: String::new(),
         }
     }
 

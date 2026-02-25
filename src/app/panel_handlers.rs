@@ -238,6 +238,53 @@ impl TaleNodeApp {
         }
     }
 
+    pub(super) fn render_locale_tab(&mut self, ui: &mut egui::Ui) {
+        let action = crate::ui::locale_panel::show_locale_panel(
+            ui,
+            &self.graph,
+            &mut self.active_locale,
+            &mut self.locale_filter_untranslated,
+            &mut self.locale_new_name,
+        );
+        match action {
+            crate::ui::locale_panel::LocalePanelAction::AddLocale(name) => {
+                self.snapshot();
+                self.graph.locale.add_locale(name);
+            }
+            crate::ui::locale_panel::LocalePanelAction::RemoveLocale(name) => {
+                self.snapshot();
+                self.graph.locale.remove_locale(&name);
+                if self.active_locale.as_deref() == Some(name.as_str()) {
+                    self.active_locale = None;
+                }
+            }
+            crate::ui::locale_panel::LocalePanelAction::SetTranslation {
+                key,
+                locale,
+                text,
+            } => {
+                self.snapshot();
+                self.graph.locale.set_translation(key, locale, text);
+            }
+            crate::ui::locale_panel::LocalePanelAction::Navigate(node_id) => {
+                self.selected_nodes = vec![node_id];
+                if let Some(node) = self.graph.nodes.get(&node_id) {
+                    self.canvas.pan_offset = egui::Vec2::new(
+                        -node.position[0] * self.canvas.zoom,
+                        -node.position[1] * self.canvas.zoom,
+                    );
+                }
+            }
+            crate::ui::locale_panel::LocalePanelAction::ExportCsv => {
+                self.do_export_locale_csv();
+            }
+            crate::ui::locale_panel::LocalePanelAction::ImportCsv => {
+                self.do_import_locale_csv();
+            }
+            crate::ui::locale_panel::LocalePanelAction::None => {}
+        }
+    }
+
     pub(super) fn render_playtest_tab(&mut self, ui: &mut egui::Ui) {
         crate::ui::playtest::show_playtest_panel(
             ui,
