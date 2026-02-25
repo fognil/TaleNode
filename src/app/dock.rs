@@ -42,8 +42,8 @@ pub(super) fn default_dock_state() -> DockState<DockTab> {
     let mut state = DockState::new(vec![DockTab::Canvas]);
     let surface = state.main_surface_mut();
 
-    // Split left panel (15%)
-    let [_left, rest] =
+    // Split left panel (15%) — returns [old=Canvas, new=LeftPanel]
+    let [rest, _left] =
         surface.split_left(NodeIndex::root(), 0.15, vec![DockTab::LeftPanel]);
 
     // Split right panel from remaining (inspector + script as tabs, ~22% of total)
