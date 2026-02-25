@@ -3,6 +3,7 @@ pub mod connection;
 mod example_project;
 pub mod graph;
 pub mod graph_diff;
+pub mod locale;
 pub mod group;
 pub mod node;
 pub mod node_types;

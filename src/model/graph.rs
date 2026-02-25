@@ -5,6 +5,7 @@ use uuid::Uuid;
 use super::character::Character;
 use super::connection::Connection;
 use super::group::NodeGroup;
+use super::locale::LocaleSettings;
 use super::node::Node;
 use super::port::{PortDirection, PortId};
 use super::review::{NodeComment, ReviewStatus};
@@ -29,6 +30,8 @@ pub struct DialogueGraph {
     pub comments: Vec<NodeComment>,
     #[serde(default)]
     pub node_tags: HashMap<Uuid, Vec<String>>,
+    #[serde(default)]
+    pub locale: LocaleSettings,
 }
 
 impl Default for DialogueGraph {
@@ -48,6 +51,7 @@ impl DialogueGraph {
             review_statuses: HashMap::new(),
             comments: Vec::new(),
             node_tags: HashMap::new(),
+            locale: LocaleSettings::default(),
         }
     }
 
