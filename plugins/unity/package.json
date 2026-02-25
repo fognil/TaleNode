@@ -1,0 +1,19 @@
+{
+  "name": "com.talenode.dialogue",
+  "version": "1.0.0",
+  "displayName": "TaleNode Dialogue",
+  "description": "Node-based dialogue system runtime and editor tools for TaleNode exported JSON.",
+  "unity": "6000.0",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "keywords": [
+    "dialogue",
+    "narrative",
+    "node-graph",
+    "talenode"
+  ],
+  "author": {
+    "name": "TaleNode"
+  }
+}

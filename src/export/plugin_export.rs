@@ -9,9 +9,9 @@ const GODOT_CFG: &str =
     include_str!("../../plugins/godot/addons/talenode/plugin.cfg");
 
 const UNITY_RUNNER: &str =
-    include_str!("../../plugins/unity/TaleNode/TaleNodeRunner.cs");
+    include_str!("../../plugins/unity/Runtime/TaleNodeRunner.cs");
 const UNITY_EXPR: &str =
-    include_str!("../../plugins/unity/TaleNode/TaleNodeExpression.cs");
+    include_str!("../../plugins/unity/Runtime/TaleNodeExpression.cs");
 
 const UNREAL_RUNNER_H: &str =
     include_str!("../../plugins/unreal/TaleNode/TaleNodeRunner.h");
