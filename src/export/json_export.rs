@@ -1,48 +1,10 @@
-use serde::Serialize;
-
 use crate::model::graph::DialogueGraph;
 
-use super::json_export_helpers::variable_value_to_json;
-
 use super::json_export_helpers::{
-    build_connection_map, build_id_map, export_node_data,
+    build_connection_map, build_id_map, build_string_table, export_node_data,
+    variable_value_to_json,
 };
-
-/// Exported dialogue JSON for game engines.
-#[derive(Debug, Serialize)]
-pub struct ExportedDialogue {
-    pub version: String,
-    pub name: String,
-    pub variables: Vec<ExportedVariable>,
-    pub characters: Vec<ExportedCharacter>,
-    pub nodes: Vec<ExportedNode>,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ExportedVariable {
-    pub name: String,
-    #[serde(rename = "type")]
-    pub var_type: String,
-    pub default: serde_json::Value,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ExportedCharacter {
-    pub id: String,
-    pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub portrait: Option<String>,
-    pub color: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ExportedNode {
-    pub id: String,
-    #[serde(rename = "type")]
-    pub node_type: String,
-    #[serde(flatten)]
-    pub data: serde_json::Value,
-}
+use super::json_export_types::*;
 
 /// Export a DialogueGraph to the game-engine JSON format.
 /// SubGraph nodes are flattened (inlined) so the output is always a flat node array.
@@ -104,15 +66,33 @@ fn build_export(graph: &DialogueGraph, name: &str) -> ExportedDialogue {
         });
     }
 
+    let has_locales = graph.locale.has_extra_locales();
+
     ExportedDialogue {
         version: "1.0".to_string(),
         name: name.to_string(),
+        default_locale: if has_locales {
+            Some(graph.locale.default_locale.clone())
+        } else {
+            None
+        },
+        locales: if has_locales {
+            let mut all = vec![graph.locale.default_locale.clone()];
+            all.extend(graph.locale.extra_locales.clone());
+            Some(all)
+        } else {
+            None
+        },
         variables,
         characters,
         nodes,
+        strings: if has_locales {
+            Some(build_string_table(graph, &id_map))
+        } else {
+            None
+        },
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -368,6 +348,43 @@ mod tests {
         let color = chars[0]["color"].as_str().unwrap();
         assert!(color.starts_with('#'));
         assert_eq!(color.len(), 7);
+    }
+
+    #[test]
+    fn export_with_locales_has_string_table() {
+        use crate::model::node::NodeType;
+
+        let mut graph = DialogueGraph::new();
+        let mut dlg = Node::new_dialogue([0.0, 100.0]);
+        let dlg_uuid8 = dlg.id.to_string()[..8].to_string();
+        if let NodeType::Dialogue(ref mut d) = dlg.node_type {
+            d.text = "Hello!".to_string();
+        }
+        graph.add_node(dlg);
+        graph.locale.add_locale("fr".to_string());
+        graph.locale.set_translation(
+            format!("dlg_{dlg_uuid8}"),
+            "fr".to_string(),
+            "Bonjour!".to_string(),
+        );
+
+        let json = export_json(&graph, "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed["default_locale"], "en");
+        assert!(parsed["locales"].as_array().unwrap().contains(&"fr".into()));
+        assert!(parsed["strings"].is_object());
+        // Find the string entry (readable id = dlg_1)
+        let dlg_entry = &parsed["strings"]["dlg_1"];
+        assert_eq!(dlg_entry["en"], "Hello!");
+        assert_eq!(dlg_entry["fr"], "Bonjour!");
+    }
+
+    #[test]
+    fn export_without_locales_omits_string_table() {
+        let json = export_json(&DialogueGraph::new(), "test").unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert!(parsed.get("default_locale").is_none());
+        assert!(parsed.get("strings").is_none());
     }
 
     #[test]

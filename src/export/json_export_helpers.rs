@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::model::graph::DialogueGraph;
+use crate::model::locale::collect_translatable_strings;
 use crate::model::node::{CompareOp, NodeType, VariableValue};
 
 /// Build a map of Uuid -> readable ID like "start_1", "dlg_2", etc.
@@ -207,7 +208,7 @@ pub fn export_node_data(
                 .collect();
             ("random", serde_json::json!({ "branches": branches }))
         }
-        NodeType::End(d) => ("end", serde_json::json!({ "tag": d.tag })),
+        NodeType::End(d) => ("end", serde_json::json!({ "tag": &d.tag })),
         NodeType::SubGraph(d) => {
             let next = find_next_single(outputs, conn_map, id_map);
             ("subgraph", serde_json::json!({
@@ -216,6 +217,54 @@ pub fn export_node_data(
             }))
         }
     }
+}
+
+/// Build the string table for the exported JSON.
+/// Maps readable IDs to { locale -> text } for all translatable strings.
+pub fn build_string_table(
+    graph: &DialogueGraph,
+    id_map: &HashMap<Uuid, String>,
+) -> serde_json::Value {
+    let locale = &graph.locale;
+    let strings = collect_translatable_strings(graph);
+    let mut table = serde_json::Map::new();
+
+    for ts in &strings {
+        // Map UUID-based key to readable key using node's readable id
+        let readable_prefix = id_map
+            .get(&ts.node_id)
+            .cloned()
+            .unwrap_or_else(|| ts.node_id.to_string());
+        let readable_key = match ts.string_type {
+            crate::model::locale::StringType::Dialogue => readable_prefix,
+            crate::model::locale::StringType::ChoicePrompt => {
+                format!("{readable_prefix}_prompt")
+            }
+            crate::model::locale::StringType::ChoiceOption => {
+                // Extract the index suffix from the UUID-based key (e.g. "opt_abcd1234_0" -> "0")
+                let suffix = ts.key.rsplit('_').next().unwrap_or("0");
+                format!("{readable_prefix}_opt_{suffix}")
+            }
+        };
+
+        let mut locale_map = serde_json::Map::new();
+        // Default locale text
+        locale_map.insert(
+            locale.default_locale.clone(),
+            serde_json::Value::String(ts.default_text.clone()),
+        );
+        // Extra locale translations
+        for loc in &locale.extra_locales {
+            let text = locale
+                .get_translation(&ts.key, loc)
+                .unwrap_or("")
+                .to_string();
+            locale_map.insert(loc.clone(), serde_json::Value::String(text));
+        }
+        table.insert(readable_key, serde_json::Value::Object(locale_map));
+    }
+
+    serde_json::Value::Object(table)
 }
 
 #[cfg(test)]
