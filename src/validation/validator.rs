@@ -26,6 +26,8 @@ pub fn validate(graph: &DialogueGraph) -> Vec<ValidationWarning> {
     check_unreachable_nodes(graph, &mut warnings);
     check_empty_dialogue(graph, &mut warnings);
     check_dead_ends(graph, &mut warnings);
+    super::validator_locale::check_untranslated_strings(graph, &mut warnings);
+    super::validator_locale::check_orphaned_translations(graph, &mut warnings);
     check_subgraph_children(graph, &mut warnings);
 
     warnings
