@@ -1,3 +1,5 @@
+mod async_handlers;
+pub mod async_runtime;
 mod canvas;
 mod confirm;
 mod context_menu;
@@ -96,10 +98,19 @@ pub struct TaleNodeApp {
     locale_new_name: String,
     settings: settings::AppSettings,
     settings_open: bool,
+    #[allow(dead_code)]
+    tokio_runtime: tokio::runtime::Runtime,
+    async_rx: std::sync::mpsc::Receiver<async_runtime::AsyncResult>,
+    #[allow(dead_code)]
+    async_tx: std::sync::mpsc::Sender<async_runtime::AsyncResult>,
+    translation_in_progress: bool,
+    voice_generation_in_progress: bool,
+    available_voices: Vec<async_runtime::VoiceInfo>,
 }
 
 impl TaleNodeApp {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+        let (async_tx, async_rx) = std::sync::mpsc::channel();
         Self {
             graph: {
                 let mut g = DialogueGraph::new();
@@ -149,6 +160,13 @@ impl TaleNodeApp {
             locale_new_name: String::new(),
             settings: settings::AppSettings::load(),
             settings_open: false,
+            tokio_runtime: tokio::runtime::Runtime::new()
+                .expect("Failed to create tokio runtime"),
+            async_rx,
+            async_tx,
+            translation_in_progress: false,
+            voice_generation_in_progress: false,
+            available_voices: Vec::new(),
         }
     }
 
@@ -179,6 +197,9 @@ impl eframe::App for TaleNodeApp {
             self.do_save(false);
             self.status_message = Some(("Auto-saved".to_string(), Instant::now(), false));
         }
+
+        // Poll async results (translation, voice, collab)
+        self.poll_async_results();
 
         // Keyboard shortcuts
         self.handle_keyboard_shortcuts(ctx);
