@@ -1,228 +1,68 @@
 {
   "version": "1.0",
-  "name": "Dragon Quest Example",
+  "name": "Dragon's Lair",
   "graph": {
     "nodes": {
-      "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35": {
-        "id": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
+      "7de3cb62-838b-44d9-b46a-c36b00fce0ad": {
+        "id": "7de3cb62-838b-44d9-b46a-c36b00fce0ad",
         "node_type": {
           "Dialogue": {
-            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
-            "speaker_name": "Merchant",
-            "text": "Here's your sword! Good luck on your quest.",
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "Welcome, {player_name}! I am Elder Aldric of Thornvale.",
             "emotion": "neutral",
             "portrait_override": null,
-            "audio_clip": null,
+            "audio_clip": "audio/elder_01.wav",
             "metadata": {}
           }
         },
         "position": [
-          2200.0,
-          300.0
+          400.0,
+          400.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "15bab2dc-4947-4f1a-9e7d-68adf48d8021",
+            "id": "964d754c-e8f7-459d-8713-1cb1aacd5e10",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "e365d5fb-6c9d-46b3-be06-331d54112289",
+            "id": "374deacd-5e56-48cd-9f15-644645a3ca75",
             "direction": "Output",
             "label": ""
           }
         ]
       },
-      "08457b20-8422-4177-831d-f631d82810ea": {
-        "id": "08457b20-8422-4177-831d-f631d82810ea",
-        "node_type": {
-          "End": {
-            "tag": "no_gold"
-          }
-        },
-        "position": [
-          2200.0,
-          550.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "57064afa-5d50-42ef-a905-70f82a0725f0",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": []
-      },
-      "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b": {
-        "id": "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b",
-        "node_type": {
-          "End": {
-            "tag": "declined"
-          }
-        },
-        "position": [
-          1504.9185,
-          654.7904
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "2b54a1ef-6fa7-4b33-ab2c-f99594fce10d",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": []
-      },
-      "4216a2a0-57b3-4ca4-a3a8-030594dea0d8": {
-        "id": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
-        "node_type": {
-          "Dialogue": {
-            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
-            "speaker_name": "Merchant",
-            "text": "Sorry, you don't have enough gold. Come back when you have 30 gold.",
-            "emotion": "sad",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
-          }
-        },
-        "position": [
-          1850.0,
-          550.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "59546216-dcc4-47c0-911a-608f2d27915a",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "523b7098-c24f-439f-83ef-7c329fe7e699",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "bae46683-9995-4b7f-959c-323a5041dc27": {
-        "id": "bae46683-9995-4b7f-959c-323a5041dc27",
-        "node_type": {
-          "Dialogue": {
-            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
-            "speaker_name": "Village Elder",
-            "text": "You are brave indeed! Head north through the forest. Be careful!",
-            "emotion": "happy",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
-          }
-        },
-        "position": [
-          1500.0,
-          150.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "94916c6f-28d8-48ce-9ae4-00f39305b9a5",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "1f8fc1f8-7157-490c-8939-e13cd637ce7b",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "05034862-26bc-45c9-ba09-16dfa9a08f22": {
-        "id": "05034862-26bc-45c9-ba09-16dfa9a08f22",
-        "node_type": {
-          "End": {
-            "tag": "quest_accepted"
-          }
-        },
-        "position": [
-          1850.0,
-          150.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "11ee0276-263f-49bc-a711-bc60813c62b9",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": []
-      },
-      "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036": {
-        "id": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
-        "node_type": {
-          "Dialogue": {
-            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
-            "speaker_name": "Village Elder",
-            "text": "I understand. Safe travels, stranger.",
-            "emotion": "sad",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
-          }
-        },
-        "position": [
-          1150.0,
-          650.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "d3af1784-3555-4a52-87b7-fffb8af7c4ca",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "cd090199-1f95-4cf9-8db6-7cefcde63f3c",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e": {
-        "id": "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e",
+      "78620b5d-8d34-4e75-9139-7c394662f09d": {
+        "id": "78620b5d-8d34-4e75-9139-7c394662f09d",
         "node_type": "Start",
         "position": [
           100.0,
-          300.0
+          400.0
         ],
         "collapsed": false,
         "inputs": [],
         "outputs": [
           {
-            "id": "5c2cb39b-2c52-4975-b842-d111bcd8381c",
+            "id": "d5b663d9-1f66-4405-b094-6abb4af798b9",
             "direction": "Output",
             "label": ""
           }
         ]
       },
-      "288b2675-c68e-4c7f-b921-ab8323ca841f": {
-        "id": "288b2675-c68e-4c7f-b921-ab8323ca841f",
+      "4968a99b-ad78-43dd-a0f7-55a25b7ccfbf": {
+        "id": "4968a99b-ad78-43dd-a0f7-55a25b7ccfbf",
         "node_type": {
           "Event": {
             "actions": [
               {
-                "action_type": "SetVariable",
-                "key": "quest_started",
+                "action_type": {
+                  "Custom": "knowledge_gained"
+                },
+                "key": "dragon_lore",
                 "value": {
                   "Bool": true
                 }
@@ -231,96 +71,351 @@
           }
         },
         "position": [
-          1150.0,
-          150.0
+          1400.0,
+          650.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "4e95744a-d80d-49de-9a52-0f08ed94bb3e",
+            "id": "fa7869e8-f8f1-4740-8654-a3d023917249",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "c0a2e41b-50e7-4aba-9279-5bff032c2389",
+            "id": "b12cd9fb-4d73-4f74-95d1-371f58457a5d",
             "direction": "Output",
             "label": ""
           }
         ]
       },
-      "96ac3772-af94-4f6f-b459-3a30e8c4695f": {
-        "id": "96ac3772-af94-4f6f-b459-3a30e8c4695f",
+      "d662afd3-ac0f-422f-89f8-a140db9e1350": {
+        "id": "d662afd3-ac0f-422f-89f8-a140db9e1350",
         "node_type": {
           "Dialogue": {
-            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
-            "speaker_name": "Village Elder",
-            "text": "Welcome, traveler! Our village is in danger. A dragon has been spotted near the northern caves.",
-            "emotion": "worried",
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "I understand. Not everyone is meant for such dangers. Safe travels, stranger.",
+            "emotion": "sad",
             "portrait_override": null,
             "audio_clip": null,
             "metadata": {}
           }
         },
         "position": [
-          400.0,
-          300.0
+          1400.0,
+          950.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "04e445cc-14d8-47e3-b9ca-cd2d54f1cc22",
+            "id": "4357de6b-0c7f-4c37-b82a-05c92c0783ee",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "c4a6189f-05ae-4cf7-9e70-7f588b60d12f",
+            "id": "603b7212-ffe3-4c92-bfc4-e05ba5e5e996",
             "direction": "Output",
             "label": ""
           }
         ]
       },
-      "c773d629-f0ff-4cd8-abae-79b8386b71a8": {
-        "id": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
+      "7b13257e-bc39-4606-b922-7ba4106982aa": {
+        "id": "7b13257e-bc39-4606-b922-7ba4106982aa",
         "node_type": {
-          "Condition": {
-            "variable_name": "gold",
-            "operator": "Gte",
-            "value": {
-              "Int": 30
-            }
+          "Dialogue": {
+            "speaker_id": "277dd739-64dc-46b7-822b-48886818ec08",
+            "speaker_name": "Merchant Bria",
+            "text": "I'm sorry, friend. You'll need at least 30 gold for a proper sword. Come back when you've earned some more.",
+            "emotion": "sad",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
           }
         },
         "position": [
-          1505.0098,
-          394.09012
+          2000.0,
+          450.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "75ad568f-b83f-45ed-9619-fd0217db105c",
+            "id": "82614a75-50c7-49eb-9c76-b5e558655cb6",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "a405a422-77ce-4600-87f5-80c53f9c72e0",
+            "id": "f7d40f12-1a34-4a72-88d7-df666b321643",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "0f89b676-561a-4f13-b3e0-167e8a3b5e84": {
+        "id": "0f89b676-561a-4f13-b3e0-167e8a3b5e84",
+        "node_type": {
+          "Choice": {
+            "prompt": "How will you respond to the Elder's plea?",
+            "choices": [
+              {
+                "id": "e3cdb173-1e4a-4d36-b335-a2b6dfa9f9ff",
+                "text": "I'll slay the dragon for you!",
+                "condition": null
+              },
+              {
+                "id": "842f4c6e-8fda-40ce-92c1-f895cf31e7b6",
+                "text": "I need to buy supplies first.",
+                "condition": null
+              },
+              {
+                "id": "1c0cebfc-7006-41b3-9283-6dceae82de0d",
+                "text": "Tell me what you know about this dragon.",
+                "condition": {
+                  "variable_name": "reputation",
+                  "operator": "Gte",
+                  "value": {
+                    "Float": 0.3
+                  }
+                }
+              },
+              {
+                "id": "ae6b05a8-0120-4205-be98-118ef280c55a",
+                "text": "I'm not interested. Goodbye.",
+                "condition": null
+              }
+            ]
+          }
+        },
+        "position": [
+          1050.0,
+          400.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "85f00513-b5d8-4c3b-9c19-89bec61d0cde",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "65df6c5f-35a7-41d1-83b4-cc47a5ba6211",
+            "direction": "Output",
+            "label": "I'll slay the dragon for you!"
+          },
+          {
+            "id": "f596c620-9b04-405d-88ca-4d52bbcc30e1",
+            "direction": "Output",
+            "label": "I need to buy supplies first."
+          },
+          {
+            "id": "312443e6-6a57-4ded-9e8f-bef100f51525",
+            "direction": "Output",
+            "label": "Tell me what you know about this dragon."
+          },
+          {
+            "id": "e9ada2cc-e0d4-4617-b677-48b6cbd32f68",
+            "direction": "Output",
+            "label": "I'm not interested. Goodbye."
+          }
+        ]
+      },
+      "3277316d-48e8-4e41-a213-46ec8e8987f1": {
+        "id": "3277316d-48e8-4e41-a213-46ec8e8987f1",
+        "node_type": {
+          "Condition": {
+            "variable_name": "has_sword",
+            "operator": "Eq",
+            "value": {
+              "Bool": true
+            }
+          }
+        },
+        "position": [
+          2000.0,
+          100.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "42a8ee2c-2374-4b75-8e60-ebce84eb5637",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "07b8e20b-cfed-4ca2-9fa9-b020c5497396",
             "direction": "Output",
             "label": "True"
           },
           {
-            "id": "09dc3c24-e1ce-41b3-951c-ccd61ae43ee5",
+            "id": "b6195b07-92d6-480b-9d73-7a5a6f8f8213",
             "direction": "Output",
             "label": "False"
           }
         ]
       },
-      "8b3352ac-50f3-40d0-8df3-08867c3dac60": {
-        "id": "8b3352ac-50f3-40d0-8df3-08867c3dac60",
+      "cfdd674b-e237-452f-ba68-fcebd3c5d226": {
+        "id": "cfdd674b-e237-452f-ba68-fcebd3c5d226",
+        "node_type": {
+          "Event": {
+            "actions": [
+              {
+                "action_type": "SetVariable",
+                "key": "quest_accepted",
+                "value": {
+                  "Bool": true
+                }
+              },
+              {
+                "action_type": "PlaySound",
+                "key": "quest_accept.wav",
+                "value": {
+                  "Bool": true
+                }
+              }
+            ]
+          }
+        },
+        "position": [
+          1400.0,
+          100.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "9616b370-322b-48c4-821a-88a868692a8b",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "71027d64-42bb-4d97-85fa-39e33328995f",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "ca6fcc41-2812-473d-a8d9-dbe47dfb1970": {
+        "id": "ca6fcc41-2812-473d-a8d9-dbe47dfb1970",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "A terrible dragon has been sighted near the northern caves. Our village lives in fear. We need someone brave enough to face it.",
+            "emotion": "scared",
+            "portrait_override": "portraits/elder_worried.png",
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          700.0,
+          400.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "d9675a21-ab65-4538-986f-35a2d71a21b8",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "768737ba-00e5-40f2-b904-3879286d3a1f",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "6145bdff-ce28-4272-bcfd-71cb4bd869c5": {
+        "id": "6145bdff-ce28-4272-bcfd-71cb4bd869c5",
+        "node_type": {
+          "End": {
+            "tag": "need_supplies"
+          }
+        },
+        "position": [
+          2600.0,
+          200.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "7c9e4928-f184-431b-ba9d-4c8286614927",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "ff2c48e6-7511-4255-af9a-60c6c80fc93a": {
+        "id": "ff2c48e6-7511-4255-af9a-60c6c80fc93a",
+        "node_type": {
+          "End": {
+            "tag": "bought_supplies"
+          }
+        },
+        "position": [
+          2600.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "e2ef5e89-5178-4c6f-b7b8-b9e7c996418c",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "c72ef771-c08c-4383-8463-936bbcf6908f": {
+        "id": "c72ef771-c08c-4383-8463-936bbcf6908f",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "Bless you, brave soul! The village will remember your courage. Head north through the Darkwood Forest.",
+            "emotion": "happy",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {
+              "quest_hook": "true"
+            }
+          }
+        },
+        "position": [
+          1700.0,
+          100.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "e41ca423-66a7-47c7-a5f2-64e35803b3ee",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "a506651a-527d-4df7-b71e-a6a1a7c214a8",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "dbf093d3-99ea-4dc2-b47e-7479e9c29dc1": {
+        "id": "dbf093d3-99ea-4dc2-b47e-7479e9c29dc1",
         "node_type": {
           "Event": {
             "actions": [
@@ -332,42 +427,56 @@
                 }
               },
               {
-                "action_type": "SetVariable",
-                "key": "s",
+                "action_type": "AddItem",
+                "key": "iron_sword",
                 "value": {
-                  "Bool": false
+                  "Int": 1
+                }
+              },
+              {
+                "action_type": "RemoveItem",
+                "key": "old_dagger",
+                "value": {
+                  "Int": 1
+                }
+              },
+              {
+                "action_type": "PlaySound",
+                "key": "purchase.wav",
+                "value": {
+                  "Bool": true
                 }
               }
             ]
           }
         },
         "position": [
-          1835.0891,
-          305.3452
+          2000.0,
+          300.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "767ac9c7-cc77-47f5-9413-43e6495987ce",
+            "id": "c2561cf8-e2fc-41f6-95b5-d60556b12309",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "5204af07-4dcd-4677-9ad7-b35fbc4e39af",
+            "id": "8880981b-12be-46cf-9fb6-d4060f29f4c5",
             "direction": "Output",
             "label": ""
           }
         ]
       },
-      "ef7f14f4-57e5-47dc-8936-b4464627e039": {
-        "id": "ef7f14f4-57e5-47dc-8936-b4464627e039",
+      "72728cd4-3b20-452e-9789-d2b40d32698f": {
+        "id": "72728cd4-3b20-452e-9789-d2b40d32698f",
         "node_type": {
           "Dialogue": {
-            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
-            "speaker_name": "Merchant",
-            "text": "Welcome to my shop! I have swords and potions. What do you need?",
+            "speaker_id": "277dd739-64dc-46b7-822b-48886818ec08",
+            "speaker_name": "Merchant Bria",
+            "text": "Excellent choice! This iron sword has served many an adventurer well. Good luck out there!",
             "emotion": "happy",
             "portrait_override": null,
             "audio_clip": null,
@@ -375,212 +484,729 @@
           }
         },
         "position": [
-          1150.0,
-          400.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "311d68fb-2fc9-44d3-abe7-2cffdb3b8409",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "4b3d3249-daf3-428e-b223-aee03c60275b",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "3e985f2c-fe71-4ce3-b6f4-0540ff452f36": {
-        "id": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
-        "node_type": {
-          "Choice": {
-            "prompt": "What will you do?",
-            "choices": [
-              {
-                "id": "7d0efd82-5235-4f75-be9e-2bc11676d445",
-                "text": "I'll help you!",
-                "condition": null
-              },
-              {
-                "id": "74bfacf6-a614-4037-a5ac-223d753571b1",
-                "text": "I need supplies first.",
-                "condition": null
-              },
-              {
-                "id": "ac4a1fa6-1ba8-4f69-bb3c-613f089d189e",
-                "text": "Not interested.",
-                "condition": null
-              }
-            ]
-          }
-        },
-        "position": [
-          750.0,
+          2300.0,
           300.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "ddb5cdc6-d7e6-49b2-9137-c4daee3fd8d8",
+            "id": "e120d7c8-d815-43a3-aa80-a1adc921fedd",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "b148b657-640e-4f20-8a3a-50edd2603526",
+            "id": "cfe56032-46e8-4b68-80d5-a53e78c9ca4f",
             "direction": "Output",
-            "label": "I'll help you!"
-          },
-          {
-            "id": "1d8e6c3d-8063-49a2-aa04-bf00963bf881",
-            "direction": "Output",
-            "label": "I need supplies first."
-          },
-          {
-            "id": "10088c1e-4755-4c63-b3ba-bcb9b19e02c0",
-            "direction": "Output",
-            "label": "Not interested."
+            "label": ""
           }
         ]
       },
-      "ff70c236-9526-44ae-b5a8-f96b2c2fdac5": {
-        "id": "ff70c236-9526-44ae-b5a8-f96b2c2fdac5",
+      "e072f4a5-18bb-4eff-80ca-982d3dfcb876": {
+        "id": "e072f4a5-18bb-4eff-80ca-982d3dfcb876",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "The dragon breathes fire hot enough to melt stone. Whatever you do, don't let it corner you.",
+            "emotion": "scared",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          2000.0,
+          550.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "179fe9e4-5e41-47e7-b55f-10230bd41631",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "f76f2b93-63f5-4b25-a2b6-f578af6f16af",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "ba44d489-a0cb-41f1-8a04-b073a083b994": {
+        "id": "ba44d489-a0cb-41f1-8a04-b073a083b994",
         "node_type": {
           "End": {
-            "tag": "bought_supplies"
+            "tag": "rumor_treasure"
           }
         },
         "position": [
-          2550.0,
-          300.0
+          2300.0,
+          650.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "a7e651dc-59bb-4412-bc61-2709b1697ffd",
+            "id": "3ac4327b-782c-4ceb-b081-f4fdafbc6e58",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": []
+      },
+      "3deb0246-ede0-4760-8f13-88417e99038a": {
+        "id": "3deb0246-ede0-4760-8f13-88417e99038a",
+        "node_type": {
+          "Condition": {
+            "variable_name": "gold",
+            "operator": "Gte",
+            "value": {
+              "Int": 30
+            }
+          }
+        },
+        "position": [
+          1700.0,
+          350.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "2132c42b-1b13-4aef-bd2b-15a0fb6525a8",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "9c82013e-c1e8-43bf-98de-9f609b8bcea3",
+            "direction": "Output",
+            "label": "True"
+          },
+          {
+            "id": "1e3019ba-820d-40f6-be05-3e9cfcf659e1",
+            "direction": "Output",
+            "label": "False"
+          }
+        ]
+      },
+      "e3b45326-6d36-4054-88ad-0d06653aac3c": {
+        "id": "e3b45326-6d36-4054-88ad-0d06653aac3c",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "I've heard that dragon once destroyed an entire garrison. The soldiers never stood a chance!",
+            "emotion": "angry",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          2000.0,
+          750.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "f42be546-7bd1-4d65-ac27-fa3a8a609c4f",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "62297a2e-2189-437e-9276-b09c1d5a1dbf",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "229ee98f-2447-4c62-8d00-9440b65d0871": {
+        "id": "229ee98f-2447-4c62-8d00-9440b65d0871",
+        "node_type": {
+          "End": {
+            "tag": "no_gold"
+          }
+        },
+        "position": [
+          2300.0,
+          450.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "d827f01a-6cbf-4e25-a434-d052a3a6c0fd",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "0c457bc7-4798-47f2-ba3c-42a3e54ba3da": {
+        "id": "0c457bc7-4798-47f2-ba3c-42a3e54ba3da",
+        "node_type": {
+          "End": {
+            "tag": "quest_begun"
+          }
+        },
+        "position": [
+          2600.0,
+          0.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "6ebb64b7-8e5d-4446-a725-e1be5ca62b20",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "8845e62f-89d0-4eaa-99d4-87d0c1ba1ce4": {
+        "id": "8845e62f-89d0-4eaa-99d4-87d0c1ba1ce4",
+        "node_type": {
+          "Random": {
+            "branches": [
+              {
+                "id": "fcbee501-3499-47b3-89ef-fcf1a46a8caa",
+                "weight": 0.4
+              },
+              {
+                "id": "56a4328a-77d3-418b-8885-acaa1c899553",
+                "weight": 0.35
+              },
+              {
+                "id": "74ab3f11-4395-4331-b50f-5bad21fd5e54",
+                "weight": 0.25
+              }
+            ]
+          }
+        },
+        "position": [
+          1700.0,
+          650.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "f8ac00d5-e106-49c4-ad1c-a6995edfa6aa",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "eb0e990c-76ab-418e-8334-cd57f97180f9",
+            "direction": "Output",
+            "label": "40%"
+          },
+          {
+            "id": "8fedf31c-a09c-49ff-a87c-035927902833",
+            "direction": "Output",
+            "label": "35%"
+          },
+          {
+            "id": "e8ef897e-80f5-4b88-b670-1fbda08c5266",
+            "direction": "Output",
+            "label": "25%"
+          }
+        ]
+      },
+      "4fdde57b-1824-43e4-a9bb-83609c6d06d8": {
+        "id": "4fdde57b-1824-43e4-a9bb-83609c6d06d8",
+        "node_type": {
+          "End": {
+            "tag": "rumor_fire"
+          }
+        },
+        "position": [
+          2300.0,
+          550.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "d838abc5-d086-491d-8e8a-adb69bafc3d3",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "eee00a1f-a32c-4902-ad69-f2c3e4f007fd": {
+        "id": "eee00a1f-a32c-4902-ad69-f2c3e4f007fd",
+        "node_type": {
+          "SubGraph": {
+            "name": "Forest Path",
+            "child_graph": {
+              "nodes": {
+                "4b307183-36a0-4a0b-a630-a4a36bbd3a82": {
+                  "id": "4b307183-36a0-4a0b-a630-a4a36bbd3a82",
+                  "node_type": "Start",
+                  "position": [
+                    100.0,
+                    200.0
+                  ],
+                  "collapsed": false,
+                  "inputs": [],
+                  "outputs": [
+                    {
+                      "id": "c95aba5e-c6a2-4727-8f53-bb6b1e437a7e",
+                      "direction": "Output",
+                      "label": ""
+                    }
+                  ]
+                },
+                "43389e34-bfba-4070-b804-0c34f9072a93": {
+                  "id": "43389e34-bfba-4070-b804-0c34f9072a93",
+                  "node_type": {
+                    "End": {
+                      "tag": "forest_cleared"
+                    }
+                  },
+                  "position": [
+                    700.0,
+                    200.0
+                  ],
+                  "collapsed": false,
+                  "inputs": [
+                    {
+                      "id": "89ebcaeb-18a8-4ce8-84f7-1169e079c662",
+                      "direction": "Input",
+                      "label": ""
+                    }
+                  ],
+                  "outputs": []
+                },
+                "35601057-a9d7-4219-9cf2-cd7f46d9ddd6": {
+                  "id": "35601057-a9d7-4219-9cf2-cd7f46d9ddd6",
+                  "node_type": {
+                    "Dialogue": {
+                      "speaker_id": "e636f4ba-895f-4657-8479-1e629ecec753",
+                      "speaker_name": "Captain Rook",
+                      "text": "Halt! The forest ahead is dangerous. Stay on the marked path and watch for the dragon's patrols.",
+                      "emotion": "neutral",
+                      "portrait_override": null,
+                      "audio_clip": "audio/guard_01.wav",
+                      "metadata": {}
+                    }
+                  },
+                  "position": [
+                    400.0,
+                    200.0
+                  ],
+                  "collapsed": false,
+                  "inputs": [
+                    {
+                      "id": "cff40136-116f-42f6-8753-c44f3ec735f2",
+                      "direction": "Input",
+                      "label": ""
+                    }
+                  ],
+                  "outputs": [
+                    {
+                      "id": "f297d98a-8018-4707-97f1-4f170c8cd6a3",
+                      "direction": "Output",
+                      "label": ""
+                    }
+                  ]
+                }
+              },
+              "connections": [
+                {
+                  "id": "33ebd5e7-cc4c-49c1-aafc-2a788bd1df60",
+                  "from_node": "4b307183-36a0-4a0b-a630-a4a36bbd3a82",
+                  "from_port": "c95aba5e-c6a2-4727-8f53-bb6b1e437a7e",
+                  "to_node": "35601057-a9d7-4219-9cf2-cd7f46d9ddd6",
+                  "to_port": "cff40136-116f-42f6-8753-c44f3ec735f2"
+                },
+                {
+                  "id": "d81a6bb6-568f-4fb2-bff9-75560e317fce",
+                  "from_node": "35601057-a9d7-4219-9cf2-cd7f46d9ddd6",
+                  "from_port": "f297d98a-8018-4707-97f1-4f170c8cd6a3",
+                  "to_node": "43389e34-bfba-4070-b804-0c34f9072a93",
+                  "to_port": "89ebcaeb-18a8-4ce8-84f7-1169e079c662"
+                }
+              ],
+              "variables": [],
+              "characters": [],
+              "groups": [],
+              "review_statuses": {},
+              "comments": [],
+              "node_tags": {}
+            }
+          }
+        },
+        "position": [
+          2300.0,
+          0.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "d098ec0d-e556-49e8-8f68-23d351fe50cb",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "764682df-cf0c-4e79-8f86-4461e4b45f1c",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "61dcc908-eb8f-4130-ad26-ae4f64d77325": {
+        "id": "61dcc908-eb8f-4130-ad26-ae4f64d77325",
+        "node_type": {
+          "End": {
+            "tag": "rumor_water"
+          }
+        },
+        "position": [
+          2300.0,
+          750.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "e3c5f33a-ad1c-4f53-b484-9e8cae016cb8",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "d31723a5-cdd9-42f9-84db-ecd4a0e316e8": {
+        "id": "d31723a5-cdd9-42f9-84db-ecd4a0e316e8",
+        "node_type": {
+          "End": {
+            "tag": "declined"
+          }
+        },
+        "position": [
+          1700.0,
+          950.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "957cd0c2-61d2-4e62-a272-6ce80125837d",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "591e8fd8-1302-42b5-9920-f56ee5510f02": {
+        "id": "591e8fd8-1302-42b5-9920-f56ee5510f02",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "You may want to visit Bria's shop first. A good sword could save your life against the dragon.",
+            "emotion": "neutral",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          2300.0,
+          200.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "7465693f-18d9-464e-becd-b065cbddc7b7",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "76000a33-62fa-4acf-a4af-e7ed5d2612d0",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "135773a4-3d64-421d-bf7c-525a96f48b64": {
+        "id": "135773a4-3d64-421d-bf7c-525a96f48b64",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "speaker_name": "Elder Aldric",
+            "text": "They say the dragon sits atop a mountain of gold and jewels. Perhaps that's worth the risk?",
+            "emotion": "surprised",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          2000.0,
+          650.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "9c060c50-fefc-4995-8142-7b887da818eb",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "d95c05a7-5e18-4a5e-b55b-0fc602153b2f",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "12352a17-7b29-4ebc-b13f-4f8e8c4aba3a": {
+        "id": "12352a17-7b29-4ebc-b13f-4f8e8c4aba3a",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "277dd739-64dc-46b7-822b-48886818ec08",
+            "speaker_name": "Merchant Bria",
+            "text": "Welcome to Bria's Armory! I have the finest blades in Thornvale. What catches your eye?",
+            "emotion": "happy",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1400.0,
+          350.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "c7609c6b-2b56-4d25-9bd7-3eb5d54f2d10",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "e6a66c96-5d30-4474-b627-c1a44fbbd537",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
       }
     },
     "connections": [
       {
-        "id": "edeb2889-1bb1-4aa4-8dcf-df990d0b7885",
-        "from_node": "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e",
-        "from_port": "5c2cb39b-2c52-4975-b842-d111bcd8381c",
-        "to_node": "96ac3772-af94-4f6f-b459-3a30e8c4695f",
-        "to_port": "04e445cc-14d8-47e3-b9ca-cd2d54f1cc22"
+        "id": "5c302307-2268-48b9-a464-45a3975e533e",
+        "from_node": "78620b5d-8d34-4e75-9139-7c394662f09d",
+        "from_port": "d5b663d9-1f66-4405-b094-6abb4af798b9",
+        "to_node": "7de3cb62-838b-44d9-b46a-c36b00fce0ad",
+        "to_port": "964d754c-e8f7-459d-8713-1cb1aacd5e10"
       },
       {
-        "id": "e18909f9-dac4-4858-8274-8c3a660e1c33",
-        "from_node": "96ac3772-af94-4f6f-b459-3a30e8c4695f",
-        "from_port": "c4a6189f-05ae-4cf7-9e70-7f588b60d12f",
-        "to_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
-        "to_port": "ddb5cdc6-d7e6-49b2-9137-c4daee3fd8d8"
+        "id": "bdda84a4-5c97-4af2-8116-474c88eeacde",
+        "from_node": "7de3cb62-838b-44d9-b46a-c36b00fce0ad",
+        "from_port": "374deacd-5e56-48cd-9f15-644645a3ca75",
+        "to_node": "ca6fcc41-2812-473d-a8d9-dbe47dfb1970",
+        "to_port": "d9675a21-ab65-4538-986f-35a2d71a21b8"
       },
       {
-        "id": "2011c5e3-68cc-4c9d-87f3-56a557d625ce",
-        "from_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
-        "from_port": "b148b657-640e-4f20-8a3a-50edd2603526",
-        "to_node": "288b2675-c68e-4c7f-b921-ab8323ca841f",
-        "to_port": "4e95744a-d80d-49de-9a52-0f08ed94bb3e"
+        "id": "1016b6a0-e00e-4c1c-b3e0-4983b370a2dc",
+        "from_node": "ca6fcc41-2812-473d-a8d9-dbe47dfb1970",
+        "from_port": "768737ba-00e5-40f2-b904-3879286d3a1f",
+        "to_node": "0f89b676-561a-4f13-b3e0-167e8a3b5e84",
+        "to_port": "85f00513-b5d8-4c3b-9c19-89bec61d0cde"
       },
       {
-        "id": "a97fd8c2-56a1-47c6-b04d-384b79078247",
-        "from_node": "288b2675-c68e-4c7f-b921-ab8323ca841f",
-        "from_port": "c0a2e41b-50e7-4aba-9279-5bff032c2389",
-        "to_node": "bae46683-9995-4b7f-959c-323a5041dc27",
-        "to_port": "94916c6f-28d8-48ce-9ae4-00f39305b9a5"
+        "id": "d9b22974-3e44-4ef2-9d61-636c83aa4cd7",
+        "from_node": "0f89b676-561a-4f13-b3e0-167e8a3b5e84",
+        "from_port": "65df6c5f-35a7-41d1-83b4-cc47a5ba6211",
+        "to_node": "cfdd674b-e237-452f-ba68-fcebd3c5d226",
+        "to_port": "9616b370-322b-48c4-821a-88a868692a8b"
       },
       {
-        "id": "4447bf1c-2c5a-4184-94d5-f22934db1160",
-        "from_node": "bae46683-9995-4b7f-959c-323a5041dc27",
-        "from_port": "1f8fc1f8-7157-490c-8939-e13cd637ce7b",
-        "to_node": "05034862-26bc-45c9-ba09-16dfa9a08f22",
-        "to_port": "11ee0276-263f-49bc-a711-bc60813c62b9"
+        "id": "4287ab4c-9c2f-4de0-8934-d1b38c8f20cc",
+        "from_node": "0f89b676-561a-4f13-b3e0-167e8a3b5e84",
+        "from_port": "f596c620-9b04-405d-88ca-4d52bbcc30e1",
+        "to_node": "12352a17-7b29-4ebc-b13f-4f8e8c4aba3a",
+        "to_port": "c7609c6b-2b56-4d25-9bd7-3eb5d54f2d10"
       },
       {
-        "id": "41a3f635-1910-4734-8020-d2e82831394c",
-        "from_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
-        "from_port": "1d8e6c3d-8063-49a2-aa04-bf00963bf881",
-        "to_node": "ef7f14f4-57e5-47dc-8936-b4464627e039",
-        "to_port": "311d68fb-2fc9-44d3-abe7-2cffdb3b8409"
+        "id": "a84c71e1-7e30-4a1b-9561-30bf5c638161",
+        "from_node": "0f89b676-561a-4f13-b3e0-167e8a3b5e84",
+        "from_port": "312443e6-6a57-4ded-9e8f-bef100f51525",
+        "to_node": "4968a99b-ad78-43dd-a0f7-55a25b7ccfbf",
+        "to_port": "fa7869e8-f8f1-4740-8654-a3d023917249"
       },
       {
-        "id": "47ae9bb6-3e50-4ed8-af6f-ec162783156f",
-        "from_node": "ef7f14f4-57e5-47dc-8936-b4464627e039",
-        "from_port": "4b3d3249-daf3-428e-b223-aee03c60275b",
-        "to_node": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
-        "to_port": "75ad568f-b83f-45ed-9619-fd0217db105c"
+        "id": "22356e9e-9ee2-4212-ae60-8212bcb5fb1d",
+        "from_node": "0f89b676-561a-4f13-b3e0-167e8a3b5e84",
+        "from_port": "e9ada2cc-e0d4-4617-b677-48b6cbd32f68",
+        "to_node": "d662afd3-ac0f-422f-89f8-a140db9e1350",
+        "to_port": "4357de6b-0c7f-4c37-b82a-05c92c0783ee"
       },
       {
-        "id": "8825a22b-9927-40f4-89b1-45dc2054b8f1",
-        "from_node": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
-        "from_port": "a405a422-77ce-4600-87f5-80c53f9c72e0",
-        "to_node": "8b3352ac-50f3-40d0-8df3-08867c3dac60",
-        "to_port": "767ac9c7-cc77-47f5-9413-43e6495987ce"
+        "id": "6f3ec371-15fa-478f-9792-a0775c4a4a7f",
+        "from_node": "cfdd674b-e237-452f-ba68-fcebd3c5d226",
+        "from_port": "71027d64-42bb-4d97-85fa-39e33328995f",
+        "to_node": "c72ef771-c08c-4383-8463-936bbcf6908f",
+        "to_port": "e41ca423-66a7-47c7-a5f2-64e35803b3ee"
       },
       {
-        "id": "00384651-0324-4af9-a6b4-355c97351958",
-        "from_node": "8b3352ac-50f3-40d0-8df3-08867c3dac60",
-        "from_port": "5204af07-4dcd-4677-9ad7-b35fbc4e39af",
-        "to_node": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
-        "to_port": "15bab2dc-4947-4f1a-9e7d-68adf48d8021"
+        "id": "28b0ffbe-60a0-41fb-a3e5-1dedc5d0c11f",
+        "from_node": "c72ef771-c08c-4383-8463-936bbcf6908f",
+        "from_port": "a506651a-527d-4df7-b71e-a6a1a7c214a8",
+        "to_node": "3277316d-48e8-4e41-a213-46ec8e8987f1",
+        "to_port": "42a8ee2c-2374-4b75-8e60-ebce84eb5637"
       },
       {
-        "id": "ef4f2766-d485-44c3-9449-5689ce1cb048",
-        "from_node": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
-        "from_port": "e365d5fb-6c9d-46b3-be06-331d54112289",
-        "to_node": "ff70c236-9526-44ae-b5a8-f96b2c2fdac5",
-        "to_port": "a7e651dc-59bb-4412-bc61-2709b1697ffd"
+        "id": "10689c33-300f-4e4e-a57d-9fa4e753de72",
+        "from_node": "3277316d-48e8-4e41-a213-46ec8e8987f1",
+        "from_port": "07b8e20b-cfed-4ca2-9fa9-b020c5497396",
+        "to_node": "eee00a1f-a32c-4902-ad69-f2c3e4f007fd",
+        "to_port": "d098ec0d-e556-49e8-8f68-23d351fe50cb"
       },
       {
-        "id": "8a03e535-b4ae-4baf-aa85-05eebbe38260",
-        "from_node": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
-        "from_port": "09dc3c24-e1ce-41b3-951c-ccd61ae43ee5",
-        "to_node": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
-        "to_port": "59546216-dcc4-47c0-911a-608f2d27915a"
+        "id": "adf6cad7-7184-41da-8876-2438dc7b6bd0",
+        "from_node": "3277316d-48e8-4e41-a213-46ec8e8987f1",
+        "from_port": "b6195b07-92d6-480b-9d73-7a5a6f8f8213",
+        "to_node": "591e8fd8-1302-42b5-9920-f56ee5510f02",
+        "to_port": "7465693f-18d9-464e-becd-b065cbddc7b7"
       },
       {
-        "id": "098f9abe-6e2f-4152-be05-4d6eb1846450",
-        "from_node": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
-        "from_port": "523b7098-c24f-439f-83ef-7c329fe7e699",
-        "to_node": "08457b20-8422-4177-831d-f631d82810ea",
-        "to_port": "57064afa-5d50-42ef-a905-70f82a0725f0"
+        "id": "65c1b334-e2b8-495b-a912-e927e2e209be",
+        "from_node": "eee00a1f-a32c-4902-ad69-f2c3e4f007fd",
+        "from_port": "764682df-cf0c-4e79-8f86-4461e4b45f1c",
+        "to_node": "0c457bc7-4798-47f2-ba3c-42a3e54ba3da",
+        "to_port": "6ebb64b7-8e5d-4446-a725-e1be5ca62b20"
       },
       {
-        "id": "39d2706b-dc9f-4bed-af44-d42deeb701a4",
-        "from_node": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
-        "from_port": "10088c1e-4755-4c63-b3ba-bcb9b19e02c0",
-        "to_node": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
-        "to_port": "d3af1784-3555-4a52-87b7-fffb8af7c4ca"
+        "id": "72ad74b0-2d07-477c-9e16-d981971680be",
+        "from_node": "591e8fd8-1302-42b5-9920-f56ee5510f02",
+        "from_port": "76000a33-62fa-4acf-a4af-e7ed5d2612d0",
+        "to_node": "6145bdff-ce28-4272-bcfd-71cb4bd869c5",
+        "to_port": "7c9e4928-f184-431b-ba9d-4c8286614927"
       },
       {
-        "id": "f4fa08c7-8f4f-4c84-8e0f-330b619dd8c0",
-        "from_node": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
-        "from_port": "cd090199-1f95-4cf9-8db6-7cefcde63f3c",
-        "to_node": "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b",
-        "to_port": "2b54a1ef-6fa7-4b33-ab2c-f99594fce10d"
+        "id": "6260abc7-7049-4b3c-b188-52af95fd6f52",
+        "from_node": "12352a17-7b29-4ebc-b13f-4f8e8c4aba3a",
+        "from_port": "e6a66c96-5d30-4474-b627-c1a44fbbd537",
+        "to_node": "3deb0246-ede0-4760-8f13-88417e99038a",
+        "to_port": "2132c42b-1b13-4aef-bd2b-15a0fb6525a8"
+      },
+      {
+        "id": "34abbfba-a15e-433a-bcd8-fb80cf3bdad3",
+        "from_node": "3deb0246-ede0-4760-8f13-88417e99038a",
+        "from_port": "9c82013e-c1e8-43bf-98de-9f609b8bcea3",
+        "to_node": "dbf093d3-99ea-4dc2-b47e-7479e9c29dc1",
+        "to_port": "c2561cf8-e2fc-41f6-95b5-d60556b12309"
+      },
+      {
+        "id": "95e7d9d8-7a58-44e1-9b28-4c78766686fc",
+        "from_node": "3deb0246-ede0-4760-8f13-88417e99038a",
+        "from_port": "1e3019ba-820d-40f6-be05-3e9cfcf659e1",
+        "to_node": "7b13257e-bc39-4606-b922-7ba4106982aa",
+        "to_port": "82614a75-50c7-49eb-9c76-b5e558655cb6"
+      },
+      {
+        "id": "ed4ea4a3-4d5c-4dcc-85a9-3eba02905974",
+        "from_node": "dbf093d3-99ea-4dc2-b47e-7479e9c29dc1",
+        "from_port": "8880981b-12be-46cf-9fb6-d4060f29f4c5",
+        "to_node": "72728cd4-3b20-452e-9789-d2b40d32698f",
+        "to_port": "e120d7c8-d815-43a3-aa80-a1adc921fedd"
+      },
+      {
+        "id": "816c6614-68ce-4125-8b5d-fb274a5e7548",
+        "from_node": "72728cd4-3b20-452e-9789-d2b40d32698f",
+        "from_port": "cfe56032-46e8-4b68-80d5-a53e78c9ca4f",
+        "to_node": "ff2c48e6-7511-4255-af9a-60c6c80fc93a",
+        "to_port": "e2ef5e89-5178-4c6f-b7b8-b9e7c996418c"
+      },
+      {
+        "id": "0b9aa6a2-b8c3-4ece-8943-6c32f052e81a",
+        "from_node": "7b13257e-bc39-4606-b922-7ba4106982aa",
+        "from_port": "f7d40f12-1a34-4a72-88d7-df666b321643",
+        "to_node": "229ee98f-2447-4c62-8d00-9440b65d0871",
+        "to_port": "d827f01a-6cbf-4e25-a434-d052a3a6c0fd"
+      },
+      {
+        "id": "8e3b611a-c94e-4493-83a2-cfe3598e2d86",
+        "from_node": "4968a99b-ad78-43dd-a0f7-55a25b7ccfbf",
+        "from_port": "b12cd9fb-4d73-4f74-95d1-371f58457a5d",
+        "to_node": "8845e62f-89d0-4eaa-99d4-87d0c1ba1ce4",
+        "to_port": "f8ac00d5-e106-49c4-ad1c-a6995edfa6aa"
+      },
+      {
+        "id": "9832b012-3538-4191-b6d5-4b079460e33e",
+        "from_node": "8845e62f-89d0-4eaa-99d4-87d0c1ba1ce4",
+        "from_port": "eb0e990c-76ab-418e-8334-cd57f97180f9",
+        "to_node": "e072f4a5-18bb-4eff-80ca-982d3dfcb876",
+        "to_port": "179fe9e4-5e41-47e7-b55f-10230bd41631"
+      },
+      {
+        "id": "b6a9af8b-f4c4-404c-af0c-dcadae691f73",
+        "from_node": "8845e62f-89d0-4eaa-99d4-87d0c1ba1ce4",
+        "from_port": "8fedf31c-a09c-49ff-a87c-035927902833",
+        "to_node": "135773a4-3d64-421d-bf7c-525a96f48b64",
+        "to_port": "9c060c50-fefc-4995-8142-7b887da818eb"
+      },
+      {
+        "id": "36118a8f-7957-462f-830d-3fa90cc09880",
+        "from_node": "8845e62f-89d0-4eaa-99d4-87d0c1ba1ce4",
+        "from_port": "e8ef897e-80f5-4b88-b670-1fbda08c5266",
+        "to_node": "e3b45326-6d36-4054-88ad-0d06653aac3c",
+        "to_port": "f42be546-7bd1-4d65-ac27-fa3a8a609c4f"
+      },
+      {
+        "id": "acd2a7cd-4eef-4a59-afe6-a9efec2b24ae",
+        "from_node": "e072f4a5-18bb-4eff-80ca-982d3dfcb876",
+        "from_port": "f76f2b93-63f5-4b25-a2b6-f578af6f16af",
+        "to_node": "4fdde57b-1824-43e4-a9bb-83609c6d06d8",
+        "to_port": "d838abc5-d086-491d-8e8a-adb69bafc3d3"
+      },
+      {
+        "id": "bf0572e3-2273-40cb-a08a-f3bfbff30054",
+        "from_node": "135773a4-3d64-421d-bf7c-525a96f48b64",
+        "from_port": "d95c05a7-5e18-4a5e-b55b-0fc602153b2f",
+        "to_node": "ba44d489-a0cb-41f1-8a04-b073a083b994",
+        "to_port": "3ac4327b-782c-4ceb-b081-f4fdafbc6e58"
+      },
+      {
+        "id": "45e38b2c-c682-4614-a7df-8ea08fbbd6d0",
+        "from_node": "e3b45326-6d36-4054-88ad-0d06653aac3c",
+        "from_port": "62297a2e-2189-437e-9276-b09c1d5a1dbf",
+        "to_node": "61dcc908-eb8f-4130-ad26-ae4f64d77325",
+        "to_port": "e3c5f33a-ad1c-4f53-b484-9e8cae016cb8"
+      },
+      {
+        "id": "73a6cb99-4d5c-4c48-b00c-0320e9ae61c9",
+        "from_node": "d662afd3-ac0f-422f-89f8-a140db9e1350",
+        "from_port": "603b7212-ffe3-4c92-bfc4-e05ba5e5e996",
+        "to_node": "d31723a5-cdd9-42f9-84db-ecd4a0e316e8",
+        "to_port": "957cd0c2-61d2-4e62-a272-6ce80125837d"
       }
     ],
     "variables": [
       {
-        "id": "1f20de2a-8d1e-4138-a9e3-c3d0e87bfcec",
-        "name": "quest_started",
+        "id": "167ecc07-8370-4733-b288-aea5e36001f7",
+        "name": "quest_accepted",
         "var_type": "Bool",
         "default_value": {
           "Bool": false
         }
       },
       {
-        "id": "87747cd2-f75e-43b7-bd3d-06ba84d62490",
+        "id": "af25ea87-116e-4827-b9ae-02b596965a4d",
         "name": "gold",
         "var_type": "Int",
         "default_value": {
@@ -588,8 +1214,40 @@
         }
       },
       {
-        "id": "165d17c4-075d-4b80-9881-f3d93f8d24f0",
+        "id": "a5748ae1-cc7f-44b5-9915-6379ac05a642",
+        "name": "reputation",
+        "var_type": "Float",
+        "default_value": {
+          "Float": 0.5
+        }
+      },
+      {
+        "id": "f8ff7cd2-7725-4c51-8aca-f5e8123f8e38",
+        "name": "player_name",
+        "var_type": "Text",
+        "default_value": {
+          "Text": "Adventurer"
+        }
+      },
+      {
+        "id": "ac087065-1fbc-401d-8da6-b7ae0794a1b9",
         "name": "has_sword",
+        "var_type": "Bool",
+        "default_value": {
+          "Bool": false
+        }
+      },
+      {
+        "id": "d6fec4aa-3d6a-44b2-b36d-5f37dfa12139",
+        "name": "has_potion",
+        "var_type": "Bool",
+        "default_value": {
+          "Bool": false
+        }
+      },
+      {
+        "id": "c3caebff-f889-4af3-a26f-846426c884c3",
+        "name": "dragon_wounded",
         "var_type": "Bool",
         "default_value": {
           "Bool": false
@@ -598,34 +1256,304 @@
     ],
     "characters": [
       {
-        "id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
-        "name": "Village Elder",
+        "id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+        "name": "Elder Aldric",
         "color": [
           74,
           144,
           217,
           255
         ],
-        "portrait_path": ""
+        "portrait_path": "portraits/elder.png"
       },
       {
-        "id": "d61a4c90-e417-446c-864c-30da0d73024a",
-        "name": "Merchant",
+        "id": "277dd739-64dc-46b7-822b-48886818ec08",
+        "name": "Merchant Bria",
         "color": [
           217,
           165,
           74,
           255
         ],
-        "portrait_path": ""
+        "portrait_path": "portraits/merchant.png"
+      },
+      {
+        "id": "e636f4ba-895f-4657-8479-1e629ecec753",
+        "name": "Captain Rook",
+        "color": [
+          76,
+          175,
+          80,
+          255
+        ],
+        "portrait_path": "portraits/guard.png"
+      },
+      {
+        "id": "76bac0ab-47b4-4574-aff6-7327e9d1f47b",
+        "name": "Dragon Ignis",
+        "color": [
+          229,
+          57,
+          53,
+          255
+        ],
+        "portrait_path": "portraits/dragon.png"
       }
     ],
-    "groups": [],
+    "groups": [
+      {
+        "id": "e95b627a-df8a-4769-b4f6-f813c73cdf81",
+        "name": "Introduction",
+        "node_ids": [
+          "7de3cb62-838b-44d9-b46a-c36b00fce0ad",
+          "ca6fcc41-2812-473d-a8d9-dbe47dfb1970",
+          "0f89b676-561a-4f13-b3e0-167e8a3b5e84"
+        ],
+        "color": [
+          74,
+          144,
+          217,
+          30
+        ]
+      },
+      {
+        "id": "8224e525-5df8-43b8-adbb-fd2a77f06c38",
+        "name": "Merchant Shop",
+        "node_ids": [
+          "12352a17-7b29-4ebc-b13f-4f8e8c4aba3a",
+          "3deb0246-ede0-4760-8f13-88417e99038a",
+          "dbf093d3-99ea-4dc2-b47e-7479e9c29dc1",
+          "72728cd4-3b20-452e-9789-d2b40d32698f",
+          "7b13257e-bc39-4606-b922-7ba4106982aa"
+        ],
+        "color": [
+          217,
+          165,
+          74,
+          30
+        ]
+      }
+    ],
     "review_statuses": {
-      "8b3352ac-50f3-40d0-8df3-08867c3dac60": "Approved"
+      "d662afd3-ac0f-422f-89f8-a140db9e1350": "Approved",
+      "ca6fcc41-2812-473d-a8d9-dbe47dfb1970": "NeedsReview",
+      "78620b5d-8d34-4e75-9139-7c394662f09d": "Approved",
+      "7de3cb62-838b-44d9-b46a-c36b00fce0ad": "Approved",
+      "c72ef771-c08c-4383-8463-936bbcf6908f": "Approved",
+      "72728cd4-3b20-452e-9789-d2b40d32698f": "Approved",
+      "7b13257e-bc39-4606-b922-7ba4106982aa": "NeedsReview"
     },
-    "comments": [],
-    "node_tags": {}
+    "comments": [
+      {
+        "id": "9842d7dc-cde2-4101-93e7-adbc79bf9e51",
+        "node_id": "ca6fcc41-2812-473d-a8d9-dbe47dfb1970",
+        "author": "",
+        "text": "Should the Elder sound more desperate here?"
+      },
+      {
+        "id": "7d5e8a86-fc9b-4f06-a616-db5239460248",
+        "node_id": "0f89b676-561a-4f13-b3e0-167e8a3b5e84",
+        "author": "",
+        "text": "Consider adding a stealth option for rogue characters."
+      },
+      {
+        "id": "9ec716bd-701a-4276-b3d1-dfb079d4ce58",
+        "node_id": "dbf093d3-99ea-4dc2-b47e-7479e9c29dc1",
+        "author": "",
+        "text": "Verify gold cost with game designer — 30 might be too cheap."
+      }
+    ],
+    "node_tags": {
+      "4fdde57b-1824-43e4-a9bb-83609c6d06d8": [
+        "ending"
+      ],
+      "78620b5d-8d34-4e75-9139-7c394662f09d": [
+        "main_path",
+        "intro"
+      ],
+      "8845e62f-89d0-4eaa-99d4-87d0c1ba1ce4": [
+        "lore"
+      ],
+      "3deb0246-ede0-4760-8f13-88417e99038a": [
+        "shop"
+      ],
+      "135773a4-3d64-421d-bf7c-525a96f48b64": [
+        "lore"
+      ],
+      "cfdd674b-e237-452f-ba68-fcebd3c5d226": [
+        "quest"
+      ],
+      "e3b45326-6d36-4054-88ad-0d06653aac3c": [
+        "lore"
+      ],
+      "d31723a5-cdd9-42f9-84db-ecd4a0e316e8": [
+        "ending"
+      ],
+      "0f89b676-561a-4f13-b3e0-167e8a3b5e84": [
+        "main_path",
+        "intro"
+      ],
+      "eee00a1f-a32c-4902-ad69-f2c3e4f007fd": [
+        "quest",
+        "forest"
+      ],
+      "7b13257e-bc39-4606-b922-7ba4106982aa": [
+        "shop"
+      ],
+      "e072f4a5-18bb-4eff-80ca-982d3dfcb876": [
+        "lore"
+      ],
+      "dbf093d3-99ea-4dc2-b47e-7479e9c29dc1": [
+        "shop"
+      ],
+      "ca6fcc41-2812-473d-a8d9-dbe47dfb1970": [
+        "main_path",
+        "intro"
+      ],
+      "7de3cb62-838b-44d9-b46a-c36b00fce0ad": [
+        "main_path",
+        "intro"
+      ],
+      "ff2c48e6-7511-4255-af9a-60c6c80fc93a": [
+        "ending"
+      ],
+      "6145bdff-ce28-4272-bcfd-71cb4bd869c5": [
+        "ending"
+      ],
+      "ba44d489-a0cb-41f1-8a04-b073a083b994": [
+        "ending"
+      ],
+      "61dcc908-eb8f-4130-ad26-ae4f64d77325": [
+        "ending"
+      ],
+      "12352a17-7b29-4ebc-b13f-4f8e8c4aba3a": [
+        "shop"
+      ],
+      "72728cd4-3b20-452e-9789-d2b40d32698f": [
+        "shop"
+      ],
+      "0c457bc7-4798-47f2-ba3c-42a3e54ba3da": [
+        "ending"
+      ],
+      "229ee98f-2447-4c62-8d00-9440b65d0871": [
+        "ending"
+      ]
+    }
   },
-  "versions": []
+  "versions": [
+    {
+      "id": 1,
+      "timestamp": "2026-02-20 14:30:00 UTC",
+      "description": "Initial draft — intro only",
+      "graph": {
+        "nodes": {
+          "c153c81f-37f9-4c06-9f8d-19c6777505e5": {
+            "id": "c153c81f-37f9-4c06-9f8d-19c6777505e5",
+            "node_type": "Start",
+            "position": [
+              100.0,
+              300.0
+            ],
+            "collapsed": false,
+            "inputs": [],
+            "outputs": [
+              {
+                "id": "1c8ef8e7-b1b8-4fc0-b3be-690b464aae4c",
+                "direction": "Output",
+                "label": ""
+              }
+            ]
+          },
+          "93089f53-0d01-45d2-a5fe-5474d84fdb17": {
+            "id": "93089f53-0d01-45d2-a5fe-5474d84fdb17",
+            "node_type": {
+              "Dialogue": {
+                "speaker_id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+                "speaker_name": "Elder Aldric",
+                "text": "Welcome, traveler!",
+                "emotion": "neutral",
+                "portrait_override": null,
+                "audio_clip": null,
+                "metadata": {}
+              }
+            },
+            "position": [
+              400.0,
+              300.0
+            ],
+            "collapsed": false,
+            "inputs": [
+              {
+                "id": "bfe9d0a2-8ea1-4e83-91d5-8e053a848947",
+                "direction": "Input",
+                "label": ""
+              }
+            ],
+            "outputs": [
+              {
+                "id": "02249084-4812-46e9-b31a-3dd7ff7038b2",
+                "direction": "Output",
+                "label": ""
+              }
+            ]
+          },
+          "f26685fd-c038-40f3-85da-ae6857cfc7b4": {
+            "id": "f26685fd-c038-40f3-85da-ae6857cfc7b4",
+            "node_type": {
+              "End": {
+                "tag": "placeholder"
+              }
+            },
+            "position": [
+              700.0,
+              300.0
+            ],
+            "collapsed": false,
+            "inputs": [
+              {
+                "id": "255199bc-7879-498c-adab-0ee89f86ace8",
+                "direction": "Input",
+                "label": ""
+              }
+            ],
+            "outputs": []
+          }
+        },
+        "connections": [
+          {
+            "id": "3bd68b87-a3d5-44f8-a7b1-2be8ec304a4f",
+            "from_node": "c153c81f-37f9-4c06-9f8d-19c6777505e5",
+            "from_port": "1c8ef8e7-b1b8-4fc0-b3be-690b464aae4c",
+            "to_node": "93089f53-0d01-45d2-a5fe-5474d84fdb17",
+            "to_port": "bfe9d0a2-8ea1-4e83-91d5-8e053a848947"
+          },
+          {
+            "id": "8907163b-0020-490c-811a-31f4dff1b371",
+            "from_node": "93089f53-0d01-45d2-a5fe-5474d84fdb17",
+            "from_port": "02249084-4812-46e9-b31a-3dd7ff7038b2",
+            "to_node": "f26685fd-c038-40f3-85da-ae6857cfc7b4",
+            "to_port": "255199bc-7879-498c-adab-0ee89f86ace8"
+          }
+        ],
+        "variables": [],
+        "characters": [
+          {
+            "id": "02e5d097-894c-40d0-8ee7-215e1968ef36",
+            "name": "Elder Aldric",
+            "color": [
+              74,
+              144,
+              217,
+              255
+            ],
+            "portrait_path": "portraits/elder.png"
+          }
+        ],
+        "groups": [],
+        "review_statuses": {},
+        "comments": [],
+        "node_tags": {}
+      }
+    }
+  ]
 }
