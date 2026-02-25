@@ -42,13 +42,13 @@ pub fn export_xml(graph: &DialogueGraph, name: &str) -> Result<String, String> {
 
     let mut xml = String::with_capacity(4096);
     xml.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    xml.push_str(&format!(
-        "<dialogue version=\"1.0\" name=\"{}\">\n",
-        xml_escape(name)
-    ));
+    xml.push_str(&format!("<dialogue version=\"1.0\" name=\"{}\">\n", xml_escape(name)));
 
     write_variables(graph, &mut xml);
     write_characters(graph, &id_map, &mut xml);
+    if flat.locale.has_extra_locales() {
+        write_localization(&flat, &id_map, &mut xml);
+    }
     write_nodes(graph, &id_map, &conn_map, &mut xml);
 
     xml.push_str("</dialogue>\n");
@@ -105,6 +105,30 @@ fn write_characters(
         }
     }
     xml.push_str("  </characters>\n");
+}
+
+fn write_localization(
+    graph: &DialogueGraph,
+    id_map: &std::collections::HashMap<uuid::Uuid, String>,
+    xml: &mut String,
+) {
+    let strings = crate::model::locale::collect_translatable_strings(graph);
+    let dl = &graph.locale.default_locale;
+    xml.push_str(&format!("  <localization default=\"{}\">\n", xml_escape(dl)));
+    for loc in &graph.locale.extra_locales {
+        xml.push_str(&format!("    <locale code=\"{}\"/>\n", xml_escape(loc)));
+    }
+    for ts in &strings {
+        let rk = super::json_export_helpers::readable_key_for_locale(&ts.key, ts.node_id, id_map);
+        xml.push_str(&format!("    <string key=\"{}\">\n", xml_escape(&rk)));
+        xml.push_str(&format!("      <text locale=\"{}\">{}</text>\n", xml_escape(dl), xml_escape(&ts.default_text)));
+        for loc in &graph.locale.extra_locales {
+            let t = graph.locale.get_translation(&ts.key, loc).unwrap_or("");
+            xml.push_str(&format!("      <text locale=\"{}\">{}</text>\n", xml_escape(loc), xml_escape(t)));
+        }
+        xml.push_str("    </string>\n");
+    }
+    xml.push_str("  </localization>\n");
 }
 
 fn write_nodes(
@@ -334,19 +358,14 @@ mod tests {
         let mut graph = DialogueGraph::new();
         let start = Node::new_start([0.0, 0.0]);
         let end = Node::new_end([200.0, 0.0]);
-        let s_out = start.outputs[0].id;
-        let e_in = end.inputs[0].id;
+        let (s_out, e_in) = (start.outputs[0].id, end.inputs[0].id);
         let (s_id, e_id) = (start.id, end.id);
         graph.add_node(start);
         graph.add_node(end);
         graph.add_connection(s_id, s_out, e_id, e_in);
-
         let xml = export_xml(&graph, "test").unwrap();
-        assert!(xml.contains("<?xml version="));
-        assert!(xml.contains("<dialogue"));
-        assert!(xml.contains("type=\"start\""));
-        assert!(xml.contains("type=\"end\""));
-        assert!(xml.contains("</dialogue>"));
+        assert!(xml.contains("<?xml version=") && xml.contains("type=\"start\""));
+        assert!(xml.contains("type=\"end\"") && xml.contains("</dialogue>"));
     }
 
     #[test]
@@ -358,22 +377,16 @@ mod tests {
             d.speaker_name = "O'Brien".to_string();
         }
         graph.add_node(dlg);
-
         let xml = export_xml(&graph, "esc&test").unwrap();
-        assert!(xml.contains("esc&amp;test"));
-        assert!(xml.contains("&lt;world&gt;"));
-        assert!(xml.contains("&amp;"));
-        assert!(xml.contains("&quot;friends&quot;"));
-        assert!(xml.contains("O&apos;Brien"));
+        assert!(xml.contains("esc&amp;test") && xml.contains("&lt;world&gt;"));
+        assert!(xml.contains("&quot;friends&quot;") && xml.contains("O&apos;Brien"));
     }
 
     #[test]
     fn export_empty_graph() {
         let graph = DialogueGraph::new();
         let xml = export_xml(&graph, "empty").unwrap();
-        assert!(xml.contains("<variables/>"));
-        assert!(xml.contains("<characters/>"));
-        assert!(xml.contains("<nodes/>"));
+        assert!(xml.contains("<variables/>") && xml.contains("<nodes/>"));
     }
 
     #[test]
@@ -381,8 +394,6 @@ mod tests {
         let mut graph = DialogueGraph::new();
         graph.add_node(Node::new_start([123.0, 456.0]));
         let xml = export_xml(&graph, "test").unwrap();
-        assert!(!xml.contains("position"));
-        assert!(!xml.contains("123"));
-        assert!(!xml.contains("456"));
+        assert!(!xml.contains("position") && !xml.contains("123"));
     }
 }

@@ -219,6 +219,34 @@ pub fn export_node_data(
     }
 }
 
+/// Map a UUID-based locale key to a readable key using the node's readable ID.
+pub fn readable_key_for_locale(
+    key: &str,
+    node_id: uuid::Uuid,
+    id_map: &HashMap<uuid::Uuid, String>,
+) -> String {
+    use crate::model::locale::StringType;
+    let readable_prefix = id_map
+        .get(&node_id)
+        .cloned()
+        .unwrap_or_else(|| node_id.to_string());
+    let string_type = if key.starts_with("dlg_") {
+        StringType::Dialogue
+    } else if key.starts_with("choice_") {
+        StringType::ChoicePrompt
+    } else {
+        StringType::ChoiceOption
+    };
+    match string_type {
+        StringType::Dialogue => readable_prefix,
+        StringType::ChoicePrompt => format!("{readable_prefix}_prompt"),
+        StringType::ChoiceOption => {
+            let suffix = key.rsplit('_').next().unwrap_or("0");
+            format!("{readable_prefix}_opt_{suffix}")
+        }
+    }
+}
+
 /// Build the string table for the exported JSON.
 /// Maps readable IDs to { locale -> text } for all translatable strings.
 pub fn build_string_table(
@@ -230,22 +258,7 @@ pub fn build_string_table(
     let mut table = serde_json::Map::new();
 
     for ts in &strings {
-        // Map UUID-based key to readable key using node's readable id
-        let readable_prefix = id_map
-            .get(&ts.node_id)
-            .cloned()
-            .unwrap_or_else(|| ts.node_id.to_string());
-        let readable_key = match ts.string_type {
-            crate::model::locale::StringType::Dialogue => readable_prefix,
-            crate::model::locale::StringType::ChoicePrompt => {
-                format!("{readable_prefix}_prompt")
-            }
-            crate::model::locale::StringType::ChoiceOption => {
-                // Extract the index suffix from the UUID-based key (e.g. "opt_abcd1234_0" -> "0")
-                let suffix = ts.key.rsplit('_').next().unwrap_or("0");
-                format!("{readable_prefix}_opt_{suffix}")
-            }
-        };
+        let readable_key = readable_key_for_locale(&ts.key, ts.node_id, id_map);
 
         let mut locale_map = serde_json::Map::new();
         // Default locale text
