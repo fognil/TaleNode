@@ -55,10 +55,10 @@
   - [x] Template library (shop encounter, quest giver, guard check, ...)
   - [x] Insert template vao canvas
 
-- [ ] **Dual editor view**
-  - Text/script view song song voi node view
-  - Sync 2 chieu: edit text -> update node va nguoc lai
-  - Kieu nhu Ink/Yarn text format
+- [x] **Dual editor view**
+  - [x] Text/script view song song voi node view
+  - [x] Sync 2 chieu: edit text -> update node va nguoc lai
+  - [x] Kieu nhu Ink/Yarn text format
 
 - [x] **Search & Replace**
   - [x] Ctrl+F tim kiem across tat ca nodes
