@@ -134,12 +134,13 @@ impl PlaytestState {
                         graph: data.child_graph,
                         parent_next,
                     });
-                    let cg = &self.subgraph_stack.last().unwrap().graph;
-                    let start = cg.nodes.values()
+                    let Some(frame) = self.subgraph_stack.last() else { break };
+                    let start = frame.graph.nodes.values()
                         .find(|n| matches!(n.node_type, NodeType::Start))
                         .map(|n| n.id);
                     self.current_node = start.and_then(|sid| {
-                        follow_first_output(&self.subgraph_stack.last().unwrap().graph, sid)
+                        let f = self.subgraph_stack.last()?;
+                        follow_first_output(&f.graph, sid)
                     });
                 }
                 NodeType::End(_) if !self.subgraph_stack.is_empty() => {
@@ -147,7 +148,7 @@ impl PlaytestState {
                         speaker: "[SubGraph]".to_string(),
                         text: "Exiting sub-graph".to_string(),
                     });
-                    let frame = self.subgraph_stack.pop().unwrap();
+                    let Some(frame) = self.subgraph_stack.pop() else { break };
                     self.current_node = frame.parent_next;
                 }
                 _ => break,
