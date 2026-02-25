@@ -1,6 +1,7 @@
 pub mod analytics_export;
 pub mod flatten;
 pub mod json_export;
+pub mod locale_export;
 pub mod json_export_helpers;
 pub mod plugin_export;
 pub mod voice_export;
