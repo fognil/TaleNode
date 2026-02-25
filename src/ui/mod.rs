@@ -10,5 +10,6 @@ pub mod left_panel;
 mod node_body;
 pub mod node_widget;
 pub mod playtest;
+pub mod script_panel;
 pub mod template_panel;
 pub mod version_panel;

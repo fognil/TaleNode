@@ -226,6 +226,18 @@ impl TaleNodeApp {
                 {
                     ui.close_menu();
                 }
+                if ui
+                    .checkbox(&mut self.show_script_panel, "Script Editor")
+                    .changed()
+                {
+                    if self.show_script_panel {
+                        self.script_panel_text =
+                            crate::export::yarn_export::export_yarn(&self.graph);
+                        self.script_panel_dirty = false;
+                        self.script_panel_stale = false;
+                    }
+                    ui.close_menu();
+                }
                 ui.separator();
                 if ui
                     .button(if self.dark_theme {

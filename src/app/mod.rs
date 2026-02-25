@@ -50,80 +50,47 @@ pub struct TaleNodeApp {
     pub canvas: CanvasState,
     pub selected_nodes: Vec<Uuid>,
     interaction: InteractionState,
-    /// Where to open the context menu (canvas coords).
     context_menu_pos: Option<[f32; 2]>,
-    /// Current project name.
     project_name: String,
-    /// Path to the current .talenode file (None if unsaved).
     project_path: Option<std::path::PathBuf>,
-    /// Whether the left panel is visible.
     show_left_panel: bool,
-    /// Undo/redo history.
     history: UndoHistory,
-    /// Cached validation warnings.
     validation_warnings: Vec<ValidationWarning>,
-    /// Whether the validation panel is open.
     show_validation_panel: bool,
-    /// Search query for finding nodes.
     search_query: String,
-    /// Whether the search bar is visible.
     show_search: bool,
-    /// Node IDs matching the current search.
     search_results: Vec<Uuid>,
-    /// Current index in search results for cycling through matches.
     search_index: usize,
-    /// Replace query text.
     replace_query: String,
-    /// Whether the replace row is visible.
     show_replace: bool,
-    /// Whether to use dark theme (true) or light theme (false).
     dark_theme: bool,
-    /// Playtest mode state.
     playtest: PlaytestState,
-    /// Whether the playtest panel is visible.
     show_playtest: bool,
-    /// Last auto-save time.
     last_auto_save: Instant,
-    /// Brief message shown in status bar.
     status_message: Option<(String, Instant)>,
-    /// Batch audio assignment state.
     audio_manager: crate::ui::audio_manager::AudioManagerState,
-    /// Whether the version panel is visible.
     show_version_panel: bool,
-    /// Text input for new version description.
     version_new_desc: String,
-    /// Saved version snapshots.
     versions: Vec<crate::model::project::VersionSnapshot>,
-    /// Version compare checkbox selection [slot_a, slot_b].
     version_compare_selection: [Option<usize>; 2],
-    /// Cached diff result from comparing two versions.
     version_diff_result: Option<crate::model::graph_diff::GraphDiff>,
-    /// Whether the analytics panel is visible.
     show_analytics_panel: bool,
-    /// Whether the bookmark panel is visible.
     show_bookmark_panel: bool,
-    /// Tag filter for bookmark panel.
     bookmark_tag_filter: Option<String>,
-    /// Text input for new tag in bookmark panel.
     bookmark_new_tag_text: String,
-    /// Text input for new tag in inspector.
     inspector_new_tag_text: String,
-    /// Whether the comments panel is visible.
     show_comments_panel: bool,
-    /// Filter for the comments panel.
     comments_filter: Option<crate::model::review::ReviewStatus>,
-    /// Which node is targeted for new comments.
     comment_target_node: Option<Uuid>,
-    /// Text input for new comment.
     new_comment_text: String,
-    /// Navigation stack for sub-graph editing.
     subgraph_stack: Vec<subgraph_nav::SubGraphFrame>,
-    /// Reusable node pattern library.
     template_library: crate::model::template::TemplateLibrary,
-    /// Whether the template panel is visible.
     show_template_panel: bool,
-    /// Text input for new template name.
     template_new_name: String,
+    show_script_panel: bool,
+    script_panel_text: String,
+    script_panel_dirty: bool,
+    script_panel_stale: bool,
 }
 
 impl TaleNodeApp {
@@ -174,12 +141,17 @@ impl TaleNodeApp {
             template_library: Self::load_template_library(),
             show_template_panel: false,
             template_new_name: String::new(),
+            show_script_panel: false,
+            script_panel_text: String::new(),
+            script_panel_dirty: false,
+            script_panel_stale: false,
         }
     }
 
     /// Save a snapshot for undo before mutating the graph.
     fn snapshot(&mut self) {
         self.history.save_snapshot(&self.graph);
+        if self.show_script_panel { self.script_panel_stale = true; }
     }
 }
 
@@ -379,6 +351,9 @@ impl eframe::App for TaleNodeApp {
                     });
                 });
         }
+
+        // Script editor panel (right side)
+        self.show_script_side_panel(ctx);
 
         // Main canvas
         egui::CentralPanel::default()

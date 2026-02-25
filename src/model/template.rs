@@ -30,8 +30,8 @@ pub struct TemplateLibrary {
 }
 
 impl NodeTemplate {
-    /// Create a new empty template.
-    pub fn new(name: &str) -> Self {
+    #[cfg(test)]
+    fn new(name: &str) -> Self {
         Self {
             id: Uuid::new_v4(),
             name: name.to_string(),

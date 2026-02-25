@@ -217,4 +217,54 @@ impl TaleNodeApp {
                 }
             });
     }
+
+    pub(super) fn show_script_side_panel(&mut self, ctx: &egui::Context) {
+        if !self.show_script_panel {
+            return;
+        }
+        egui::SidePanel::right("script_panel")
+            .default_width(350.0)
+            .min_width(250.0)
+            .show(ctx, |ui| {
+                let action = crate::ui::script_panel::show_script_panel(
+                    ui,
+                    &mut self.script_panel_text,
+                    self.script_panel_dirty,
+                    self.script_panel_stale,
+                );
+                match action {
+                    crate::ui::script_panel::ScriptPanelAction::Commit(text) => {
+                        match crate::import::yarn_import::import_yarn(&text) {
+                            Ok(new_graph) => {
+                                self.snapshot();
+                                self.graph = new_graph;
+                                self.selected_nodes.clear();
+                                self.script_panel_dirty = false;
+                                self.script_panel_stale = false;
+                                self.status_message = Some((
+                                    "Script committed to graph".to_string(),
+                                    std::time::Instant::now(),
+                                ));
+                            }
+                            Err(e) => {
+                                self.status_message = Some((
+                                    format!("Script error: {e}"),
+                                    std::time::Instant::now(),
+                                ));
+                            }
+                        }
+                    }
+                    crate::ui::script_panel::ScriptPanelAction::Refresh => {
+                        self.script_panel_text =
+                            crate::export::yarn_export::export_yarn(&self.graph);
+                        self.script_panel_dirty = false;
+                        self.script_panel_stale = false;
+                    }
+                    crate::ui::script_panel::ScriptPanelAction::TextChanged => {
+                        self.script_panel_dirty = true;
+                    }
+                    crate::ui::script_panel::ScriptPanelAction::None => {}
+                }
+            });
+    }
 }
