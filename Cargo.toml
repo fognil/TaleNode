@@ -15,6 +15,7 @@ serde_json = "1"
 uuid = { version = "1", features = ["v4", "serde"] }
 rfd = "0.15"
 roxmltree = "0.20"
+egui_dock = "0.16"
 
 [profile.release]
 opt-level = 3

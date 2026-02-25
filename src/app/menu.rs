@@ -172,64 +172,29 @@ impl TaleNodeApp {
                 }
             });
             ui.menu_button("View", |ui| {
-                if ui
-                    .checkbox(&mut self.show_left_panel, "Left Panel")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_validation_panel, "Validation Panel")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_playtest, "Playtest Panel")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_comments_panel, "Comments Panel")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_bookmark_panel, "Bookmark Panel")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_analytics_panel, "Analytics Panel")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_version_panel, "Version History")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_template_panel, "Template Library")
-                    .changed()
-                {
-                    ui.close_menu();
-                }
-                if ui
-                    .checkbox(&mut self.show_script_panel, "Script Editor")
-                    .changed()
-                {
-                    if self.show_script_panel {
-                        self.script_panel_text =
-                            crate::export::yarn_export::export_yarn(&self.graph);
-                        self.script_panel_dirty = false;
-                        self.script_panel_stale = false;
+                use super::dock::DockTab;
+                let toggles: &[(DockTab, &str)] = &[
+                    (DockTab::LeftPanel, "Project Panel"),
+                    (DockTab::Inspector, "Inspector"),
+                    (DockTab::ScriptEditor, "Script Editor"),
+                    (DockTab::Validation, "Validation Panel"),
+                    (DockTab::Playtest, "Playtest Panel"),
+                    (DockTab::Comments, "Comments Panel"),
+                    (DockTab::Bookmarks, "Bookmark Panel"),
+                    (DockTab::Analytics, "Analytics Panel"),
+                    (DockTab::VersionHistory, "Version History"),
+                    (DockTab::Templates, "Template Library"),
+                ];
+                for &(tab, label) in toggles {
+                    let mut open = self.dock_has_tab(tab);
+                    if ui.checkbox(&mut open, label).changed() {
+                        self.dock_toggle_tab(tab);
+                        ui.close_menu();
                     }
+                }
+                ui.separator();
+                if ui.button("Reset Layout").clicked() {
+                    self.dock_reset_layout();
                     ui.close_menu();
                 }
                 ui.separator();

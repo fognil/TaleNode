@@ -69,7 +69,7 @@ impl TaleNodeApp {
                     )
                     .clicked()
                 {
-                    self.show_validation_panel = !self.show_validation_panel;
+                    self.dock_toggle_tab(super::dock::DockTab::Validation);
                 }
             });
         });
@@ -78,11 +78,6 @@ impl TaleNodeApp {
     pub(super) fn show_validation_panel(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             ui.heading("Validation");
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.small_button("X").clicked() {
-                    self.show_validation_panel = false;
-                }
-            });
         });
         ui.separator();
 

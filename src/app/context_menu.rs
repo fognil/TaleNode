@@ -60,7 +60,7 @@ impl TaleNodeApp {
                             close_menu = true;
                         }
                         if ui.button("Save as Template").clicked() {
-                            self.show_template_panel = true;
+                            self.dock_add_tab(super::dock::DockTab::Templates);
                             close_menu = true;
                         }
                     }
