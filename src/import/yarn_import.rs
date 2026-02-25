@@ -50,14 +50,11 @@ fn parse_yarn_node(raw: &str) -> Result<YarnNode, String> {
     let body = raw[sep_idx + 3..].trim();
 
     let mut title = String::new();
-    let mut tags = Vec::new();
 
     for line in header.lines() {
         let line = line.trim();
         if let Some(val) = line.strip_prefix("title:") {
             title = val.trim().to_string();
-        } else if let Some(val) = line.strip_prefix("tags:") {
-            tags = val.split_whitespace().map(|s| s.to_string()).collect();
         }
     }
     if title.is_empty() {
@@ -65,7 +62,7 @@ fn parse_yarn_node(raw: &str) -> Result<YarnNode, String> {
     }
 
     let lines = parse_body_lines(body);
-    Ok(YarnNode { title, tags, lines })
+    Ok(YarnNode { title, lines })
 }
 
 fn parse_body_lines(body: &str) -> Vec<YarnLine> {

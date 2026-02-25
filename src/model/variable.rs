@@ -25,7 +25,7 @@ pub struct Variable {
 }
 
 impl Variable {
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn new_bool(name: impl Into<String>, default: bool) -> Self {
         Self {
             id: Uuid::new_v4(),
@@ -35,7 +35,7 @@ impl Variable {
         }
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn new_int(name: impl Into<String>, default: i64) -> Self {
         Self {
             id: Uuid::new_v4(),

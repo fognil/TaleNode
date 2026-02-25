@@ -12,8 +12,6 @@ use super::yarn_import::YarnLine;
 
 pub(super) struct YarnNode {
     pub title: String,
-    #[allow(dead_code)]
-    pub tags: Vec<String>,
     pub lines: Vec<YarnLine>,
 }
 

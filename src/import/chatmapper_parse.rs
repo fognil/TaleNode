@@ -18,8 +18,6 @@ pub(super) struct CmEntry {
     pub id: String,
     pub conv_id: String,
     pub is_root: bool,
-    #[allow(dead_code)]
-    pub is_group: bool,
     pub actor_id: Option<String>,
     pub text: String,
     pub outgoing_links: Vec<CmLink>,
@@ -101,7 +99,6 @@ fn parse_conversations(assets: &roxmltree::Node) -> Result<Vec<CmEntry>, String>
         for entry in entries_node.children().filter(|n| n.has_tag_name("DialogEntry")) {
             let entry_id = entry.attribute("ID").unwrap_or("0").to_string();
             let is_root = entry.attribute("IsRoot").unwrap_or("false") == "true";
-            let is_group = entry.attribute("IsGroup").unwrap_or("false") == "true";
             let actor_id = get_field_value(&entry, "Actor");
             let text = get_field_value(&entry, "Dialogue Text")
                 .or_else(|| get_field_value(&entry, "Menu Text"))
@@ -113,7 +110,6 @@ fn parse_conversations(assets: &roxmltree::Node) -> Result<Vec<CmEntry>, String>
                 id: entry_id,
                 conv_id: conv_id.clone(),
                 is_root,
-                is_group,
                 actor_id,
                 text,
                 outgoing_links,
