@@ -101,6 +101,21 @@ Exports a drop-in runtime plugin to the selected game engine project folder. See
 
 Exports a CSV file listing all dialogue lines with speaker, text, emotion, and audio clip fields — ready for voice actors.
 
+### Batch Assign Audio
+
+- **Menu**: File > Batch Assign Audio...
+
+Opens the Batch Audio Assignment window for matching audio files to dialogue nodes in bulk.
+
+1. Click **Select Folder** and choose a folder containing audio files (`.wav`, `.ogg`, `.mp3`)
+2. TaleNode scans and matches files to dialogue nodes using two strategies:
+    - **By readable ID**: e.g., `dlg_1.wav` matches the first dialogue node
+    - **By speaker + index**: e.g., `elder_1.wav` matches the first dialogue line by "Elder"
+3. Review the match table — matched files show in green, unmatched show "(none)"
+4. Click **Apply Matches** to assign all matched audio paths to the dialogue nodes
+
+Click **Re-scan** after adding files to the folder to refresh the match list.
+
 ## Import
 
 ### Import from Yarn

@@ -74,6 +74,8 @@ nav:
     - Comments & Review: user-guide/comments-review.md
     - Version History: user-guide/version-history.md
     - Templates: user-guide/templates.md
+    - Script Editor: user-guide/script-editor.md
+    - Analytics: user-guide/analytics.md
     - Validation: user-guide/validation.md
     - Playtest Mode: user-guide/playtest.md
     - File Operations: user-guide/file-operations.md
