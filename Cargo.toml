@@ -16,6 +16,10 @@ uuid = { version = "1", features = ["v4", "serde"] }
 rfd = "0.15"
 roxmltree = "0.20"
 egui_dock = { version = "0.16", features = ["serde"] }
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
+tokio-tungstenite = "0.24"
+dirs = "6"
 
 [profile.release]
 opt-level = 3
