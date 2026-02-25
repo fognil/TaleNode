@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -25,7 +26,10 @@ namespace TaleNode.Editor
             Insert(0, grid);
             grid.StretchToParentSize();
 
-            styleSheets.Add(Resources.Load<StyleSheet>("TaleNodeGraphStyles"));
+            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+                "Packages/com.talenode.dialogue/Editor/GraphView/TaleNodeGraphStyles.uss");
+            if (uss != null)
+                styleSheets.Add(uss);
         }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -37,7 +41,7 @@ namespace TaleNode.Editor
         public void Clear()
         {
             _nodeMap.Clear();
-            DeleteElements(graphElements);
+            DeleteElements(graphElements.ToList());
             _dialogue = null;
         }
 

@@ -50,7 +50,7 @@ namespace TaleNode.Editor
             });
             toolbar.Add(_assetField);
 
-            _localeDropdown = new DropdownField("Locale", new List<string>(), 0);
+            _localeDropdown = new DropdownField("Locale", new List<string> { "(none)" }, 0);
             _localeDropdown.style.minWidth = 120;
             _localeDropdown.RegisterValueChangedCallback(evt =>
             {

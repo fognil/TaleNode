@@ -60,7 +60,7 @@ namespace TaleNode.Editor
             toolbar.Add(_assetField);
 
             _localeDropdown = new DropdownField("Locale",
-                new List<string>(), 0);
+                new List<string> { "(none)" }, 0);
             _localeDropdown.style.minWidth = 100;
             _localeDropdown.RegisterValueChangedCallback(evt =>
                 _currentLocale = evt.newValue);
@@ -393,10 +393,10 @@ namespace TaleNode.Editor
 
         private static void SyncGraphHighlight(string nodeId)
         {
+            if (!HasOpenInstances<TaleNodeGraphWindow>()) return;
             var graphWindow = GetWindow<TaleNodeGraphWindow>(
                 "TaleNode Graph", false);
-            if (graphWindow != null)
-                graphWindow.HighlightNode(nodeId);
+            graphWindow.HighlightNode(nodeId);
         }
     }
 }

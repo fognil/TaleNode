@@ -9,7 +9,19 @@ namespace TaleNode.Editor
     public class TaleNodeDialogue : ScriptableObject
     {
         [HideInInspector] public string RawJson;
-        [HideInInspector] public TaleNodeDialogueData Data;
+        [System.NonSerialized] private TaleNodeDialogueData _data;
+
+        /// <summary>Lazily parsed data — survives domain reload via RawJson.</summary>
+        public TaleNodeDialogueData Data
+        {
+            get
+            {
+                if (_data == null && !string.IsNullOrEmpty(RawJson))
+                    _data = JsonConvert.DeserializeObject<TaleNodeDialogueData>(RawJson);
+                return _data;
+            }
+            private set => _data = value;
+        }
 
         // Metadata cached on import
         public string DialogueName;

@@ -44,7 +44,7 @@ namespace TaleNode.Editor
 
         private static string FormatTitle(TaleNodeNodeData data)
         {
-            string type = data.NodeType ?? "unknown";
+            string type = string.IsNullOrEmpty(data.NodeType) ? "unknown" : data.NodeType;
             string upper = char.ToUpperInvariant(type[0]) + type.Substring(1);
             return $"{upper} ({data.Id})";
         }

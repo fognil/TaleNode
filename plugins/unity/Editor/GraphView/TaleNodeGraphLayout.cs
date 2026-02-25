@@ -132,6 +132,7 @@ namespace TaleNode.Editor
                 queue.Enqueue(data.Nodes[0].Id);
             }
 
+            int maxDepth = data.Nodes.Count;
             while (queue.Count > 0)
             {
                 string current = queue.Dequeue();
@@ -143,6 +144,7 @@ namespace TaleNode.Editor
                 foreach (string next in neighbors)
                 {
                     int newDepth = currentDepth + 1;
+                    if (newDepth > maxDepth) continue; // guard against cycles
                     // Place multi-path nodes at max depth
                     if (!depths.ContainsKey(next) || depths[next] < newDepth)
                     {
