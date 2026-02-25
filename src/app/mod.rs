@@ -4,6 +4,7 @@ mod menu;
 mod panel_handlers;
 mod panels;
 mod search;
+mod subgraph_nav;
 
 use egui::Pos2;
 use std::time::Instant;
@@ -114,6 +115,8 @@ pub struct TaleNodeApp {
     comment_target_node: Option<Uuid>,
     /// Text input for new comment.
     new_comment_text: String,
+    /// Navigation stack for sub-graph editing.
+    subgraph_stack: Vec<subgraph_nav::SubGraphFrame>,
 }
 
 impl TaleNodeApp {
@@ -160,6 +163,7 @@ impl TaleNodeApp {
             comments_filter: None,
             comment_target_node: None,
             new_comment_text: String::new(),
+            subgraph_stack: Vec::new(),
         }
     }
 
@@ -237,12 +241,16 @@ impl eframe::App for TaleNodeApp {
         {
             self.duplicate_selected();
         }
-        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) && self.show_search {
-            self.show_search = false;
-            self.show_replace = false;
-            self.search_query.clear();
-            self.search_results.clear();
-            self.replace_query.clear();
+        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
+            if self.show_search {
+                self.show_search = false;
+                self.show_replace = false;
+                self.search_query.clear();
+                self.search_results.clear();
+                self.replace_query.clear();
+            } else if self.is_in_subgraph() {
+                self.exit_subgraph();
+            }
         }
         if self.show_search
             && !self.search_results.is_empty()
@@ -261,6 +269,23 @@ impl eframe::App for TaleNodeApp {
         if self.show_search {
             egui::TopBottomPanel::top("search_bar").show(ctx, |ui| {
                 self.show_search_bar(ui);
+            });
+        }
+
+        // Breadcrumb bar for sub-graph navigation
+        if self.is_in_subgraph() {
+            egui::TopBottomPanel::top("breadcrumb_bar").show(ctx, |ui| {
+                ui.horizontal(|ui| {
+                    if ui.button("< Back").clicked() {
+                        self.exit_subgraph();
+                    }
+                    ui.separator();
+                    ui.label("Root");
+                    for label in self.breadcrumb_labels() {
+                        ui.label(">");
+                        ui.label(label);
+                    }
+                });
             });
         }
 

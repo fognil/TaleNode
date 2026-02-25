@@ -161,6 +161,14 @@ fn write_single_node(
                 xml_escape(&d.tag)
             ));
         }
+        NodeType::SubGraph(d) => {
+            let next = find_next_single(&node.outputs, conn_map, id_map);
+            let next_attr = next.as_deref().unwrap_or("");
+            xml.push_str(&format!(
+                "    <node id=\"{rid}\" type=\"subgraph\" name=\"{}\" next=\"{next_attr}\"/>\n",
+                xml_escape(&d.name)
+            ));
+        }
     }
 }
 

@@ -19,6 +19,13 @@ pub struct PlaytestState {
     pub running: bool,
     /// Runtime variable context.
     pub variables: ScriptContext,
+    /// Stack for SubGraph auto-traversal.
+    subgraph_stack: Vec<PlaytestSubFrame>,
+}
+
+struct PlaytestSubFrame {
+    graph: DialogueGraph,
+    parent_next: Option<Uuid>,
 }
 
 pub struct PlaytestLogEntry {
@@ -33,6 +40,7 @@ impl PlaytestState {
             log: Vec::new(),
             running: false,
             variables: ScriptContext::default(),
+            subgraph_stack: Vec::new(),
         }
     }
 
@@ -40,6 +48,7 @@ impl PlaytestState {
     pub fn start(&mut self, graph: &DialogueGraph) {
         self.log.clear();
         self.running = true;
+        self.subgraph_stack.clear();
         self.variables = ScriptContext::from_variables(&graph.variables);
         self.current_node = graph
             .nodes
@@ -49,7 +58,7 @@ impl PlaytestState {
 
         // Auto-advance past the Start node
         if let Some(id) = self.current_node {
-            self.current_node = self.follow_first_output(graph, id);
+            self.current_node = follow_first_output(graph, id);
             self.auto_advance(graph);
         }
     }
@@ -57,102 +66,90 @@ impl PlaytestState {
     pub fn stop(&mut self) {
         self.running = false;
         self.current_node = None;
+        self.subgraph_stack.clear();
     }
 
-    /// Follow the first output port connection from a node.
-    fn follow_first_output(&self, graph: &DialogueGraph, node_id: Uuid) -> Option<Uuid> {
-        let node = graph.nodes.get(&node_id)?;
-        let first_output = node.outputs.first()?;
-        self.follow_port(graph, first_output.id)
-    }
-
-    /// Follow a specific output port to its connected node.
-    fn follow_port(&self, graph: &DialogueGraph, port_id: PortId) -> Option<Uuid> {
-        graph
-            .connections
-            .iter()
-            .find(|c| c.from_port == port_id)
-            .map(|c| c.to_node)
-    }
-
-    /// Auto-advance through nodes that don't need user interaction
-    /// (Event, Condition, Random).
+    /// Auto-advance through nodes that don't need user interaction.
     fn auto_advance(&mut self, graph: &DialogueGraph) {
         while let Some(id) = self.current_node {
-            let Some(node) = graph.nodes.get(&id) else { break };
-
-            match &node.node_type {
+            // Clone node_type + outputs to release borrow on subgraph_stack.
+            let (node_type, outputs) = {
+                let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+                match g.nodes.get(&id) {
+                    Some(n) => (n.node_type.clone(), n.outputs.clone()),
+                    None => break,
+                }
+            };
+            match node_type {
                 NodeType::Event(data) => {
-                    execute_event(&mut self.variables, data);
+                    execute_event(&mut self.variables, &data);
                     self.log.push(PlaytestLogEntry {
                         speaker: "[Event]".to_string(),
                         text: format!("{} action(s) executed", data.actions.len()),
                     });
-                    self.current_node = self.follow_first_output(graph, id);
+                    let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+                    self.current_node = follow_first_output(g, id);
                 }
                 NodeType::Condition(data) => {
-                    let result = evaluate_condition(&self.variables, data);
+                    let result = evaluate_condition(&self.variables, &data);
                     self.log.push(PlaytestLogEntry {
                         speaker: "[Condition]".to_string(),
                         text: format!(
                             "{} {} {:?} → {}",
-                            data.variable_name,
-                            match data.operator {
-                                crate::model::node::CompareOp::Eq => "==",
-                                crate::model::node::CompareOp::Neq => "!=",
-                                crate::model::node::CompareOp::Gt => ">",
-                                crate::model::node::CompareOp::Lt => "<",
-                                crate::model::node::CompareOp::Gte => ">=",
-                                crate::model::node::CompareOp::Lte => "<=",
-                                crate::model::node::CompareOp::Contains => "contains",
-                            },
-                            data.value,
-                            result
+                            data.variable_name, op_str(data.operator),
+                            data.value, result
                         ),
                     });
-                    if result {
-                        // True branch = first output (index 0)
-                        if let Some(port) = node.outputs.first() {
-                            self.current_node = self.follow_port(graph, port.id);
-                        } else {
-                            self.current_node = None;
-                        }
-                    } else {
-                        // False branch = second output (index 1)
-                        if let Some(port) = node.outputs.get(1) {
-                            self.current_node = self.follow_port(graph, port.id);
-                        } else {
-                            self.current_node = None;
-                        }
-                    }
+                    let port = if result { outputs.first() } else { outputs.get(1) };
+                    let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+                    self.current_node = port.and_then(|p| follow_port(g, p.id));
                 }
                 NodeType::Random(data) => {
-                    // Pick a random branch weighted by weights
                     let total: f32 = data.branches.iter().map(|b| b.weight).sum();
                     let mut roll: f32 = rand_simple(total);
-                    let mut chosen_idx = 0;
+                    let mut chosen = 0;
                     for (i, branch) in data.branches.iter().enumerate() {
                         roll -= branch.weight;
-                        if roll <= 0.0 {
-                            chosen_idx = i;
-                            break;
-                        }
+                        if roll <= 0.0 { chosen = i; break; }
                     }
                     self.log.push(PlaytestLogEntry {
                         speaker: "[Random]".to_string(),
-                        text: format!("Branch {} selected", chosen_idx + 1),
+                        text: format!("Branch {} selected", chosen + 1),
                     });
-                    // Follow the chosen output port
-                    if let Some(port) = node.outputs.get(chosen_idx) {
-                        self.current_node = self.follow_port(graph, port.id);
-                    } else {
-                        self.current_node = None;
-                    }
+                    let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+                    self.current_node = outputs.get(chosen).and_then(|p| follow_port(g, p.id));
                 }
                 NodeType::Start => {
-                    self.current_node = self.follow_first_output(graph, id);
+                    let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+                    self.current_node = follow_first_output(g, id);
                 }
-                // Dialogue, Choice, End — stop and wait for UI
+                NodeType::SubGraph(data) => {
+                    let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+                    let parent_next = follow_first_output(g, id);
+                    self.log.push(PlaytestLogEntry {
+                        speaker: "[SubGraph]".to_string(),
+                        text: format!("Entering '{}'", data.name),
+                    });
+                    self.subgraph_stack.push(PlaytestSubFrame {
+                        graph: data.child_graph,
+                        parent_next,
+                    });
+                    let cg = &self.subgraph_stack.last().unwrap().graph;
+                    let start = cg.nodes.values()
+                        .find(|n| matches!(n.node_type, NodeType::Start))
+                        .map(|n| n.id);
+                    self.current_node = start.and_then(|sid| {
+                        follow_first_output(&self.subgraph_stack.last().unwrap().graph, sid)
+                    });
+                }
+                NodeType::End(_) if !self.subgraph_stack.is_empty() => {
+                    self.log.push(PlaytestLogEntry {
+                        speaker: "[SubGraph]".to_string(),
+                        text: "Exiting sub-graph".to_string(),
+                    });
+                    let frame = self.subgraph_stack.pop().unwrap();
+                    self.current_node = frame.parent_next;
+                }
                 _ => break,
             }
         }
@@ -161,43 +158,66 @@ impl PlaytestState {
     /// Make a choice (for Choice nodes). `choice_index` is the output port index.
     pub fn make_choice(&mut self, graph: &DialogueGraph, choice_index: usize) {
         let Some(id) = self.current_node else { return };
-        let Some(node) = graph.nodes.get(&id) else { return };
-
-        if let NodeType::Choice(data) = &node.node_type {
-            if let Some(choice) = data.choices.get(choice_index) {
-                let text = interpolate_text(&choice.text, &self.variables);
-                self.log.push(PlaytestLogEntry {
-                    speaker: "[You]".to_string(),
-                    text,
-                });
-            }
-        }
-
-        if let Some(port) = node.outputs.get(choice_index) {
-            self.current_node = self.follow_port(graph, port.id);
-        } else {
-            self.current_node = None;
-        }
+        let entry = {
+            let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+            let Some(node) = g.nodes.get(&id) else { return };
+            if let NodeType::Choice(data) = &node.node_type {
+                data.choices.get(choice_index).map(|choice| {
+                    let text = interpolate_text(&choice.text, &self.variables);
+                    PlaytestLogEntry { speaker: "[You]".to_string(), text }
+                })
+            } else { None }
+        };
+        if let Some(e) = entry { self.log.push(e); }
+        let next = {
+            let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+            g.nodes.get(&id)
+                .and_then(|n| n.outputs.get(choice_index))
+                .and_then(|p| follow_port(g, p.id))
+        };
+        self.current_node = next;
         self.auto_advance(graph);
     }
 
     /// Advance past a Dialogue node (user clicked "Continue").
     pub fn advance_dialogue(&mut self, graph: &DialogueGraph) {
         let Some(id) = self.current_node else { return };
-        let Some(node) = graph.nodes.get(&id) else { return };
-
-        if let NodeType::Dialogue(data) = &node.node_type {
-            let speaker = if data.speaker_name.is_empty() {
-                "???".to_string()
-            } else {
-                data.speaker_name.clone()
-            };
-            let text = interpolate_text(&data.text, &self.variables);
-            self.log.push(PlaytestLogEntry { speaker, text });
-        }
-
-        self.current_node = self.follow_first_output(graph, id);
+        let entry = {
+            let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+            let Some(node) = g.nodes.get(&id) else { return };
+            if let NodeType::Dialogue(data) = &node.node_type {
+                let speaker = if data.speaker_name.is_empty() {
+                    "???".to_string()
+                } else {
+                    data.speaker_name.clone()
+                };
+                let text = interpolate_text(&data.text, &self.variables);
+                Some(PlaytestLogEntry { speaker, text })
+            } else { None }
+        };
+        if let Some(e) = entry { self.log.push(e); }
+        let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
+        self.current_node = follow_first_output(g, id);
         self.auto_advance(graph);
+    }
+}
+
+fn follow_first_output(graph: &DialogueGraph, node_id: Uuid) -> Option<Uuid> {
+    let node = graph.nodes.get(&node_id)?;
+    let port = node.outputs.first()?;
+    follow_port(graph, port.id)
+}
+
+fn follow_port(graph: &DialogueGraph, port_id: PortId) -> Option<Uuid> {
+    graph.connections.iter().find(|c| c.from_port == port_id).map(|c| c.to_node)
+}
+
+fn op_str(op: crate::model::node::CompareOp) -> &'static str {
+    use crate::model::node::CompareOp;
+    match op {
+        CompareOp::Eq => "==", CompareOp::Neq => "!=", CompareOp::Gt => ">",
+        CompareOp::Lt => "<", CompareOp::Gte => ">=", CompareOp::Lte => "<=",
+        CompareOp::Contains => "contains",
     }
 }
 
@@ -260,7 +280,8 @@ pub fn show_playtest_panel(
         return;
     };
 
-    let Some(node) = graph.nodes.get(&node_id) else {
+    let active = state.subgraph_stack.last().map_or(graph, |f| &f.graph);
+    let Some(node) = active.nodes.get(&node_id) else {
         ui.colored_label(Color32::from_rgb(255, 100, 100), "Error: node not found.");
         return;
     };

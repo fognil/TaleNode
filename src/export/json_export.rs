@@ -45,8 +45,10 @@ pub struct ExportedNode {
 }
 
 /// Export a DialogueGraph to the game-engine JSON format.
+/// SubGraph nodes are flattened (inlined) so the output is always a flat node array.
 pub fn export_json(graph: &DialogueGraph, name: &str) -> Result<String, serde_json::Error> {
-    let exported = build_export(graph, name);
+    let flat = super::flatten::flatten_subgraphs(graph);
+    let exported = build_export(&flat, name);
     serde_json::to_string_pretty(&exported)
 }
 

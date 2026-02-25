@@ -26,6 +26,7 @@ pub fn validate(graph: &DialogueGraph) -> Vec<ValidationWarning> {
     check_unreachable_nodes(graph, &mut warnings);
     check_empty_dialogue(graph, &mut warnings);
     check_dead_ends(graph, &mut warnings);
+    check_subgraph_children(graph, &mut warnings);
 
     warnings
 }
@@ -133,6 +134,23 @@ fn check_empty_dialogue(graph: &DialogueGraph, warnings: &mut Vec<ValidationWarn
                     node_id: Some(node.id),
                     message: format!("'{}' has empty text", node.title()),
                     severity: Severity::Warning,
+                });
+            }
+        }
+    }
+}
+
+/// Recursively validate child graphs inside SubGraph nodes.
+fn check_subgraph_children(graph: &DialogueGraph, warnings: &mut Vec<ValidationWarning>) {
+    for node in graph.nodes.values() {
+        if let NodeType::SubGraph(data) = &node.node_type {
+            let child_warnings = validate(&data.child_graph);
+            for w in child_warnings {
+                let prefix = format!("[SubGraph '{}'] ", node.title());
+                warnings.push(ValidationWarning {
+                    node_id: Some(node.id),
+                    message: format!("{prefix}{}", w.message),
+                    severity: w.severity,
                 });
             }
         }

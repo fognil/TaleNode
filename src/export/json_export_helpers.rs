@@ -31,6 +31,7 @@ pub fn build_id_map(graph: &DialogueGraph) -> HashMap<Uuid, String> {
             NodeType::Event(_) => "evt",
             NodeType::Random(_) => "rand",
             NodeType::End(_) => "end",
+            NodeType::SubGraph(_) => "sub",
         };
         let counter = counters.entry(prefix).or_insert(0);
         *counter += 1;
@@ -207,6 +208,13 @@ pub fn export_node_data(
             ("random", serde_json::json!({ "branches": branches }))
         }
         NodeType::End(d) => ("end", serde_json::json!({ "tag": d.tag })),
+        NodeType::SubGraph(d) => {
+            let next = find_next_single(outputs, conn_map, id_map);
+            ("subgraph", serde_json::json!({
+                "name": d.name,
+                "next": next,
+            }))
+        }
     }
 }
 

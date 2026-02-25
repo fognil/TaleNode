@@ -57,6 +57,7 @@ fn count_nodes_by_type(graph: &DialogueGraph, stats: &mut GraphAnalytics) {
             NodeType::Event(_) => "Event",
             NodeType::Random(_) => "Random",
             NodeType::End(_) => "End",
+            NodeType::SubGraph(_) => "SubGraph",
         };
         *stats.nodes_by_type.entry(type_name).or_insert(0) += 1;
     }

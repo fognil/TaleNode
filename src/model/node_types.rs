@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
+use super::graph::DialogueGraph;
+
 // --- NodeType enum ---
 
 /// The type-specific data for each node.
@@ -14,6 +16,7 @@ pub enum NodeType {
     Event(EventData),
     Random(RandomData),
     End(EndData),
+    SubGraph(SubGraphData),
 }
 
 // --- Dialogue ---
@@ -167,6 +170,28 @@ pub struct RandomBranch {
 pub struct EndData {
     #[serde(default)]
     pub tag: String,
+}
+
+// --- SubGraph ---
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SubGraphData {
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub child_graph: DialogueGraph,
+}
+
+impl Default for SubGraphData {
+    fn default() -> Self {
+        let mut graph = DialogueGraph::new();
+        let start = super::node::Node::new_start([100.0, 200.0]);
+        graph.add_node(start);
+        Self {
+            name: String::new(),
+            child_graph: graph,
+        }
+    }
 }
 
 #[cfg(test)]

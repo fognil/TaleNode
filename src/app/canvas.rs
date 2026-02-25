@@ -248,6 +248,18 @@ impl TaleNodeApp {
             self.interaction = InteractionState::Idle;
         }
 
+        // Double-click to enter sub-graph
+        if response.double_clicked() {
+            if let Some(node_id) = self.node_at_screen_pos(pointer_pos) {
+                if let Some(node) = self.graph.nodes.get(&node_id) {
+                    if matches!(node.node_type, crate::model::node::NodeType::SubGraph(_)) {
+                        self.enter_subgraph(node_id);
+                        return;
+                    }
+                }
+            }
+        }
+
         // Click to select node or deselect on empty space
         if response.clicked() && matches!(self.interaction, InteractionState::Idle) {
             if let Some(node_id) = self.node_at_screen_pos(pointer_pos) {
@@ -299,6 +311,7 @@ impl TaleNodeApp {
                         ("Event", Node::new_event),
                         ("Random", Node::new_random),
                         ("End", Node::new_end),
+                        ("SubGraph", Node::new_subgraph),
                     ];
                     for (label, constructor) in items {
                         if ui.button(*label).clicked() {
@@ -356,10 +369,32 @@ impl TaleNodeApp {
                 for port in &mut dup.outputs {
                     port.id = crate::model::port::PortId(Uuid::new_v4());
                 }
+                if let crate::model::node::NodeType::SubGraph(ref mut data) = dup.node_type {
+                    regenerate_child_ids(&mut data.child_graph);
+                }
                 new_ids.push(dup.id);
                 self.graph.add_node(dup);
             }
         }
         self.selected_nodes = new_ids;
+    }
+}
+fn regenerate_child_ids(g: &mut crate::model::graph::DialogueGraph) {
+    let (mut ids, mut ports) = (std::collections::HashMap::new(), std::collections::HashMap::new());
+    for (oid, mut n) in g.nodes.drain().collect::<Vec<_>>() {
+        let nid = Uuid::new_v4();
+        ids.insert(oid, nid);
+        n.id = nid;
+        for p in n.inputs.iter_mut().chain(n.outputs.iter_mut()) {
+            let np = PortId(Uuid::new_v4()); ports.insert(p.id, np); p.id = np;
+        }
+        g.nodes.insert(nid, n);
+    }
+    for c in &mut g.connections {
+        c.id = Uuid::new_v4();
+        c.from_node = ids.get(&c.from_node).copied().unwrap_or(c.from_node);
+        c.to_node = ids.get(&c.to_node).copied().unwrap_or(c.to_node);
+        c.from_port = ports.get(&c.from_port).copied().unwrap_or(c.from_port);
+        c.to_port = ports.get(&c.to_port).copied().unwrap_or(c.to_port);
     }
 }

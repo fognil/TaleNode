@@ -3,62 +3,38 @@
   "name": "Dragon Quest Example",
   "graph": {
     "nodes": {
-      "c773d629-f0ff-4cd8-abae-79b8386b71a8": {
-        "id": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
+      "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35": {
+        "id": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
         "node_type": {
-          "Condition": {
-            "variable_name": "gold",
-            "operator": "Gte",
-            "value": {
-              "Int": 30
-            }
+          "Dialogue": {
+            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
+            "speaker_name": "Merchant",
+            "text": "Here's your sword! Good luck on your quest.",
+            "emotion": "neutral",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
           }
         },
         "position": [
-          1500.0,
-          400.0
+          2200.0,
+          300.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "75ad568f-b83f-45ed-9619-fd0217db105c",
+            "id": "15bab2dc-4947-4f1a-9e7d-68adf48d8021",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "a405a422-77ce-4600-87f5-80c53f9c72e0",
+            "id": "e365d5fb-6c9d-46b3-be06-331d54112289",
             "direction": "Output",
-            "label": "True"
-          },
-          {
-            "id": "09dc3c24-e1ce-41b3-951c-ccd61ae43ee5",
-            "direction": "Output",
-            "label": "False"
-          }
-        ]
-      },
-      "ff70c236-9526-44ae-b5a8-f96b2c2fdac5": {
-        "id": "ff70c236-9526-44ae-b5a8-f96b2c2fdac5",
-        "node_type": {
-          "End": {
-            "tag": "bought_supplies"
-          }
-        },
-        "position": [
-          2550.0,
-          300.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "a7e651dc-59bb-4412-bc61-2709b1697ffd",
-            "direction": "Input",
             "label": ""
           }
-        ],
-        "outputs": []
+        ]
       },
       "08457b20-8422-4177-831d-f631d82810ea": {
         "id": "08457b20-8422-4177-831d-f631d82810ea",
@@ -80,6 +56,164 @@
           }
         ],
         "outputs": []
+      },
+      "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b": {
+        "id": "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b",
+        "node_type": {
+          "End": {
+            "tag": "declined"
+          }
+        },
+        "position": [
+          1504.9185,
+          654.7904
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "2b54a1ef-6fa7-4b33-ab2c-f99594fce10d",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "4216a2a0-57b3-4ca4-a3a8-030594dea0d8": {
+        "id": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
+            "speaker_name": "Merchant",
+            "text": "Sorry, you don't have enough gold. Come back when you have 30 gold.",
+            "emotion": "sad",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1850.0,
+          550.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "59546216-dcc4-47c0-911a-608f2d27915a",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "523b7098-c24f-439f-83ef-7c329fe7e699",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "bae46683-9995-4b7f-959c-323a5041dc27": {
+        "id": "bae46683-9995-4b7f-959c-323a5041dc27",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
+            "speaker_name": "Village Elder",
+            "text": "You are brave indeed! Head north through the forest. Be careful!",
+            "emotion": "happy",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1500.0,
+          150.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "94916c6f-28d8-48ce-9ae4-00f39305b9a5",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "1f8fc1f8-7157-490c-8939-e13cd637ce7b",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "05034862-26bc-45c9-ba09-16dfa9a08f22": {
+        "id": "05034862-26bc-45c9-ba09-16dfa9a08f22",
+        "node_type": {
+          "End": {
+            "tag": "quest_accepted"
+          }
+        },
+        "position": [
+          1850.0,
+          150.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "11ee0276-263f-49bc-a711-bc60813c62b9",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": []
+      },
+      "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036": {
+        "id": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
+        "node_type": {
+          "Dialogue": {
+            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
+            "speaker_name": "Village Elder",
+            "text": "I understand. Safe travels, stranger.",
+            "emotion": "sad",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
+          }
+        },
+        "position": [
+          1150.0,
+          650.0
+        ],
+        "collapsed": false,
+        "inputs": [
+          {
+            "id": "d3af1784-3555-4a52-87b7-fffb8af7c4ca",
+            "direction": "Input",
+            "label": ""
+          }
+        ],
+        "outputs": [
+          {
+            "id": "cd090199-1f95-4cf9-8db6-7cefcde63f3c",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
+      },
+      "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e": {
+        "id": "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e",
+        "node_type": "Start",
+        "position": [
+          100.0,
+          300.0
+        ],
+        "collapsed": false,
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "5c2cb39b-2c52-4975-b842-d111bcd8381c",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
       },
       "288b2675-c68e-4c7f-b921-ab8323ca841f": {
         "id": "288b2675-c68e-4c7f-b921-ab8323ca841f",
@@ -149,36 +283,39 @@
           }
         ]
       },
-      "bae46683-9995-4b7f-959c-323a5041dc27": {
-        "id": "bae46683-9995-4b7f-959c-323a5041dc27",
+      "c773d629-f0ff-4cd8-abae-79b8386b71a8": {
+        "id": "c773d629-f0ff-4cd8-abae-79b8386b71a8",
         "node_type": {
-          "Dialogue": {
-            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
-            "speaker_name": "Village Elder",
-            "text": "You are brave indeed! Head north through the forest. Be careful!",
-            "emotion": "happy",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
+          "Condition": {
+            "variable_name": "gold",
+            "operator": "Gte",
+            "value": {
+              "Int": 30
+            }
           }
         },
         "position": [
-          1500.0,
-          150.0
+          1505.0098,
+          394.09012
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "94916c6f-28d8-48ce-9ae4-00f39305b9a5",
+            "id": "75ad568f-b83f-45ed-9619-fd0217db105c",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": [
           {
-            "id": "1f8fc1f8-7157-490c-8939-e13cd637ce7b",
+            "id": "a405a422-77ce-4600-87f5-80c53f9c72e0",
             "direction": "Output",
-            "label": ""
+            "label": "True"
+          },
+          {
+            "id": "09dc3c24-e1ce-41b3-951c-ccd61ae43ee5",
+            "direction": "Output",
+            "label": "False"
           }
         ]
       },
@@ -193,13 +330,20 @@
                 "value": {
                   "Bool": true
                 }
+              },
+              {
+                "action_type": "SetVariable",
+                "key": "s",
+                "value": {
+                  "Bool": false
+                }
               }
             ]
           }
         },
         "position": [
-          1850.0,
-          300.0
+          1835.0891,
+          305.3452
         ],
         "collapsed": false,
         "inputs": [
@@ -217,26 +361,38 @@
           }
         ]
       },
-      "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b": {
-        "id": "616284f7-6ca1-4df9-bd8f-fa93b5fcba3b",
+      "ef7f14f4-57e5-47dc-8936-b4464627e039": {
+        "id": "ef7f14f4-57e5-47dc-8936-b4464627e039",
         "node_type": {
-          "End": {
-            "tag": "declined"
+          "Dialogue": {
+            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
+            "speaker_name": "Merchant",
+            "text": "Welcome to my shop! I have swords and potions. What do you need?",
+            "emotion": "happy",
+            "portrait_override": null,
+            "audio_clip": null,
+            "metadata": {}
           }
         },
         "position": [
-          1500.0,
-          650.0
+          1150.0,
+          400.0
         ],
         "collapsed": false,
         "inputs": [
           {
-            "id": "2b54a1ef-6fa7-4b33-ab2c-f99594fce10d",
+            "id": "311d68fb-2fc9-44d3-abe7-2cffdb3b8409",
             "direction": "Input",
             "label": ""
           }
         ],
-        "outputs": []
+        "outputs": [
+          {
+            "id": "4b3d3249-daf3-428e-b223-aee03c60275b",
+            "direction": "Output",
+            "label": ""
+          }
+        ]
       },
       "3e985f2c-fe71-4ce3-b6f4-0540ff452f36": {
         "id": "3e985f2c-fe71-4ce3-b6f4-0540ff452f36",
@@ -292,175 +448,26 @@
           }
         ]
       },
-      "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e": {
-        "id": "1dcfe1ce-c8d9-4f5d-9f42-33dd82d88b7e",
-        "node_type": "Start",
+      "ff70c236-9526-44ae-b5a8-f96b2c2fdac5": {
+        "id": "ff70c236-9526-44ae-b5a8-f96b2c2fdac5",
+        "node_type": {
+          "End": {
+            "tag": "bought_supplies"
+          }
+        },
         "position": [
-          100.0,
+          2550.0,
           300.0
         ],
         "collapsed": false,
-        "inputs": [],
-        "outputs": [
-          {
-            "id": "5c2cb39b-2c52-4975-b842-d111bcd8381c",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036": {
-        "id": "a1a0ac1c-2002-4c6d-96a7-9d44d4bb4036",
-        "node_type": {
-          "Dialogue": {
-            "speaker_id": "72e81e02-93aa-4ea4-8ae8-b3b7e1c58841",
-            "speaker_name": "Village Elder",
-            "text": "I understand. Safe travels, stranger.",
-            "emotion": "sad",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
-          }
-        },
-        "position": [
-          1150.0,
-          650.0
-        ],
-        "collapsed": false,
         "inputs": [
           {
-            "id": "d3af1784-3555-4a52-87b7-fffb8af7c4ca",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "cd090199-1f95-4cf9-8db6-7cefcde63f3c",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "05034862-26bc-45c9-ba09-16dfa9a08f22": {
-        "id": "05034862-26bc-45c9-ba09-16dfa9a08f22",
-        "node_type": {
-          "End": {
-            "tag": "quest_accepted"
-          }
-        },
-        "position": [
-          1850.0,
-          150.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "11ee0276-263f-49bc-a711-bc60813c62b9",
+            "id": "a7e651dc-59bb-4412-bc61-2709b1697ffd",
             "direction": "Input",
             "label": ""
           }
         ],
         "outputs": []
-      },
-      "ef7f14f4-57e5-47dc-8936-b4464627e039": {
-        "id": "ef7f14f4-57e5-47dc-8936-b4464627e039",
-        "node_type": {
-          "Dialogue": {
-            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
-            "speaker_name": "Merchant",
-            "text": "Welcome to my shop! I have swords and potions. What do you need?",
-            "emotion": "happy",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
-          }
-        },
-        "position": [
-          1150.0,
-          400.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "311d68fb-2fc9-44d3-abe7-2cffdb3b8409",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "4b3d3249-daf3-428e-b223-aee03c60275b",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "4216a2a0-57b3-4ca4-a3a8-030594dea0d8": {
-        "id": "4216a2a0-57b3-4ca4-a3a8-030594dea0d8",
-        "node_type": {
-          "Dialogue": {
-            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
-            "speaker_name": "Merchant",
-            "text": "Sorry, you don't have enough gold. Come back when you have 30 gold.",
-            "emotion": "sad",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
-          }
-        },
-        "position": [
-          1850.0,
-          550.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "59546216-dcc4-47c0-911a-608f2d27915a",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "523b7098-c24f-439f-83ef-7c329fe7e699",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
-      },
-      "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35": {
-        "id": "5bdabbcc-0595-42df-a0ac-c9f2e6ef2d35",
-        "node_type": {
-          "Dialogue": {
-            "speaker_id": "d61a4c90-e417-446c-864c-30da0d73024a",
-            "speaker_name": "Merchant",
-            "text": "Here's your sword! Good luck on your quest.",
-            "emotion": "neutral",
-            "portrait_override": null,
-            "audio_clip": null,
-            "metadata": {}
-          }
-        },
-        "position": [
-          2200.0,
-          300.0
-        ],
-        "collapsed": false,
-        "inputs": [
-          {
-            "id": "15bab2dc-4947-4f1a-9e7d-68adf48d8021",
-            "direction": "Input",
-            "label": ""
-          }
-        ],
-        "outputs": [
-          {
-            "id": "e365d5fb-6c9d-46b3-be06-331d54112289",
-            "direction": "Output",
-            "label": ""
-          }
-        ]
       }
     },
     "connections": [
@@ -613,6 +620,12 @@
         "portrait_path": ""
       }
     ],
-    "groups": []
-  }
+    "groups": [],
+    "review_statuses": {
+      "8b3352ac-50f3-40d0-8df3-08867c3dac60": "Approved"
+    },
+    "comments": [],
+    "node_tags": {}
+  },
+  "versions": []
 }

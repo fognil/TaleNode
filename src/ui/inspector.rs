@@ -85,6 +85,21 @@ pub fn show_inspector(
                     snapshot_needed = true;
                 }
             }
+
+            NodeType::SubGraph(data) => {
+                ui.label("Name:");
+                if ui.text_edit_singleline(&mut data.name).gained_focus() {
+                    snapshot_needed = true;
+                }
+                ui.add_space(8.0);
+                ui.label(format!(
+                    "Child nodes: {}  Connections: {}",
+                    data.child_graph.nodes.len(),
+                    data.child_graph.connections.len(),
+                ));
+                ui.add_space(4.0);
+                ui.label("Double-click to enter sub-graph.");
+            }
         }
     }
 

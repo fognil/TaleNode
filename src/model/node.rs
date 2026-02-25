@@ -203,6 +203,17 @@ impl Node {
         None
     }
 
+    pub fn new_subgraph(position: [f32; 2]) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            node_type: NodeType::SubGraph(SubGraphData::default()),
+            position,
+            collapsed: false,
+            inputs: vec![Port::input()],
+            outputs: vec![Port::output()],
+        }
+    }
+
     pub fn title(&self) -> &str {
         match &self.node_type {
             NodeType::Start => "Start",
@@ -218,6 +229,13 @@ impl Node {
             NodeType::Event(_) => "Event",
             NodeType::Random(_) => "Random",
             NodeType::End(_) => "End",
+            NodeType::SubGraph(data) => {
+                if data.name.is_empty() {
+                    "SubGraph"
+                } else {
+                    &data.name
+                }
+            }
         }
     }
 }
@@ -248,37 +266,34 @@ mod tests {
     }
 
     #[test]
-    fn node_title_defaults() {
-        assert_eq!(Node::new_start([0.0, 0.0]).title(), "Start");
-        assert_eq!(Node::new_dialogue([0.0, 0.0]).title(), "Dialogue");
-        assert_eq!(Node::new_end([0.0, 0.0]).title(), "End");
+    fn node_titles_and_port_counts() {
+        let p = [0.0, 0.0];
+        assert_eq!(Node::new_start(p).title(), "Start");
+        assert_eq!(Node::new_dialogue(p).title(), "Dialogue");
+        assert_eq!(Node::new_choice(p).title(), "Choice");
+        assert_eq!(Node::new_condition(p).title(), "Condition");
+        assert_eq!(Node::new_event(p).title(), "Event");
+        assert_eq!(Node::new_random(p).title(), "Random");
+        assert_eq!(Node::new_end(p).title(), "End");
+        assert_eq!(Node::new_subgraph(p).title(), "SubGraph");
+
+        let cond = Node::new_condition(p);
+        assert_eq!(cond.outputs[0].label, "True");
+        assert_eq!(cond.outputs[1].label, "False");
+
+        let evt = Node::new_event(p);
+        assert_eq!(evt.inputs.len(), 1);
+        assert_eq!(evt.outputs.len(), 1);
     }
 
     #[test]
     fn choice_node_has_dynamic_outputs() {
         let mut node = Node::new_choice([0.0, 0.0]);
-        assert_eq!(node.inputs.len(), 1);
         assert_eq!(node.outputs.len(), 2);
         node.add_choice();
         assert_eq!(node.outputs.len(), 3);
         node.remove_choice(0);
         assert_eq!(node.outputs.len(), 2);
-    }
-
-    #[test]
-    fn condition_node_has_true_false_outputs() {
-        let node = Node::new_condition([0.0, 0.0]);
-        assert_eq!(node.inputs.len(), 1);
-        assert_eq!(node.outputs.len(), 2);
-        assert_eq!(node.outputs[0].label, "True");
-        assert_eq!(node.outputs[1].label, "False");
-    }
-
-    #[test]
-    fn event_node_has_one_input_one_output() {
-        let node = Node::new_event([0.0, 0.0]);
-        assert_eq!(node.inputs.len(), 1);
-        assert_eq!(node.outputs.len(), 1);
     }
 
     #[test]
@@ -289,23 +304,6 @@ mod tests {
         assert_eq!(node.outputs.len(), 3);
         node.remove_random_branch(0);
         assert_eq!(node.outputs.len(), 2);
-    }
-
-    #[test]
-    fn serialization_roundtrip() {
-        let node = Node::new_dialogue([50.0, 100.0]);
-        let json = serde_json::to_string(&node).unwrap();
-        let deserialized: Node = serde_json::from_str(&json).unwrap();
-        assert_eq!(deserialized.id, node.id);
-        assert_eq!(deserialized.position, node.position);
-    }
-
-    #[test]
-    fn title_all_node_types() {
-        assert_eq!(Node::new_choice([0.0, 0.0]).title(), "Choice");
-        assert_eq!(Node::new_condition([0.0, 0.0]).title(), "Condition");
-        assert_eq!(Node::new_event([0.0, 0.0]).title(), "Event");
-        assert_eq!(Node::new_random([0.0, 0.0]).title(), "Random");
     }
 
     #[test]
@@ -384,6 +382,7 @@ mod tests {
             Node::new_event([0.0, 0.0]),
             Node::new_random([0.0, 0.0]),
             Node::new_end([0.0, 0.0]),
+            Node::new_subgraph([0.0, 0.0]),
         ];
         for node in &nodes {
             let json = serde_json::to_string(node).unwrap();

@@ -4,6 +4,7 @@ use crate::model::character::Character;
 use crate::model::node::{Node, NodeType};
 use crate::model::review::ReviewStatus;
 use crate::ui::canvas::CanvasState;
+use super::node_body::draw_node_body;
 
 /// Visual constants for node rendering.
 const NODE_WIDTH: f32 = 200.0;
@@ -14,8 +15,6 @@ const NODE_PORT_Y_SPACING: f32 = 22.0;
 const NODE_MIN_BODY_HEIGHT: f32 = 30.0;
 const NODE_ROUNDING: u8 = 6;
 const NODE_TEXT_PREVIEW_LINES: usize = 2;
-const BODY_TEXT_COLOR: Color32 = Color32::from_rgb(200, 200, 200);
-const DIM_TEXT_COLOR: Color32 = Color32::from_rgb(140, 140, 140);
 
 pub const PORT_RADIUS: f32 = NODE_PORT_RADIUS;
 
@@ -29,6 +28,7 @@ pub fn node_color(node_type: &NodeType) -> Color32 {
         NodeType::Event(_) => Color32::from_rgb(171, 71, 188),    // purple
         NodeType::Random(_) => Color32::from_rgb(158, 158, 158),  // gray
         NodeType::End(_) => Color32::from_rgb(244, 67, 54),       // red
+        NodeType::SubGraph(_) => Color32::from_rgb(0, 188, 212),  // cyan
     }
 }
 
@@ -42,24 +42,22 @@ fn node_body_height(node: &Node) -> f32 {
         0.0
     };
 
-    // Extra content height depending on node type
     let content_height = match &node.node_type {
         NodeType::Dialogue(data) if !data.text.is_empty() => {
             let line_count = data.text.lines().take(NODE_TEXT_PREVIEW_LINES).count();
             (line_count.max(1) as f32) * 16.0 + 8.0
         }
         NodeType::Condition(data) => {
-            // Show "variable op value" summary
             if !data.variable_name.is_empty() { 18.0 } else { 0.0 }
         }
         NodeType::Event(data) => {
-            // Show action count
             if !data.actions.is_empty() {
                 (data.actions.len().min(3) as f32) * 16.0 + 4.0
             } else {
                 0.0
             }
         }
+        NodeType::SubGraph(_) => 18.0,
         _ => 0.0,
     };
 
@@ -106,7 +104,6 @@ pub fn draw_node(
         return;
     }
 
-    // Use character color for Dialogue nodes with a linked speaker
     let color = resolve_node_color(node, characters);
     let body_color = Color32::from_rgb(50, 50, 50);
     let rounding = CornerRadius::same(NODE_ROUNDING);
@@ -121,12 +118,7 @@ pub fn draw_node(
     );
     painter.rect_filled(
         header_rect,
-        CornerRadius {
-            nw: NODE_ROUNDING,
-            ne: NODE_ROUNDING,
-            sw: 0,
-            se: 0,
-        },
+        CornerRadius { nw: NODE_ROUNDING, ne: NODE_ROUNDING, sw: 0, se: 0 },
         color,
     );
 
@@ -141,37 +133,16 @@ pub fn draw_node(
         Color32::WHITE,
     );
 
-    // Body content (type-specific)
+    // Body content (type-specific — delegated to node_body module)
     draw_node_body(painter, node, canvas, &screen_rect, &header_rect);
 
     // Draw ports
     draw_ports(painter, node, canvas, color);
 
     // Border
-    if is_selected {
-        painter.rect_stroke(
-            screen_rect,
-            rounding,
-            Stroke::new(2.0 * canvas.zoom, Color32::from_rgb(255, 255, 100)),
-            StrokeKind::Outside,
-        );
-    } else if is_search_match {
-        painter.rect_stroke(
-            screen_rect,
-            rounding,
-            Stroke::new(2.0 * canvas.zoom, Color32::from_rgb(100, 200, 255)),
-            StrokeKind::Outside,
-        );
-    } else {
-        painter.rect_stroke(
-            screen_rect,
-            rounding,
-            Stroke::new(1.0 * canvas.zoom, Color32::from_rgb(70, 70, 70)),
-            StrokeKind::Inside,
-        );
-    }
+    draw_border(painter, &screen_rect, rounding, canvas.zoom, is_selected, is_search_match);
 
-    // Review status badge (top-right of header)
+    // Review status badge
     if review_status != ReviewStatus::Draft {
         let badge_color = crate::ui::comments_panel::status_color(review_status);
         let badge_radius = 5.0 * canvas.zoom;
@@ -183,136 +154,33 @@ pub fn draw_node(
     }
 }
 
-/// Draw type-specific body content inside the node.
-fn draw_node_body(
+fn draw_border(
     painter: &egui::Painter,
-    node: &Node,
-    canvas: &CanvasState,
-    screen_rect: &Rect,
-    header_rect: &Rect,
+    rect: &Rect,
+    rounding: CornerRadius,
+    zoom: f32,
+    is_selected: bool,
+    is_search_match: bool,
 ) {
-    let small_font = FontId::proportional(11.0 * canvas.zoom);
-    let body_x = screen_rect.min.x + 10.0 * canvas.zoom;
-    let body_y_start = header_rect.max.y + 6.0 * canvas.zoom;
-    let max_text_w = screen_rect.width() - 20.0 * canvas.zoom;
-
-    match &node.node_type {
-        NodeType::Dialogue(data) => {
-            if !data.text.is_empty() {
-                let preview: String = data
-                    .text
-                    .lines()
-                    .take(NODE_TEXT_PREVIEW_LINES)
-                    .collect::<Vec<_>>()
-                    .join("\n");
-                let truncated = truncate_to_width(painter, &preview, &small_font, max_text_w);
-                painter.text(
-                    Pos2::new(body_x, body_y_start),
-                    egui::Align2::LEFT_TOP,
-                    &truncated,
-                    small_font,
-                    BODY_TEXT_COLOR,
-                );
-            }
-        }
-        NodeType::Condition(data) => {
-            if !data.variable_name.is_empty() {
-                let op_str = match data.operator {
-                    crate::model::node::CompareOp::Eq => "==",
-                    crate::model::node::CompareOp::Neq => "!=",
-                    crate::model::node::CompareOp::Gt => ">",
-                    crate::model::node::CompareOp::Lt => "<",
-                    crate::model::node::CompareOp::Gte => ">=",
-                    crate::model::node::CompareOp::Lte => "<=",
-                    crate::model::node::CompareOp::Contains => "contains",
-                };
-                let val_str = format_variable_value(&data.value);
-                let summary = format!("{} {} {}", data.variable_name, op_str, val_str);
-                let truncated = truncate_to_width(painter, &summary, &small_font, max_text_w);
-                painter.text(
-                    Pos2::new(body_x, body_y_start),
-                    egui::Align2::LEFT_TOP,
-                    &truncated,
-                    small_font,
-                    BODY_TEXT_COLOR,
-                );
-            } else {
-                painter.text(
-                    Pos2::new(body_x, body_y_start),
-                    egui::Align2::LEFT_TOP,
-                    "(no condition set)",
-                    small_font,
-                    DIM_TEXT_COLOR,
-                );
-            }
-        }
-        NodeType::Event(data) => {
-            if data.actions.is_empty() {
-                painter.text(
-                    Pos2::new(body_x, body_y_start),
-                    egui::Align2::LEFT_TOP,
-                    "(no actions)",
-                    small_font,
-                    DIM_TEXT_COLOR,
-                );
-            } else {
-                for (i, action) in data.actions.iter().take(3).enumerate() {
-                    let action_label = format!("{}: {}", action.key, format_variable_value(&action.value));
-                    let truncated = truncate_to_width(painter, &action_label, &small_font, max_text_w);
-                    painter.text(
-                        Pos2::new(body_x, body_y_start + i as f32 * 16.0 * canvas.zoom),
-                        egui::Align2::LEFT_TOP,
-                        &truncated,
-                        small_font.clone(),
-                        BODY_TEXT_COLOR,
-                    );
-                }
-                if data.actions.len() > 3 {
-                    painter.text(
-                        Pos2::new(body_x, body_y_start + 3.0 * 16.0 * canvas.zoom),
-                        egui::Align2::LEFT_TOP,
-                        format!("+{} more", data.actions.len() - 3),
-                        small_font,
-                        DIM_TEXT_COLOR,
-                    );
-                }
-            }
-        }
-        NodeType::End(data) => {
-            if !data.tag.is_empty() {
-                let label = format!("tag: {}", data.tag);
-                let truncated = truncate_to_width(painter, &label, &small_font, max_text_w);
-                painter.text(
-                    Pos2::new(body_x, body_y_start),
-                    egui::Align2::LEFT_TOP,
-                    &truncated,
-                    small_font,
-                    DIM_TEXT_COLOR,
-                );
-            }
-        }
-        _ => {}
+    if is_selected {
+        painter.rect_stroke(
+            *rect, rounding,
+            Stroke::new(2.0 * zoom, Color32::from_rgb(255, 255, 100)),
+            StrokeKind::Outside,
+        );
+    } else if is_search_match {
+        painter.rect_stroke(
+            *rect, rounding,
+            Stroke::new(2.0 * zoom, Color32::from_rgb(100, 200, 255)),
+            StrokeKind::Outside,
+        );
+    } else {
+        painter.rect_stroke(
+            *rect, rounding,
+            Stroke::new(1.0 * zoom, Color32::from_rgb(70, 70, 70)),
+            StrokeKind::Inside,
+        );
     }
-}
-
-/// Truncate text with "..." if it exceeds the available width.
-fn truncate_to_width(painter: &egui::Painter, text: &str, font: &FontId, max_width: f32) -> String {
-    let galley = painter.layout_no_wrap(text.to_string(), font.clone(), Color32::WHITE);
-    if galley.rect.width() <= max_width {
-        return text.to_string();
-    }
-    // Remove chars from end until it fits with ellipsis
-    let chars: Vec<char> = text.chars().collect();
-    let mut end = chars.len();
-    while end > 0 {
-        end -= 1;
-        let candidate: String = chars[..end].iter().collect::<String>() + "...";
-        let galley = painter.layout_no_wrap(candidate.clone(), font.clone(), Color32::WHITE);
-        if galley.rect.width() <= max_width {
-            return candidate;
-        }
-    }
-    "...".to_string()
 }
 
 /// Draw input and output ports on a node.
@@ -330,22 +198,14 @@ fn draw_ports(
         let screen_pos = canvas.canvas_to_screen(canvas_pos);
         painter.circle_filled(screen_pos, port_radius, Color32::from_rgb(180, 180, 180));
         painter.circle_stroke(
-            screen_pos,
-            port_radius,
+            screen_pos, port_radius,
             Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
         );
-
         if !port.label.is_empty() {
-            let label_pos = Pos2::new(
-                screen_pos.x + port_radius + 4.0 * canvas.zoom,
-                screen_pos.y,
-            );
             painter.text(
-                label_pos,
-                egui::Align2::LEFT_CENTER,
-                &port.label,
-                label_font.clone(),
-                Color32::from_rgb(180, 180, 180),
+                Pos2::new(screen_pos.x + port_radius + 4.0 * canvas.zoom, screen_pos.y),
+                egui::Align2::LEFT_CENTER, &port.label,
+                label_font.clone(), Color32::from_rgb(180, 180, 180),
             );
         }
     }
@@ -355,29 +215,20 @@ fn draw_ports(
         let screen_pos = canvas.canvas_to_screen(canvas_pos);
         painter.circle_filled(screen_pos, port_radius, accent_color);
         painter.circle_stroke(
-            screen_pos,
-            port_radius,
+            screen_pos, port_radius,
             Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
         );
-
         if !port.label.is_empty() {
-            let label_pos = Pos2::new(
-                screen_pos.x - port_radius - 4.0 * canvas.zoom,
-                screen_pos.y,
-            );
             painter.text(
-                label_pos,
-                egui::Align2::RIGHT_CENTER,
-                &port.label,
-                label_font.clone(),
-                Color32::from_rgb(180, 180, 180),
+                Pos2::new(screen_pos.x - port_radius - 4.0 * canvas.zoom, screen_pos.y),
+                egui::Align2::RIGHT_CENTER, &port.label,
+                label_font.clone(), Color32::from_rgb(180, 180, 180),
             );
         }
     }
 }
 
 /// Resolve the header color for a node.
-/// Dialogue nodes with a linked character use that character's color.
 fn resolve_node_color(node: &Node, characters: &[Character]) -> Color32 {
     if let NodeType::Dialogue(data) = &node.node_type {
         if let Some(speaker_id) = data.speaker_id {
@@ -387,13 +238,4 @@ fn resolve_node_color(node: &Node, characters: &[Character]) -> Color32 {
         }
     }
     node_color(&node.node_type)
-}
-
-fn format_variable_value(val: &crate::model::node::VariableValue) -> String {
-    match val {
-        crate::model::node::VariableValue::Bool(b) => b.to_string(),
-        crate::model::node::VariableValue::Int(i) => i.to_string(),
-        crate::model::node::VariableValue::Float(f) => format!("{f:.2}"),
-        crate::model::node::VariableValue::Text(s) => format!("\"{s}\""),
-    }
 }
