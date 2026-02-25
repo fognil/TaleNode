@@ -152,3 +152,127 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     }
     Ok(tokens)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tokenize_integer() {
+        let tokens = tokenize("42").unwrap();
+        assert_eq!(tokens, vec![Token::Int(42)]);
+    }
+
+    #[test]
+    fn tokenize_float() {
+        let tokens = tokenize("3.14").unwrap();
+        assert_eq!(tokens, vec![Token::Float(3.14)]);
+    }
+
+    #[test]
+    fn tokenize_string_literal() {
+        let tokens = tokenize("\"hello world\"").unwrap();
+        assert_eq!(tokens, vec![Token::Str("hello world".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_unterminated_string() {
+        assert!(tokenize("\"oops").is_err());
+    }
+
+    #[test]
+    fn tokenize_booleans() {
+        let tokens = tokenize("true false").unwrap();
+        assert_eq!(tokens, vec![Token::Bool(true), Token::Bool(false)]);
+    }
+
+    #[test]
+    fn tokenize_identifier() {
+        let tokens = tokenize("player_name").unwrap();
+        assert_eq!(tokens, vec![Token::Ident("player_name".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_comparison_operators() {
+        let tokens = tokenize("== != > < >= <=").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Op(BinOp::Eq), Token::Op(BinOp::Neq),
+            Token::Op(BinOp::Gt), Token::Op(BinOp::Lt),
+            Token::Op(BinOp::Gte), Token::Op(BinOp::Lte),
+        ]);
+    }
+
+    #[test]
+    fn tokenize_arithmetic() {
+        let tokens = tokenize("1 + 2 * 3 / 4 % 5").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Int(1), Token::Op(BinOp::Add), Token::Int(2),
+            Token::Op(BinOp::Mul), Token::Int(3), Token::Op(BinOp::Div),
+            Token::Int(4), Token::Op(BinOp::Mod), Token::Int(5),
+        ]);
+    }
+
+    #[test]
+    fn tokenize_logical_operators() {
+        let tokens = tokenize("true && false || !true").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Bool(true), Token::Op(BinOp::And), Token::Bool(false),
+            Token::Op(BinOp::Or), Token::Not, Token::Bool(true),
+        ]);
+    }
+
+    #[test]
+    fn tokenize_parentheses() {
+        let tokens = tokenize("(1 + 2)").unwrap();
+        assert_eq!(tokens, vec![
+            Token::LParen, Token::Int(1), Token::Op(BinOp::Add),
+            Token::Int(2), Token::RParen,
+        ]);
+    }
+
+    #[test]
+    fn tokenize_unary_minus() {
+        let tokens = tokenize("-5").unwrap();
+        assert_eq!(tokens, vec![Token::Minus, Token::Int(5)]);
+        // Minus after operator is unary
+        let tokens = tokenize("3 + -2").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Int(3), Token::Op(BinOp::Add), Token::Minus, Token::Int(2),
+        ]);
+    }
+
+    #[test]
+    fn tokenize_binary_minus() {
+        let tokens = tokenize("5 - 3").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Int(5), Token::Op(BinOp::Sub), Token::Int(3),
+        ]);
+    }
+
+    #[test]
+    fn tokenize_unexpected_char() {
+        assert!(tokenize("@").is_err());
+    }
+
+    #[test]
+    fn tokenize_complex_expression() {
+        let tokens = tokenize("gold >= 100 && has_key == true").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Ident("gold".to_string()), Token::Op(BinOp::Gte), Token::Int(100),
+            Token::Op(BinOp::And),
+            Token::Ident("has_key".to_string()), Token::Op(BinOp::Eq), Token::Bool(true),
+        ]);
+    }
+
+    #[test]
+    fn tokenize_empty_input() {
+        let tokens = tokenize("").unwrap();
+        assert!(tokens.is_empty());
+    }
+
+    #[test]
+    fn tokenize_whitespace_only() {
+        let tokens = tokenize("   \t\n  ").unwrap();
+        assert!(tokens.is_empty());
+    }
+}
