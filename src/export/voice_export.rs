@@ -41,7 +41,15 @@ pub fn export_voice_csv(graph: &DialogueGraph, name: &str) -> String {
         num_a.cmp(&num_b)
     });
 
-    let mut csv = String::from("LineID,Speaker,Text,Emotion,AudioFile,Duration,Notes\n");
+    let has_locales = graph.locale.has_extra_locales();
+    let mut csv = String::from("LineID,Speaker,Text,Emotion,AudioFile,Duration,Notes");
+    if has_locales {
+        for loc in &graph.locale.extra_locales {
+            csv.push(',');
+            csv.push_str(&csv_escape(&format!("Text_{loc}")));
+        }
+    }
+    csv.push('\n');
 
     for (readable_id, node) in &rows {
         if let NodeType::Dialogue(data) = &node.node_type {
@@ -74,6 +82,14 @@ pub fn export_voice_csv(graph: &DialogueGraph, name: &str) -> String {
             csv.push_str(&csv_escape(duration));
             csv.push(',');
             csv.push_str(&csv_escape(notes));
+            if has_locales {
+                let key = format!("dlg_{}", &node.id.to_string()[..8]);
+                for loc in &graph.locale.extra_locales {
+                    csv.push(',');
+                    let t = graph.locale.get_translation(&key, loc).unwrap_or("");
+                    csv.push_str(&csv_escape(t));
+                }
+            }
             csv.push('\n');
         }
     }
