@@ -1,10 +1,13 @@
 pub mod analytics_export;
 pub mod flatten;
+pub mod html_export;
+mod html_template;
 pub mod json_export;
 pub mod json_export_helpers;
 mod json_export_types;
 pub mod locale_export;
 pub mod plugin_export;
+pub mod screenplay_export;
 pub mod voice_export;
 pub mod xml_export;
 pub mod yarn_export;

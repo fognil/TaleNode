@@ -42,6 +42,20 @@ impl ScriptContext {
         pairs.sort_by_key(|(k, _)| *k);
         pairs
     }
+
+    /// Export all variables as owned (name, value) pairs for checkpointing.
+    pub fn to_pairs(&self) -> Vec<(String, VariableValue)> {
+        let mut pairs: Vec<_> = self.vars.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
+        pairs.sort_by(|(a, _), (b, _)| a.cmp(b));
+        pairs
+    }
+
+    /// Restore from owned (name, value) pairs.
+    pub fn from_pairs(pairs: Vec<(String, VariableValue)>) -> Self {
+        Self {
+            vars: pairs.into_iter().collect(),
+        }
+    }
 }
 
 /// Evaluate a Condition node's data against the runtime context.

@@ -62,6 +62,14 @@ impl TaleNodeApp {
                     self.do_export_voice_csv();
                     ui.close_menu();
                 }
+                if ui.button("Export Screenplay...").clicked() {
+                    self.do_export_screenplay();
+                    ui.close_menu();
+                }
+                if ui.button("Export HTML Playable...").clicked() {
+                    self.do_export_html();
+                    ui.close_menu();
+                }
                 if ui.button("Batch Assign Audio...").clicked() {
                     self.audio_manager.open = true;
                     ui.close_menu();
@@ -77,6 +85,10 @@ impl TaleNodeApp {
                 }
                 if ui.button("Import from articy...").clicked() {
                     self.do_import_articy();
+                    ui.close_menu();
+                }
+                if ui.button("Import from Ink...").clicked() {
+                    self.do_import_ink();
                     ui.close_menu();
                 }
             });

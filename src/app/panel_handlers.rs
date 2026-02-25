@@ -287,7 +287,7 @@ impl TaleNodeApp {
     }
 
     pub(super) fn render_playtest_tab(&mut self, ui: &mut egui::Ui) {
-        crate::ui::playtest::show_playtest_panel(
+        crate::ui::playtest_panel::show_playtest_panel(
             ui,
             &mut self.playtest,
             &self.graph,

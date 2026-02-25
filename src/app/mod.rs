@@ -2,6 +2,7 @@ mod canvas;
 mod confirm;
 mod context_menu;
 mod dock;
+mod file_import;
 mod file_io;
 mod file_io_locale;
 mod menu;
