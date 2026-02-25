@@ -9,6 +9,7 @@ mod menu;
 mod panel_handlers;
 mod panels;
 mod search;
+pub mod settings;
 mod subgraph_nav;
 mod templates;
 
@@ -93,6 +94,8 @@ pub struct TaleNodeApp {
     active_locale: Option<String>,
     locale_filter_untranslated: bool,
     locale_new_name: String,
+    settings: settings::AppSettings,
+    settings_open: bool,
 }
 
 impl TaleNodeApp {
@@ -144,6 +147,8 @@ impl TaleNodeApp {
             active_locale: None,
             locale_filter_untranslated: false,
             locale_new_name: String::new(),
+            settings: settings::AppSettings::load(),
+            settings_open: false,
         }
     }
 
@@ -221,6 +226,11 @@ impl eframe::App for TaleNodeApp {
             &mut self.audio_manager,
             &mut self.graph,
         );
+
+        // Settings window (floating)
+        if self.settings_open {
+            settings::show_settings_window(ctx, &mut self.settings, &mut self.settings_open);
+        }
 
         // Dockable panel layout (replaces all SidePanel/CentralPanel calls)
         let prev_sel = self.last_inspector_focus_count;

@@ -92,6 +92,12 @@ impl TaleNodeApp {
                     ui.close_menu();
                 }
             });
+            ui.menu_button("Settings", |ui| {
+                if ui.button("Settings...").clicked() {
+                    self.settings_open = true;
+                    ui.close_menu();
+                }
+            });
             ui.menu_button("Edit", |ui| {
                 if ui
                     .add_enabled(
