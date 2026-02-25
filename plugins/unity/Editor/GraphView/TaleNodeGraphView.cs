@@ -68,7 +68,7 @@ namespace TaleNode.Editor
             // Auto-layout
             TaleNodeGraphLayout.ApplyLayout(_nodeMap, dialogue.Data);
 
-            schedule.Execute(FrameAll);
+            schedule.Execute(_ => FrameAll());
         }
 
         public void UpdateLocale(string locale)
