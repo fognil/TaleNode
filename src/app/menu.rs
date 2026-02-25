@@ -14,7 +14,8 @@ impl TaleNodeApp {
                     .add(egui::Button::new("New").shortcut_text(format!("{mod_key}+N")))
                     .clicked()
                 {
-                    self.do_new_project();
+                    self.pending_confirmation =
+                        Some(super::confirm::PendingAction::NewProject);
                     ui.close_menu();
                 }
                 if ui

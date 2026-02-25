@@ -150,17 +150,8 @@ impl TaleNodeApp {
                         self.versions = project.versions;
                     }
                     crate::ui::version_panel::VersionPanelAction::RestoreVersion(id) => {
-                        let mut project = crate::model::project::Project {
-                            version: "1.0".to_string(),
-                            name: self.project_name.clone(),
-                            graph: self.graph.clone(),
-                            versions: self.versions.clone(),
-                        };
-                        if let Some(old_graph) = project.restore_version(id) {
-                            self.snapshot();
-                            let _ = old_graph;
-                            self.graph = project.graph;
-                        }
+                        self.pending_confirmation =
+                            Some(super::confirm::PendingAction::RestoreVersion(id));
                     }
                     crate::ui::version_panel::VersionPanelAction::CompareVersions(a, b) => {
                         let va = self.versions.iter().find(|v| v.id == a);

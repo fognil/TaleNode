@@ -1,4 +1,5 @@
 mod canvas;
+mod confirm;
 mod context_menu;
 mod file_io;
 mod menu;
@@ -92,6 +93,7 @@ pub struct TaleNodeApp {
     script_panel_text: String,
     script_panel_dirty: bool,
     script_panel_stale: bool,
+    pending_confirmation: Option<confirm::PendingAction>,
 }
 
 impl TaleNodeApp {
@@ -146,6 +148,7 @@ impl TaleNodeApp {
             script_panel_text: String::new(),
             script_panel_dirty: false,
             script_panel_stale: false,
+            pending_confirmation: None,
         }
     }
 
@@ -214,7 +217,7 @@ impl eframe::App for TaleNodeApp {
             self.show_replace = true;
         }
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::N)) {
-            self.do_new_project();
+            self.pending_confirmation = Some(confirm::PendingAction::NewProject);
         }
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::A)) {
             self.selected_nodes = self.graph.nodes.keys().copied().collect();
@@ -248,6 +251,9 @@ impl eframe::App for TaleNodeApp {
             self.search_index = (self.search_index + 1) % self.search_results.len();
             self.focus_search_result();
         }
+
+        // Confirmation dialog (modal)
+        self.show_confirmation_dialog(ctx);
 
         // Menu bar at top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
