@@ -74,4 +74,23 @@ impl super::TaleNodeApp {
     pub(super) fn is_in_subgraph(&self) -> bool {
         !self.subgraph_stack.is_empty()
     }
+
+    /// Reconstruct the root-level graph for export.
+    /// Walks up the subgraph stack, saving the current child graph into each parent.
+    pub(super) fn root_graph_for_export(&self) -> DialogueGraph {
+        if self.subgraph_stack.is_empty() {
+            return self.graph.clone();
+        }
+        let mut current = self.graph.clone();
+        for frame in self.subgraph_stack.iter().rev() {
+            let mut parent = frame.graph.clone();
+            if let Some(node) = parent.nodes.get_mut(&frame.node_id) {
+                if let NodeType::SubGraph(ref mut data) = node.node_type {
+                    data.child_graph = current;
+                }
+            }
+            current = parent;
+        }
+        current
+    }
 }

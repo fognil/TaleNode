@@ -17,7 +17,10 @@ fn csv_escape(field: &str) -> String {
 ///
 /// Columns: LineID,Speaker,Text,Emotion,AudioFile,Duration,Notes
 /// Only Dialogue nodes are included, sorted by readable ID.
+/// SubGraph nodes are flattened first so dialogues inside SubGraphs are included.
 pub fn export_voice_csv(graph: &DialogueGraph, name: &str) -> String {
+    let flat = super::flatten::flatten_subgraphs(graph);
+    let graph = &flat;
     let id_map = build_id_map(graph);
     let _ = name; // name reserved for future header comment
 

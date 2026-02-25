@@ -33,9 +33,12 @@ fn variable_type_str(val: &VariableValue) -> &'static str {
 }
 
 /// Export a DialogueGraph to XML format.
+/// SubGraph nodes are flattened (inlined) before export.
 pub fn export_xml(graph: &DialogueGraph, name: &str) -> Result<String, String> {
-    let id_map = build_id_map(graph);
-    let conn_map = build_connection_map(graph);
+    let flat = super::flatten::flatten_subgraphs(graph);
+    let id_map = build_id_map(&flat);
+    let conn_map = build_connection_map(&flat);
+    let graph = &flat;
 
     let mut xml = String::with_capacity(4096);
     xml.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");

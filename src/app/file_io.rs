@@ -74,7 +74,8 @@ impl TaleNodeApp {
             .save_file();
 
         if let Some(path) = path {
-            match crate::export::json_export::export_json(&self.graph, &self.project_name) {
+            let graph = self.root_graph_for_export();
+            match crate::export::json_export::export_json(&graph, &self.project_name) {
                 Ok(json) => {
                     if let Err(e) = std::fs::write(&path, json) {
                         eprintln!("Failed to write export: {e}");
@@ -148,8 +149,9 @@ impl TaleNodeApp {
             .save_file();
 
         if let Some(path) = path {
+            let graph = self.root_graph_for_export();
             let csv = crate::export::voice_export::export_voice_csv(
-                &self.graph,
+                &graph,
                 &self.project_name,
             );
             if let Err(e) = std::fs::write(&path, csv) {
@@ -168,7 +170,8 @@ impl TaleNodeApp {
             .save_file();
 
         if let Some(path) = path {
-            match crate::export::xml_export::export_xml(&self.graph, &self.project_name) {
+            let graph = self.root_graph_for_export();
+            match crate::export::xml_export::export_xml(&graph, &self.project_name) {
                 Ok(xml) => {
                     if let Err(e) = std::fs::write(&path, xml) {
                         eprintln!("Failed to write XML export: {e}");
