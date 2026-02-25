@@ -5,7 +5,7 @@ edition = "2021"
 description = "Node-based dialogue and quest editor for game developers"
 authors = ["TaleNode"]
 license = "MIT"
-repository = "https://github.com/talenode/talenode"
+repository = "https://github.com/fognil/TaleNode"
 
 [dependencies]
 eframe = "0.31"

@@ -123,7 +123,7 @@ impl DialogueGraph {
         true
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn remove_connection(&mut self, connection_id: Uuid) -> Option<Connection> {
         if let Some(idx) = self.connections.iter().position(|c| c.id == connection_id) {
             Some(self.connections.remove(idx))
@@ -150,7 +150,7 @@ impl DialogueGraph {
     }
 
     /// Find which node and port a given PortId belongs to.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn find_port_node(&self, port_id: PortId) -> Option<(Uuid, PortDirection)> {
         for node in self.nodes.values() {
             for p in &node.inputs {

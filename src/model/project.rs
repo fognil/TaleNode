@@ -53,7 +53,7 @@ impl Project {
         }
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn list_versions(&self) -> &[VersionSnapshot] {
         &self.versions
     }

@@ -94,7 +94,7 @@ pub struct ConditionData {
     pub value: VariableValue,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum CompareOp {
     #[default]
     Eq,
@@ -138,7 +138,7 @@ pub struct EventAction {
     pub value: VariableValue,
 }
 
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum EventActionType {
     #[default]
     SetVariable,
@@ -166,7 +166,7 @@ pub struct RandomBranch {
 
 // --- End ---
 
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct EndData {
     #[serde(default)]
     pub tag: String,

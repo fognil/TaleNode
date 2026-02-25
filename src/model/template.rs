@@ -24,7 +24,7 @@ pub struct NodeTemplate {
 }
 
 /// Persistent collection of templates.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TemplateLibrary {
     pub templates: Vec<NodeTemplate>,
 }
