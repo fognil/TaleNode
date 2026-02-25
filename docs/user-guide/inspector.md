@@ -77,6 +77,33 @@ Each branch shows a **weight** as a percentage drag-value (0%–100%). The Inspe
 
 Common suggestions: `good_ending`, `bad_ending`, `continue`, `death`, `quest_complete`.
 
+### SubGraph Node
+
+| Field | Description |
+|---|---|
+| **Name** | Label for the nested dialogue. |
+
+Shows the count of child nodes and connections inside the sub-graph. Double-click the node on the canvas to enter and edit the nested graph.
+
+## Tags
+
+Below the node-specific fields, every node has a **Tags** section:
+
+- View existing tags as labels with **x** buttons to remove
+- Type a tag name and click **+** to add a new tag
+- Tags are used for organization and can be filtered in the [Bookmark Panel](bookmarks-tags.md)
+
+## Review Status
+
+Every node has a **Review** section at the bottom of the Inspector:
+
+| Field | Description |
+|---|---|
+| **Status** | Dropdown: `Draft`, `Needs Review`, `Approved` |
+| **Comments** | Shows the comment count for this node |
+
+Review statuses appear as colored badges on nodes in the canvas. Use the [Comments Panel](comments-review.md) to manage comments and filter by review status.
+
 ## Tips
 
 !!! tip

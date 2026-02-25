@@ -20,12 +20,12 @@ TaleNode is a desktop application that lets game developers create dialogue tree
 
 <div class="feature-card" markdown>
 ### Visual Node Editor
-Drag-and-drop 7 node types on an infinite canvas with pan, zoom, and grid snapping. See your dialogue flow at a glance.
+Drag-and-drop 8 node types on an infinite canvas with pan, zoom, and grid snapping. See your dialogue flow at a glance.
 </div>
 
 <div class="feature-card" markdown>
-### 7 Node Types
-Start, Dialogue, Choice, Condition, Event, Random, and End nodes cover every branching pattern your game needs.
+### 8 Node Types
+Start, Dialogue, Choice, Condition, Event, Random, End, and SubGraph nodes cover every branching pattern your game needs.
 </div>
 
 <div class="feature-card" markdown>
@@ -49,13 +49,23 @@ Walk through your dialogue in a built-in preview. See branching in action, test 
 </div>
 
 <div class="feature-card" markdown>
-### Clean JSON Export
-Export a flat, engine-agnostic JSON file with human-readable IDs. Connections are baked into `next` fields — no graph parsing needed.
+### Multi-Format Export
+Export JSON, XML, Voice CSV, or drop-in runtime plugins for Godot, Unity, and Unreal. Import from Yarn, Chat Mapper, and articy.
 </div>
 
 <div class="feature-card" markdown>
-### Undo/Redo & Auto-Save
-Full undo history (up to 100 steps) and automatic saves every 60 seconds. Never lose your work.
+### Script Editor
+Dual-view editing — visual node graph and text-based Yarn script side by side with bidirectional sync.
+</div>
+
+<div class="feature-card" markdown>
+### Review & Collaboration
+Comments per node, review status tracking (Draft/Needs Review/Approved), version history with diff comparison.
+</div>
+
+<div class="feature-card" markdown>
+### Templates & Analytics
+Save node patterns as reusable templates. Analyze your graph with path stats, word counts, and dead-path detection.
 </div>
 
 </div>
@@ -66,7 +76,7 @@ Full undo history (up to 100 steps) and automatic saves every 60 seconds. Never 
 |---|---|
 | [Installation](getting-started/installation.md) | Download or build from source |
 | [Quick Start](getting-started/quickstart.md) | Create your first dialogue in 5 minutes |
-| [Node Reference](reference/node-reference.md) | Detailed spec for all 7 node types |
+| [Node Reference](reference/node-reference.md) | Detailed spec for all 8 node types |
 | [JSON Export Format](export/json-format.md) | Full export schema with examples |
 | [Keyboard Shortcuts](reference/keyboard-shortcuts.md) | Complete shortcut table |
 | [FAQ](reference/faq.md) | Common questions answered |

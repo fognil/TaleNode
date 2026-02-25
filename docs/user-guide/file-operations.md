@@ -29,7 +29,7 @@ Opens a file dialog to load a `.talenode` project file.
 - **Shortcut**: ++ctrl+n++
 - **Menu**: File > New
 
-Clears the current graph and starts fresh. If you have unsaved changes, you'll be working from a blank slate — save first if needed.
+Clears the current graph and starts fresh. A **confirmation dialog** will appear to prevent accidental data loss — click **Yes** to proceed or **No** to cancel.
 
 ### Auto-Save
 
@@ -63,7 +63,9 @@ This includes everything: node positions, port data, all connections, variables,
 !!! note
     `.talenode` files are backward compatible — new fields use `#[serde(default)]` so older files open in newer versions without issues.
 
-## Export JSON
+## Export
+
+### Export JSON
 
 - **Menu**: File > Export JSON...
 
@@ -78,6 +80,49 @@ Key differences from the project file:
 | Node IDs | UUIDs | Human-readable (`dlg_1`, `choice_2`) |
 | Groups | Included | Not included |
 | Port data | Included | Not included |
+
+### Export XML
+
+- **Menu**: File > Export XML...
+
+Exports the dialogue graph in XML format.
+
+### Runtime Plugin Export
+
+- **Menu**: File > Export Godot Plugin...
+- **Menu**: File > Export Unity Plugin...
+- **Menu**: File > Export Unreal Plugin...
+
+Exports a drop-in runtime plugin to the selected game engine project folder. See [Plugin Export](../export/plugin-export.md) for details.
+
+### Export Voice Script (CSV)
+
+- **Menu**: File > Export Voice Script (CSV)...
+
+Exports a CSV file listing all dialogue lines with speaker, text, emotion, and audio clip fields — ready for voice actors.
+
+## Import
+
+### Import from Yarn
+
+- **Menu**: File > Import from Yarn...
+
+Imports a Yarn Spinner `.yarn` file and converts it into a TaleNode dialogue graph.
+
+### Import from Chat Mapper
+
+- **Menu**: File > Import from Chat Mapper...
+
+Imports a Chat Mapper JSON file.
+
+### Import from articy
+
+- **Menu**: File > Import from articy...
+
+Imports an articy:draft XML export file.
+
+!!! note
+    Importing replaces the current graph. The operation supports undo — press ++ctrl+z++ to revert.
 
 ## Tips
 

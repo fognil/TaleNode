@@ -1,6 +1,6 @@
 # Nodes
 
-Nodes are the building blocks of your dialogue graph. TaleNode provides 7 node types, each with a specific purpose.
+Nodes are the building blocks of your dialogue graph. TaleNode provides 8 node types, each with a specific purpose.
 
 ## Node Types Overview
 
@@ -13,6 +13,7 @@ Nodes are the building blocks of your dialogue graph. TaleNode provides 7 node t
 | <span class="node-badge node-badge--event">Event</span> | Purple | 1 | 1 | Trigger actions |
 | <span class="node-badge node-badge--random">Random</span> | Gray | 1 | N | Weighted random |
 | <span class="node-badge node-badge--end">End</span> | Red | 1 | 0 | Conversation end |
+| <span class="node-badge node-badge--subgraph">SubGraph</span> | Cyan | 1 | 1 | Nested dialogue |
 
 ## Adding Nodes
 
@@ -95,6 +96,21 @@ Marks the end of a conversation path.
 - **Properties**:
     - **Tag**: An identifier for the ending (e.g., `good_ending`, `bad_ending`, `continue`)
 - **Canvas preview**: Shows the tag if set.
+
+## SubGraph Node
+
+Contains a nested dialogue graph inside a single node. Useful for organizing complex conversations into reusable sub-dialogues.
+
+- **Ports**: 1 input, 1 output
+- **Properties**:
+    - **Name**: Label for the sub-graph
+- **Double-click** the SubGraph node on the canvas to enter it. A breadcrumb bar appears at the top for navigation.
+- **Canvas preview**: Shows the sub-graph name and the count of child nodes and connections.
+
+!!! tip
+    Use SubGraph nodes to break large dialogues into manageable chunks. Each sub-graph has its own Start node and can be edited independently.
+
+For more details, see [SubGraph & Nested Dialogues](subgraphs.md).
 
 ## Node Dimensions
 

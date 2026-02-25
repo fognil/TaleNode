@@ -1,6 +1,6 @@
 # Node Reference
 
-Detailed specification for all 7 node types. For a quicker overview, see [Nodes](../user-guide/nodes.md).
+Detailed specification for all 8 node types. For a quicker overview, see [Nodes](../user-guide/nodes.md).
 
 ---
 
@@ -270,5 +270,41 @@ Marks the end of a conversation path.
   "id": "end_1",
   "type": "end",
   "tag": "good_ending"
+}
+```
+
+---
+
+## SubGraph Node
+
+<span class="node-badge node-badge--subgraph">SubGraph</span>
+
+Contains a nested dialogue graph inside a single node. Useful for organizing complex conversations into reusable sub-dialogues.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `name` | String | `""` | Display label for the sub-graph |
+| `child_graph` | DialogueGraph | (empty with Start) | The nested graph |
+
+| Port | Direction | Count |
+|---|---|---|
+| Input | In | 1 |
+| Output | Out | 1 |
+
+**Canvas display:** Header shows the sub-graph name (or "SubGraph"). Body shows the count of child nodes and connections.
+
+**Interaction:** Double-click the SubGraph node to enter the nested graph. A breadcrumb bar appears at the top for navigation. Press ++escape++ to exit back to the parent graph.
+
+**Rules:** Each sub-graph has its own Start node (created automatically). Sub-graphs can be nested inside other sub-graphs.
+
+**Export format:**
+
+```json
+{
+  "id": "sub_1",
+  "type": "subgraph",
+  "name": "Side Quest",
+  "nodes": [...],
+  "next": "dlg_9"
 }
 ```

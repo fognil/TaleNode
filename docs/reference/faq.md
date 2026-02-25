@@ -56,7 +56,7 @@ Yes. Press ++ctrl+h++ (++cmd+shift+h++ on macOS) to open Search & Replace. You c
 
 ### Can I create custom node types?
 
-No. TaleNode supports 7 fixed node types: Start, Dialogue, Choice, Condition, Event, Random, and End. These cover the standard patterns for game dialogue.
+No. TaleNode supports 8 fixed node types: Start, Dialogue, Choice, Condition, Event, Random, End, and SubGraph. These cover the standard patterns for game dialogue. Use SubGraph nodes to organize complex conversations into reusable nested dialogues.
 
 ### What's the difference between .talenode and exported .json?
 
@@ -106,7 +106,12 @@ See [JSON Export Format](../export/json-format.md) for the full specification wi
 
 ### Can I export to formats other than JSON?
 
-Currently, TaleNode only exports to JSON. The format is designed to be easy to convert to other formats programmatically.
+Yes. TaleNode supports multiple export formats:
+
+- **JSON** — Standard game engine data format. See [JSON Export Format](../export/json-format.md).
+- **XML** — Alternative structured format.
+- **Voice Script (CSV)** — CSV with speaker, text, emotion, and audio clip fields for voice actors.
+- **Runtime Plugins** — Drop-in plugins for Godot, Unity, and Unreal Engine. See [Plugin Export](../export/plugin-export.md).
 
 ## Troubleshooting
 
@@ -116,7 +121,7 @@ Use `cargo run --release` (or the release build) for better performance. The deb
 
 ### My nodes disappeared
 
-You may have panned far from your nodes. Use the minimap (bottom-right corner) to find them, or press ++ctrl+a++ to select all nodes — the status bar will show the node count.
+You may have panned far from your nodes. Press ++f++ to zoom-to-fit and show all nodes, or use the minimap (bottom-right corner) to navigate. You can also press ++ctrl+a++ to select all — the status bar will show the node count.
 
 ### Auto-save isn't working
 

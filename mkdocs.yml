@@ -65,15 +65,21 @@ nav:
     - Canvas & Navigation: user-guide/canvas.md
     - Nodes: user-guide/nodes.md
     - Connections & Wiring: user-guide/connections.md
+    - SubGraph & Nested Dialogues: user-guide/subgraphs.md
     - Inspector Panel: user-guide/inspector.md
     - Variables: user-guide/variables.md
     - Characters: user-guide/characters.md
     - Node Groups: user-guide/groups.md
+    - Bookmarks & Tags: user-guide/bookmarks-tags.md
+    - Comments & Review: user-guide/comments-review.md
+    - Version History: user-guide/version-history.md
+    - Templates: user-guide/templates.md
     - Validation: user-guide/validation.md
     - Playtest Mode: user-guide/playtest.md
     - File Operations: user-guide/file-operations.md
   - Export & Integration:
     - JSON Export Format: export/json-format.md
+    - Plugin Export: export/plugin-export.md
     - Engine Integration: export/integration-guide.md
   - Reference:
     - Keyboard Shortcuts: reference/keyboard-shortcuts.md

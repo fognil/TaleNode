@@ -32,6 +32,8 @@ Complete list of keyboard shortcuts in TaleNode.
 | Scroll wheel | Pan canvas |
 | ++ctrl++ + scroll wheel | Zoom in/out |
 | Trackpad pinch (macOS) | Zoom in/out |
+| ++f++ | Zoom to fit (show all nodes) |
+| ++escape++ | Close search bar / Exit sub-graph |
 
 ## Search & Replace
 
@@ -53,3 +55,5 @@ Complete list of keyboard shortcuts in TaleNode.
 | Create wire | Left-click drag from port to port |
 | Context menu | Right-click on canvas |
 | Click minimap | Navigate to that area of the graph |
+| Enter sub-graph | Double-click on SubGraph node |
+| Node tooltip | Hover over node (shows content preview) |
