@@ -101,6 +101,25 @@ impl TaleNodeApp {
             }
         }
 
+        // Node tooltip on hover (when not dragging and not hovering a port)
+        if hovered_port_info.is_none() && matches!(self.interaction, InteractionState::Idle) {
+            if let Some(hp) = response.hover_pos() {
+                if let Some(nid) = self.node_at_screen_pos(hp) {
+                    if let Some(node) = self.graph.nodes.get(&nid) {
+                        let tip = node_tooltip_text(node);
+                        if !tip.is_empty() {
+                            egui::show_tooltip_at_pointer(
+                                ui.ctx(),
+                                ui.layer_id(),
+                                egui::Id::new("node_tooltip"),
+                                |ui| { ui.label(&tip); },
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
         // Draw dragging wire
         if let InteractionState::DraggingWire(ref drag) = self.interaction {
             let from_node = self.graph.nodes.get(&drag.from_node);
@@ -309,7 +328,6 @@ impl TaleNodeApp {
         }
     }
 
-    /// Duplicate selected nodes with offset.
     pub(super) fn duplicate_selected(&mut self) {
         if self.selected_nodes.is_empty() {
             return;
@@ -333,5 +351,46 @@ impl TaleNodeApp {
             }
         }
         self.selected_nodes = new_ids;
+    }
+}
+
+/// Build tooltip text for a node (shows key content).
+fn node_tooltip_text(node: &crate::model::node::Node) -> String {
+    use crate::model::node::NodeType;
+    match &node.node_type {
+        NodeType::Dialogue(data) => {
+            let speaker = if data.speaker_name.is_empty() {
+                String::new()
+            } else {
+                format!("[{}] ", data.speaker_name)
+            };
+            format!("{}{}", speaker, data.text)
+        }
+        NodeType::Choice(data) => {
+            let mut s = data.prompt.clone();
+            for (i, c) in data.choices.iter().enumerate() {
+                s.push_str(&format!("\n  {}. {}", i + 1, c.text));
+            }
+            s
+        }
+        NodeType::Condition(data) => {
+            format!("{} {:?} {:?}", data.variable_name, data.operator, data.value)
+        }
+        NodeType::Event(data) => {
+            data.actions
+                .iter()
+                .map(|a| format!("{} = {:?}", a.key, a.value))
+                .collect::<Vec<_>>()
+                .join("\n")
+        }
+        NodeType::End(data) => {
+            if data.tag.is_empty() {
+                "End".to_string()
+            } else {
+                format!("End: {}", data.tag)
+            }
+        }
+        NodeType::SubGraph(data) => format!("Sub-graph: {}", data.name),
+        _ => String::new(),
     }
 }

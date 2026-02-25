@@ -192,9 +192,16 @@ fn draw_border(
             StrokeKind::Outside,
         );
     } else if is_search_match {
+        // Outer glow ring
+        painter.rect_stroke(
+            rect.expand(2.0 * zoom), rounding,
+            Stroke::new(2.0 * zoom, Color32::from_rgba_unmultiplied(0, 200, 255, 80)),
+            StrokeKind::Outside,
+        );
+        // Inner bright border
         painter.rect_stroke(
             *rect, rounding,
-            Stroke::new(2.0 * zoom, Color32::from_rgb(100, 200, 255)),
+            Stroke::new(2.5 * zoom, Color32::from_rgb(0, 200, 255)),
             StrokeKind::Outside,
         );
     } else {
