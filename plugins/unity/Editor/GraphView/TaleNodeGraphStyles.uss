@@ -1,0 +1,27 @@
+/* TaleNode — GraphView stylesheet */
+
+GridBackground {
+    --grid-background-color: #1e1e1e;
+    --line-color: rgba(255, 255, 255, 0.04);
+    --thick-line-color: rgba(255, 255, 255, 0.08);
+    --spacing: 50;
+}
+
+.talenode-active-node {
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-left-color: #FFD740;
+    border-right-color: #FFD740;
+    border-top-color: #FFD740;
+    border-bottom-color: #FFD740;
+}
+
+.node #title {
+    min-height: 28px;
+}
+
+.node #extension {
+    background-color: rgba(40, 40, 40, 0.9);
+}
