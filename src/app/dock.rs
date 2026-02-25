@@ -19,6 +19,15 @@ pub(super) enum DockTab {
     Templates,
 }
 
+/// Which dock region a tab belongs to (for smart placement).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TabRegion {
+    Canvas,
+    Left,
+    Right,
+    Bottom,
+}
+
 impl DockTab {
     fn title(self) -> &'static str {
         match self {
@@ -33,6 +42,15 @@ impl DockTab {
             Self::Analytics => "Analytics",
             Self::VersionHistory => "Version History",
             Self::Templates => "Templates",
+        }
+    }
+
+    fn region(self) -> TabRegion {
+        match self {
+            Self::Canvas => TabRegion::Canvas,
+            Self::LeftPanel => TabRegion::Left,
+            Self::Inspector | Self::ScriptEditor => TabRegion::Right,
+            _ => TabRegion::Bottom,
         }
     }
 }
@@ -103,6 +121,15 @@ impl TabViewer for AppTabViewer<'_> {
         !matches!(tab, DockTab::Canvas)
     }
 
+    fn on_close(&mut self, tab: &mut DockTab) -> bool {
+        if *tab == DockTab::ScriptEditor {
+            self.app.script_panel_text.clear();
+            self.app.script_panel_dirty = false;
+            self.app.script_panel_stale = false;
+        }
+        true
+    }
+
     fn id(&mut self, tab: &mut DockTab) -> egui::Id {
         egui::Id::new(*tab as u8)
     }
@@ -140,7 +167,7 @@ impl TaleNodeApp {
         }
     }
 
-    /// Add a tab to the dock. Inserts into the first leaf on the main surface.
+    /// Add a tab to the dock. Places it in the leaf matching the tab's region.
     pub(super) fn dock_add_tab(&mut self, tab: DockTab) {
         if self.dock_has_tab(tab) {
             return;
@@ -154,8 +181,31 @@ impl TaleNodeApp {
             self.script_panel_stale = false;
         }
 
-        if let Some(ref mut ds) = self.dock_state {
-            ds.main_surface_mut().push_to_first_leaf(tab);
+        let Some(ref mut ds) = self.dock_state else {
+            return;
+        };
+        let tree = ds.main_surface_mut();
+        let target_region = tab.region();
+
+        // Find a leaf that already contains a tab in the same region
+        let target_node = tree.iter().enumerate().find_map(|(idx, node)| {
+            if let egui_dock::Node::Leaf { tabs, .. } = node {
+                if tabs.iter().any(|t| t.region() == target_region) {
+                    return Some(NodeIndex(idx));
+                }
+            }
+            None
+        });
+
+        if let Some(node_idx) = target_node {
+            if let egui_dock::Node::Leaf { tabs, active, .. } =
+                &mut tree[node_idx]
+            {
+                *active = egui_dock::TabIndex(tabs.len());
+                tabs.push(tab);
+            }
+        } else {
+            tree.push_to_first_leaf(tab);
         }
     }
 
@@ -225,6 +275,16 @@ impl TaleNodeApp {
     /// Check if script editor tab is open (for stale marking).
     pub(super) fn has_script_tab(&self) -> bool {
         self.dock_has_tab(DockTab::ScriptEditor)
+    }
+
+    /// If the Script Editor tab is open, populate its text from the current graph.
+    pub(super) fn sync_script_if_open(&mut self) {
+        if self.has_script_tab() {
+            self.script_panel_text =
+                crate::export::yarn_export::export_yarn(&self.graph);
+            self.script_panel_dirty = false;
+            self.script_panel_stale = false;
+        }
     }
 
     /// Serialize dock state to JSON Value for project save.

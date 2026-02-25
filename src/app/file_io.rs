@@ -29,6 +29,7 @@ impl TaleNodeApp {
                 if let Some(ref layout) = project.dock_layout {
                     self.dock_state_from_json(layout);
                 }
+                self.sync_script_if_open();
             }
             Err(e) => {
                 self.status_message =
@@ -396,5 +397,4 @@ impl TaleNodeApp {
         self.history.clear();
         self.dock_reset_layout();
     }
-
 }
