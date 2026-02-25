@@ -3,9 +3,13 @@ use super::TaleNodeApp;
 impl TaleNodeApp {
     pub(super) fn render_left_panel_tab(&mut self, ui: &mut egui::Ui) {
         let pre_graph = self.graph.clone();
+        let voices = self.available_voices.clone();
         egui::ScrollArea::vertical().show(ui, |ui| {
-            let changed =
-                crate::ui::left_panel::show_left_panel(ui, &mut self.graph);
+            let changed = crate::ui::left_panel::show_left_panel(
+                ui,
+                &mut self.graph,
+                &voices,
+            );
             if changed {
                 self.history.push_undo(pre_graph);
             }
@@ -356,6 +360,27 @@ impl TaleNodeApp {
             std::time::Instant::now(),
             false,
         ));
+    }
+
+    pub(super) fn render_voice_tab(&mut self, ui: &mut egui::Ui) {
+        let action = crate::ui::voice_panel::show_voice_panel(
+            ui,
+            &self.graph,
+            &self.available_voices,
+            self.voice_generation_in_progress,
+        );
+        match action {
+            crate::ui::voice_panel::VoicePanelAction::FetchVoices => {
+                self.start_fetch_voices();
+            }
+            crate::ui::voice_panel::VoicePanelAction::GenerateForNode(id) => {
+                self.start_generate_voice(id);
+            }
+            crate::ui::voice_panel::VoicePanelAction::GenerateAll => {
+                self.start_generate_all_voices();
+            }
+            crate::ui::voice_panel::VoicePanelAction::None => {}
+        }
     }
 
     pub(super) fn render_playtest_tab(&mut self, ui: &mut egui::Ui) {

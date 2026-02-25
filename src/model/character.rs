@@ -10,6 +10,8 @@ pub struct Character {
     pub color: [u8; 4],
     #[serde(default)]
     pub portrait_path: String,
+    #[serde(default)]
+    pub voice_id: Option<String>,
 }
 
 fn default_color() -> [u8; 4] {
@@ -23,6 +25,7 @@ impl Character {
             name: name.into(),
             color: [74, 144, 217, 255], // default blue
             portrait_path: String::new(),
+            voice_id: None,
         }
     }
 }

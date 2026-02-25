@@ -203,6 +203,7 @@ impl TaleNodeApp {
                     (DockTab::VersionHistory, "Version History"),
                     (DockTab::Templates, "Template Library"),
                     (DockTab::Localization, "Localization"),
+                    (DockTab::VoiceGeneration, "Voice Generation"),
                 ];
                 for &(tab, label) in toggles {
                     let mut open = self.dock_has_tab(tab);

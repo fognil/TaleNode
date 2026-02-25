@@ -14,6 +14,7 @@ mod search;
 pub mod settings;
 mod subgraph_nav;
 mod templates;
+mod voice_handlers;
 
 use egui::Pos2;
 use std::time::Instant;

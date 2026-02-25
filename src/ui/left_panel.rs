@@ -1,6 +1,7 @@
 use egui::Ui;
 use uuid::Uuid;
 
+use crate::app::async_runtime::VoiceInfo;
 use crate::model::character::Character;
 use crate::model::graph::DialogueGraph;
 use crate::model::node::VariableValue;
@@ -8,7 +9,11 @@ use crate::model::variable::{Variable, VariableType};
 
 /// Draw the left panel (variables, characters, groups).
 /// Returns `true` when an undo-worthy event starts (caller should snapshot).
-pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) -> bool {
+pub fn show_left_panel(
+    ui: &mut Ui,
+    graph: &mut DialogueGraph,
+    available_voices: &[VoiceInfo],
+) -> bool {
     let mut snapshot_needed = false;
 
     // --- Variables section ---
@@ -153,6 +158,43 @@ pub fn show_left_panel(ui: &mut Ui, graph: &mut DialogueGraph) -> bool {
                             snapshot_needed = true;
                         }
                     });
+                    if !available_voices.is_empty() {
+                        ui.horizontal(|ui| {
+                            ui.label("Voice:");
+                            let current_label = ch
+                                .voice_id
+                                .as_ref()
+                                .and_then(|vid| {
+                                    available_voices
+                                        .iter()
+                                        .find(|v| &v.voice_id == vid)
+                                        .map(|v| v.name.as_str())
+                                })
+                                .unwrap_or("(none)");
+                            egui::ComboBox::from_id_salt(format!("voice_{}", ch.id))
+                                .selected_text(current_label)
+                                .show_ui(ui, |ui| {
+                                    if ui
+                                        .selectable_label(ch.voice_id.is_none(), "(none)")
+                                        .clicked()
+                                    {
+                                        ch.voice_id = None;
+                                        snapshot_needed = true;
+                                    }
+                                    for voice in available_voices {
+                                        let selected = ch.voice_id.as_ref()
+                                            == Some(&voice.voice_id);
+                                        if ui
+                                            .selectable_label(selected, &voice.name)
+                                            .clicked()
+                                        {
+                                            ch.voice_id = Some(voice.voice_id.clone());
+                                            snapshot_needed = true;
+                                        }
+                                    }
+                                });
+                        });
+                    }
                 });
 
                 ui.add_space(4.0);
