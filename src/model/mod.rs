@@ -4,6 +4,7 @@ pub mod connection;
 mod example_project;
 pub mod graph;
 pub mod graph_diff;
+mod graph_normalize;
 pub mod locale;
 pub mod group;
 pub mod node;

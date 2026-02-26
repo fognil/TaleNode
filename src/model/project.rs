@@ -30,7 +30,12 @@ impl Default for Project {
 
 impl Project {
     pub fn save_to_string(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string_pretty(self)
+        let mut normalized = self.clone();
+        normalized.graph.normalize();
+        for v in &mut normalized.versions {
+            v.graph.normalize();
+        }
+        serde_json::to_string_pretty(&normalized)
     }
 
     pub fn load_from_string(json: &str) -> Result<Self, serde_json::Error> {
