@@ -1,5 +1,6 @@
 mod async_handlers;
 pub mod async_runtime;
+mod bark_handlers;
 mod canvas;
 mod collab_handlers;
 mod confirm;
@@ -109,6 +110,7 @@ pub struct TaleNodeApp {
     collab_state: Option<crate::collab::CollabState>,
     collab_host_input: String,
     collab_port_input: u16,
+    bark_selected_character: Option<Uuid>,
 }
 
 impl TaleNodeApp {
@@ -172,6 +174,7 @@ impl TaleNodeApp {
             collab_state: None,
             collab_host_input: "127.0.0.1".to_string(),
             collab_port_input: 9847,
+            bark_selected_character: None,
         }
     }
 

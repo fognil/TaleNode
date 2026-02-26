@@ -1,4 +1,5 @@
 pub mod analytics_export;
+pub mod bark_export;
 pub mod flatten;
 pub mod html_export;
 mod html_template;

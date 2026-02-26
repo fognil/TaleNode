@@ -1,3 +1,4 @@
+pub mod bark;
 pub mod character;
 pub mod connection;
 mod example_project;

@@ -201,7 +201,9 @@ pub fn show_left_panel(
             }
 
             if let Some(idx) = remove_char {
+                let removed_id = graph.characters[idx].id;
                 graph.characters.remove(idx);
+                graph.barks.remove(&removed_id);
             }
 
             if ui.button("+ Add Character").clicked() {

@@ -219,6 +219,19 @@ pub fn export_node_data(
     }
 }
 
+/// Build bark/ambient dialogue export groups.
+pub fn build_bark_groups(graph: &DialogueGraph) -> Vec<super::json_export_types::ExportedBarkGroup> {
+    use super::json_export_types::{ExportedBarkGroup, ExportedBarkLine};
+    graph.characters.iter().filter_map(|ch| {
+        let bark_lines = graph.barks.get(&ch.id)?;
+        if bark_lines.is_empty() { return None; }
+        let lines = bark_lines.iter().map(|b| ExportedBarkLine {
+            text: b.text.clone(), weight: b.weight, condition: b.condition_variable.clone(),
+        }).collect();
+        Some(ExportedBarkGroup { character: ch.name.clone(), lines })
+    }).collect()
+}
+
 /// Map a UUID-based locale key to a readable key using the node's readable ID.
 pub fn readable_key_for_locale(
     key: &str,

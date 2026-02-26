@@ -1,9 +1,7 @@
 use crate::model::graph::DialogueGraph;
 
-use super::json_export_helpers::{
-    build_connection_map, build_id_map, build_string_table, export_node_data,
-    variable_value_to_json,
-};
+use super::json_export_helpers::{build_bark_groups, build_connection_map, build_id_map,
+    build_string_table, export_node_data, variable_value_to_json};
 use super::json_export_types::*;
 
 /// Export a DialogueGraph to the game-engine JSON format.
@@ -66,6 +64,7 @@ fn build_export(graph: &DialogueGraph, name: &str) -> ExportedDialogue {
         });
     }
 
+    let barks = build_bark_groups(graph);
     let has_locales = graph.locale.has_extra_locales();
 
     ExportedDialogue {
@@ -91,6 +90,7 @@ fn build_export(graph: &DialogueGraph, name: &str) -> ExportedDialogue {
         } else {
             None
         },
+        barks,
     }
 }
 

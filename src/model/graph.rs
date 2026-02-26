@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
+use super::bark::BarkLine;
 use super::character::Character;
 use super::connection::Connection;
 use super::group::NodeGroup;
@@ -32,6 +33,9 @@ pub struct DialogueGraph {
     pub node_tags: HashMap<Uuid, Vec<String>>,
     #[serde(default)]
     pub locale: LocaleSettings,
+    /// Bark/ambient dialogue lines per character (keyed by character UUID).
+    #[serde(default)]
+    pub barks: HashMap<Uuid, Vec<BarkLine>>,
 }
 
 impl Default for DialogueGraph {
@@ -52,6 +56,7 @@ impl DialogueGraph {
             comments: Vec::new(),
             node_tags: HashMap::new(),
             locale: LocaleSettings::default(),
+            barks: HashMap::new(),
         }
     }
 

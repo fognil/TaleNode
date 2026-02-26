@@ -1,5 +1,6 @@
 pub mod analytics_panel;
 pub mod audio_manager;
+pub mod bark_panel;
 pub mod bookmark_panel;
 pub mod canvas;
 pub mod collab_panel;

@@ -70,6 +70,10 @@ impl TaleNodeApp {
                     self.do_export_html();
                     ui.close_menu();
                 }
+                if ui.button("Export Bark Dialogue (CSV)...").clicked() {
+                    self.do_export_bark_csv();
+                    ui.close_menu();
+                }
                 if ui.button("Batch Assign Audio...").clicked() {
                     self.audio_manager.open = true;
                     ui.close_menu();
@@ -233,6 +237,7 @@ impl TaleNodeApp {
                     (DockTab::Localization, "Localization"),
                     (DockTab::VoiceGeneration, "Voice Generation"),
                     (DockTab::Collaboration, "Collaboration"),
+                    (DockTab::Barks, "Bark Dialogue"),
                 ];
                 for &(tab, label) in toggles {
                     let mut open = self.dock_has_tab(tab);

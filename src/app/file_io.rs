@@ -318,6 +318,25 @@ impl TaleNodeApp {
         }
     }
 
+    pub(super) fn do_export_bark_csv(&mut self) {
+        let path = rfd::FileDialog::new()
+            .add_filter("CSV", &["csv"])
+            .set_file_name(format!("{}_barks.csv", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            let graph = self.root_graph_for_export();
+            let csv = crate::export::bark_export::export_bark_csv(&graph);
+            if let Err(e) = std::fs::write(&path, csv) {
+                self.status_message =
+                    Some((format!("Failed to write bark CSV: {e}"), Instant::now(), true));
+            } else {
+                self.status_message =
+                    Some(("Bark CSV exported".to_string(), Instant::now(), false));
+            }
+        }
+    }
+
     pub(super) fn do_new_project(&mut self) {
         self.graph = DialogueGraph::new();
         self.graph.add_node(Node::new_start([100.0, 200.0]));
