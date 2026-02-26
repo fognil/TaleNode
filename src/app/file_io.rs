@@ -1,8 +1,6 @@
 use std::time::Instant;
 
-use crate::model::graph::DialogueGraph;
-use crate::model::node::Node;
-
+use crate::model::{graph::DialogueGraph, node::Node};
 use super::TaleNodeApp;
 
 impl TaleNodeApp {
@@ -20,7 +18,14 @@ impl TaleNodeApp {
             }
         };
         match crate::model::project::Project::load_from_string(&contents) {
-            Ok(project) => {
+            Ok(mut project) => {
+                // Try loading versions from sidecar file
+                let sidecar = path.with_extension("talenode.versions");
+                if project.versions.is_empty() {
+                    if let Ok(vdata) = std::fs::read_to_string(&sidecar) {
+                        let _ = project.merge_versions(&vdata);
+                    }
+                }
                 self.graph = project.graph;
                 self.project_name = project.name;
                 self.versions = project.versions;
@@ -56,12 +61,18 @@ impl TaleNodeApp {
                 versions: self.versions.clone(),
                 dock_layout: self.dock_state_to_json(),
             };
-            match project.save_to_string() {
-                Ok(json) => {
-                    if let Err(e) = std::fs::write(&path, json) {
+            match project.save_split() {
+                Ok((main_json, versions_json)) => {
+                    if let Err(e) = std::fs::write(&path, main_json) {
                         self.status_message =
                             Some((format!("Failed to write file: {e}"), Instant::now(), true));
                     } else {
+                        let sidecar = path.with_extension("talenode.versions");
+                        if let Some(vj) = versions_json {
+                            let _ = std::fs::write(&sidecar, vj);
+                        } else {
+                            let _ = std::fs::remove_file(&sidecar);
+                        }
                         self.project_path = Some(path);
                         self.status_message =
                             Some(("Saved".to_string(), Instant::now(), false));

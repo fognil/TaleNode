@@ -38,6 +38,31 @@ impl Project {
         serde_json::to_string_pretty(&normalized)
     }
 
+    /// Save with versions split into a separate sidecar string.
+    /// Returns `(main_json, Some(versions_json))` or `(main_json, None)`.
+    pub fn save_split(&self) -> Result<(String, Option<String>), serde_json::Error> {
+        let mut normalized = self.clone();
+        normalized.graph.normalize();
+        for v in &mut normalized.versions {
+            v.graph.normalize();
+        }
+        let versions = std::mem::take(&mut normalized.versions);
+        let main_json = serde_json::to_string_pretty(&normalized)?;
+        let versions_json = if versions.is_empty() {
+            None
+        } else {
+            Some(serde_json::to_string_pretty(&versions)?)
+        };
+        Ok((main_json, versions_json))
+    }
+
+    /// Merge externally loaded version snapshots into this project.
+    pub fn merge_versions(&mut self, json: &str) -> Result<(), serde_json::Error> {
+        let versions: Vec<VersionSnapshot> = serde_json::from_str(json)?;
+        self.versions = versions;
+        Ok(())
+    }
+
     pub fn load_from_string(json: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json)
     }
@@ -192,4 +217,42 @@ mod tests {
         assert_eq!(loaded.versions[0].graph.nodes.len(), 1);
     }
 
+    #[test]
+    fn save_split_separates_versions() {
+        let mut project = Project::default();
+        project.graph.add_node(Node::new_start([0.0, 0.0]));
+        project.create_version("v1".to_string());
+        let (main_json, versions_json) = project.save_split().unwrap();
+        // Main JSON has empty versions
+        let loaded = Project::load_from_string(&main_json).unwrap();
+        assert!(loaded.versions.is_empty());
+        // Sidecar has the versions
+        let vj = versions_json.unwrap();
+        let mut full = loaded;
+        full.merge_versions(&vj).unwrap();
+        assert_eq!(full.versions.len(), 1);
+        assert_eq!(full.versions[0].description, "v1");
+    }
+
+    #[test]
+    fn save_split_no_versions_returns_none() {
+        let project = Project::default();
+        let (_main, versions) = project.save_split().unwrap();
+        assert!(versions.is_none());
+    }
+
+    #[test]
+    fn deterministic_serialization() {
+        let mut project = Project::default();
+        project.graph.variables.push(Variable::new_bool("zzz", false));
+        project.graph.variables.push(Variable::new_bool("aaa", true));
+        project.graph.add_node(Node::new_start([0.0, 0.0]));
+        let json1 = project.save_to_string().unwrap();
+        let json2 = project.save_to_string().unwrap();
+        assert_eq!(json1, json2);
+        // Variables should be sorted by name
+        let idx_a = json1.find("\"aaa\"").unwrap();
+        let idx_z = json1.find("\"zzz\"").unwrap();
+        assert!(idx_a < idx_z, "variables should be sorted by name");
+    }
 }
