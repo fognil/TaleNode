@@ -1,5 +1,6 @@
 mod actions;
 mod app;
+mod cli;
 mod collab;
 mod export;
 mod import;
@@ -22,6 +23,17 @@ fn load_icon() -> Option<egui::IconData> {
 }
 
 fn main() -> eframe::Result {
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() >= 2 && args[1] == "export" {
+        match cli::run_export(&args[2..]) {
+            Ok(()) => std::process::exit(0),
+            Err(e) => {
+                eprintln!("Error: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
+
     let mut viewport = egui::ViewportBuilder::default()
         .with_inner_size([1280.0, 720.0])
         .with_min_inner_size([800.0, 500.0]);
