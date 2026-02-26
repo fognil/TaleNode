@@ -24,8 +24,13 @@ fn load_icon() -> Option<egui::IconData> {
 
 fn main() -> eframe::Result {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() >= 2 && args[1] == "export" {
-        match cli::run_export(&args[2..]) {
+    if args.len() >= 2
+        && matches!(
+            args[1].as_str(),
+            "export" | "validate" | "info" | "import" | "help" | "--help" | "-h"
+        )
+    {
+        match cli::run_cli(&args[1], &args[2..]) {
             Ok(()) => std::process::exit(0),
             Err(e) => {
                 eprintln!("Error: {e}");
