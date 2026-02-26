@@ -181,6 +181,9 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                 match word.as_str() {
                     "true" => tokens.push(Token::Bool(true)),
                     "false" => tokens.push(Token::Bool(false)),
+                    "and" => tokens.push(Token::Op(BinOp::And)),
+                    "or" => tokens.push(Token::Op(BinOp::Or)),
+                    "not" => tokens.push(Token::Not),
                     _ => tokens.push(Token::Ident(word)),
                 }
             }
@@ -352,5 +355,15 @@ mod tests {
     fn tokenize_unknown_escape_preserved() {
         let tokens = tokenize("\"hello\\xworld\"").unwrap();
         assert_eq!(tokens, vec![Token::Str("hello\\xworld".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_keyword_and_or_not() {
+        let tokens = tokenize("has_key and not is_hidden or flag").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Ident("has_key".to_string()), Token::Op(BinOp::And),
+            Token::Not, Token::Ident("is_hidden".to_string()),
+            Token::Op(BinOp::Or), Token::Ident("flag".to_string()),
+        ]);
     }
 }
