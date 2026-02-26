@@ -12,7 +12,9 @@ When you export via **File > Export JSON...**, TaleNode produces a clean, flat J
   "characters": [...],
   "nodes": [...],
   "barks": [...],
-  "quests": [...]
+  "quests": [...],
+  "world_entities": [...],
+  "timelines": [...]
 }
 ```
 
@@ -25,6 +27,8 @@ When you export via **File > Export JSON...**, TaleNode produces a clean, flat J
 | `nodes` | array | Flat list of all nodes with baked connections |
 | `barks` | array | *(optional)* Bark/ambient dialogue groups per character |
 | `quests` | array | *(optional)* Quest definitions with objectives |
+| `world_entities` | array | *(optional)* World-building entities (items, locations, lore) |
+| `timelines` | array | *(optional)* Timeline/cutscene sequences |
 
 ## Node IDs
 
@@ -291,6 +295,56 @@ When quests are defined, a `quests` array is included:
 ```
 
 The `quests` array is omitted when no quests are defined. The `description` field is omitted when empty.
+
+## World Entities
+
+When world entities are defined, a `world_entities` array is included:
+
+```json
+{
+  "world_entities": [
+    {
+      "name": "Iron Sword",
+      "category": "Item",
+      "description": "A basic iron sword.",
+      "tags": ["weapon", "starter"],
+      "properties": [
+        { "key": "damage", "value": "15" },
+        { "key": "weight", "value": "2.5" }
+      ]
+    }
+  ]
+}
+```
+
+The `world_entities` array is omitted when no entities are defined. The `description`, `tags`, and `properties` fields are omitted when empty.
+
+## Timelines
+
+When timelines are defined, a `timelines` array is included:
+
+```json
+{
+  "timelines": [
+    {
+      "name": "Intro Cutscene",
+      "steps": [
+        {
+          "action": { "type": "camera", "target": "player", "duration": 2.0 }
+        },
+        {
+          "action": { "type": "wait", "seconds": 1.0 },
+          "delay": 0.5
+        }
+      ]
+    }
+  ]
+}
+```
+
+The `timelines` array is omitted when no timelines are defined. The `delay` field is omitted when zero. The `description` field is omitted when empty. The `loop_playback` field is omitted when false.
+
+Action types: `dialogue`, `camera`, `animation`, `audio`, `wait`, `set_variable`, `custom`.
 
 ## Key Design Decisions
 

@@ -104,6 +104,21 @@ Per-character ambient dialogue lines with weights and conditions. Export as CSV 
 </div>
 
 <div class="feature-card" markdown>
+### World Database
+Catalog items, locations, lore entries, and custom entities with categories, tags, and key-value properties. Export alongside your dialogue.
+</div>
+
+<div class="feature-card" markdown>
+### Timeline / Cutscene Sequencer
+Sequence camera moves, animations, audio cues, and waits in named timelines. Export as JSON for your game engine to play back.
+</div>
+
+<div class="feature-card" markdown>
+### Plugin / Extension API
+Create custom export and import plugins with simple template files. TaleNode discovers plugins from global and project directories.
+</div>
+
+<div class="feature-card" markdown>
 ### Theme Customization
 Dark, Light, and Custom presets. Adjustable font size and accent color for a personalized editing experience.
 </div>
@@ -127,6 +142,9 @@ Export your dialogue as readable Markdown or RTF documents — complete with cha
 | [Quests](user-guide/quests.md) | Quest/journal system with objectives |
 | [NPC Relationships](user-guide/relationships.md) | Character affinity and reputation tracks |
 | [Bark Dialogue](user-guide/bark-dialogue.md) | Ambient dialogue per character |
+| [World Database](user-guide/world-database.md) | Items, locations, and lore entities |
+| [Timeline](user-guide/timeline.md) | Cutscene/event sequencer |
+| [Extensions](user-guide/extensions.md) | Custom export/import plugins |
 | [Auto-Translation](user-guide/auto-translation.md) | DeepL-powered machine translation |
 | [Voice Synthesis](user-guide/voice-synthesis.md) | ElevenLabs AI voice generation |
 | [Collaboration](user-guide/collaboration.md) | Real-time multiplayer editing |
