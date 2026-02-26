@@ -49,6 +49,20 @@ Get a DeepL API key at [deepl.com/pro-api](https://www.deepl.com/pro-api). The f
 
 Get an ElevenLabs API key at [elevenlabs.io](https://elevenlabs.io). The free plan includes limited characters/month.
 
+### AI Writing Assistant
+
+| Field | Description |
+|---|---|
+| **Provider** | Choose **OpenAI-compatible**, **Anthropic Claude**, or **Google Gemini** |
+| **API Key** | Your provider's API key (masked input). Required for all AI writing features |
+| **Base URL** | API endpoint (shown for OpenAI and Gemini only). Change this to use a local LLM server |
+| **Model** | Text field or dropdown. Click **Fetch Models** to load available models from the provider |
+| **Fetch Models** | Loads the model list from the provider's API. Requires an API key to be set |
+
+When you switch providers, the base URL and model reset to that provider's defaults. The fetched model list is also cleared.
+
+See [AI Writing Assistant](ai-writing.md) for full usage details.
+
 ### Collaboration
 
 | Field | Description |

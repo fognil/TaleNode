@@ -69,6 +69,11 @@ One-click machine translation via DeepL API. Translate all untranslated strings 
 </div>
 
 <div class="feature-card" markdown>
+### AI Writing Assistant
+Get dialogue suggestions, generate choice options, and check tone consistency using OpenAI, Anthropic Claude, or Google Gemini.
+</div>
+
+<div class="feature-card" markdown>
 ### AI Voice Synthesis
 Generate speech audio for every dialogue node via ElevenLabs. Assign voices to characters, batch-generate MP3 files for your game.
 </div>
@@ -145,6 +150,7 @@ Export your dialogue as readable Markdown or RTF documents — complete with cha
 | [World Database](user-guide/world-database.md) | Items, locations, and lore entities |
 | [Timeline](user-guide/timeline.md) | Cutscene/event sequencer |
 | [Extensions](user-guide/extensions.md) | Custom export/import plugins |
+| [AI Writing](user-guide/ai-writing.md) | Dialogue suggestions, choice generation, tone checks |
 | [Auto-Translation](user-guide/auto-translation.md) | DeepL-powered machine translation |
 | [Voice Synthesis](user-guide/voice-synthesis.md) | ElevenLabs AI voice generation |
 | [Collaboration](user-guide/collaboration.md) | Real-time multiplayer editing |
