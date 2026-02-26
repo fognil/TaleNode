@@ -265,6 +265,37 @@ mod tests {
     }
 
     #[test]
+    fn compound_add_assign() {
+        let mut ctx = ctx_with(&[("gold", VariableValue::Int(50))]);
+        let text = "<<set gold += 25>>Gold: {gold}";
+        assert_eq!(interpolate_text(text, &mut ctx), "Gold: 75");
+    }
+
+    #[test]
+    fn compound_sub_assign() {
+        let mut ctx = ctx_with(&[("hp", VariableValue::Int(100))]);
+        let text = "<<set hp -= 30>>HP: {hp}";
+        assert_eq!(interpolate_text(text, &mut ctx), "HP: 70");
+    }
+
+    #[test]
+    fn compound_mul_assign() {
+        let mut ctx = ctx_with(&[("score", VariableValue::Int(10))]);
+        let text = "<<set score *= 3>>Score: {score}";
+        assert_eq!(interpolate_text(text, &mut ctx), "Score: 30");
+    }
+
+    #[test]
+    fn compound_with_expression() {
+        let mut ctx = ctx_with(&[
+            ("gold", VariableValue::Int(50)),
+            ("bonus", VariableValue::Int(10)),
+        ]);
+        let text = "<<set gold += bonus * 2>>Gold: {gold}";
+        assert_eq!(interpolate_text(text, &mut ctx), "Gold: 70");
+    }
+
+    #[test]
     fn generic_command_produces_no_output() {
         let mut ctx = ScriptContext::default();
         let text = "Hello<<wait 2>> world";

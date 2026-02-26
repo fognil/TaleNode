@@ -222,7 +222,7 @@ fn parse_command(content: &str) -> Result<TextSegment, String> {
         return Err("Empty command <<>>".to_string());
     }
 
-    // Check for "set var = expr" or "set var expr"
+    // Check for "set var op= expr" or "set var = expr" or "set var expr"
     if let Some(rest) = content.strip_prefix("set ") {
         let rest = rest.trim();
         // Find variable name (first identifier)
@@ -234,8 +234,35 @@ fn parse_command(content: &str) -> Result<TextSegment, String> {
         }
         let var_name = rest[..var_end].to_string();
         let after = rest[var_end..].trim();
+        // Check for compound assignment: +=, -=, *=, /=, %=
+        let (compound_op, expr_after) = match after.strip_prefix("+=") {
+            Some(s) => (Some("+"), s),
+            None => match after.strip_prefix("-=") {
+                Some(s) => (Some("-"), s),
+                None => match after.strip_prefix("*=") {
+                    Some(s) => (Some("*"), s),
+                    None => match after.strip_prefix("/=") {
+                        Some(s) => (Some("/"), s),
+                        None => match after.strip_prefix("%=") {
+                            Some(s) => (Some("%"), s),
+                            None => (None, after),
+                        },
+                    },
+                },
+            },
+        };
+        if let Some(op) = compound_op {
+            // Desugar: var op= expr → var = var op expr
+            let rhs = expr_after.trim();
+            if rhs.is_empty() {
+                return Err(format!("<<set {var_name} {op}=>> missing value"));
+            }
+            let full_expr = format!("{var_name} {op} ({rhs})");
+            let expr = parse_expr(&full_expr)?;
+            return Ok(TextSegment::SetCommand { var_name, expr });
+        }
         // Strip optional '='
-        let expr_str = after.strip_prefix('=').unwrap_or(after).trim();
+        let expr_str = expr_after.strip_prefix('=').unwrap_or(expr_after).trim();
         if expr_str.is_empty() {
             return Err(format!("<<set {var_name}>> missing value expression"));
         }
