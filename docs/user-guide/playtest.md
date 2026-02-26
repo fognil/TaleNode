@@ -43,18 +43,26 @@ A collapsible **Variables** section at the bottom of the playtest panel shows al
 
 ## Text Interpolation
 
-Dialogue text and choice text support inline expressions using `{...}` syntax. During playtest, these are evaluated and replaced with their values:
+Dialogue text and choice text support a rich inline scripting syntax. During playtest, these are evaluated and replaced with their values:
 
 ```
 Hello {player_name}, you have {gold} gold.
 You need {100 - gold} more gold.
-{if has_key}You unlock the door.{else}The door is locked.{/if}
+{if gold >= 100}Rich!{elseif gold >= 50}Okay.{else}Broke.{/if}
+{gold > 100 ? "wealthy" : "modest"}
+{~First visit|Welcome back|Old friend}
 ```
 
-See [Variables — Text Interpolation](variables.md#text-interpolation) for full syntax details.
+Inline commands also execute during playtest:
+
+```
+You found treasure!<<set gold += 50>> Now you have {gold} gold.
+```
+
+See [Variables — Text Interpolation](variables.md#text-interpolation) for the full syntax reference including functions, dynamic text variations, inline commands, and operator precedence.
 
 !!! note
-    Interpolation only happens during playtest preview. The exported JSON preserves `{...}` syntax as-is for your game engine to evaluate at runtime.
+    Interpolation only happens during playtest preview. The exported JSON preserves `{...}` and `<<...>>` syntax as-is for your game engine to evaluate at runtime.
 
 ## Dialogue Log
 

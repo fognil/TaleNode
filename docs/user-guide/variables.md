@@ -115,6 +115,45 @@ Combine conditions with `&&` (and) and `||` (or), negate with `!`:
 {!is_hidden || has_detect}
 ```
 
+### Ternary Expressions
+
+Use `condition ? value_if_true : value_if_false` inline:
+
+```
+{gold > 100 ? "rich" : "poor"}
+{x < 0 ? -x : x}
+```
+
+### Built-in Functions
+
+Functions can be used inside `{...}` expressions:
+
+| Function | Description | Example |
+|---|---|---|
+| `abs(x)` | Absolute value | `abs(-5)` → `5` |
+| `round(x)` | Round to nearest integer | `round(3.7)` → `4` |
+| `floor(x)` | Round down | `floor(3.9)` → `3` |
+| `ceil(x)` | Round up | `ceil(3.1)` → `4` |
+| `min(a, b)` | Smaller value | `min(5, 3)` → `3` |
+| `max(a, b)` | Larger value | `max(5, 3)` → `5` |
+| `clamp(x, lo, hi)` | Clamp to range | `clamp(hp, 0, 100)` |
+| `pow(base, exp)` | Exponentiation | `pow(2, 10)` → `1024` |
+| `random(lo, hi)` | Random integer in range | `random(1, 6)` |
+| `len(s)` | String length | `len(name)` |
+| `upper(s)` | Uppercase | `upper("hello")` → `"HELLO"` |
+| `lower(s)` | Lowercase | `lower("HELLO")` → `"hello"` |
+| `trim(s)` | Strip whitespace | `trim(" hi ")` → `"hi"` |
+| `contains(s, sub)` | Substring check | `contains("hello", "ell")` → `true` |
+| `starts_with(s, pre)` | Prefix check | `starts_with("hello", "he")` → `true` |
+| `ends_with(s, suf)` | Suffix check | `ends_with("hello", "lo")` → `true` |
+| `replace(s, from, to)` | Replace substring | `replace("hello", "l", "r")` → `"herro"` |
+| `substr(s, start, len)` | Extract substring | `substr("hello", 1, 3)` → `"ell"` |
+| `str(x)` | Convert to text | `str(42)` → `"42"` |
+| `int(x)` | Convert to integer | `int(3.9)` → `3` |
+| `float(x)` | Convert to float | `float(5)` → `5.0` |
+
+Functions can be nested: `abs(min(-5, 3))` → `5`
+
 ### Inline Conditionals
 
 Show different text based on a condition:
@@ -126,17 +165,98 @@ Show different text based on a condition:
 
 The `{else}` block is optional. Without it, nothing is shown when the condition is false.
 
+#### Elseif Chains
+
+Use `{elseif}` for multi-branch conditionals:
+
+```
+{if gold >= 100}You're rich!{elseif gold >= 50}You're getting by.{else}You're broke.{/if}
+```
+
+You can chain as many `{elseif}` branches as needed. The first matching condition wins.
+
+### Dynamic Text Variations
+
+These blocks let you vary text across repeated visits to the same node:
+
+| Syntax | Behavior | Example |
+|---|---|---|
+| `{~a\|b\|c}` | **Sequence** — shows items in order, sticks on last | First visit: "a", second: "b", third+: "c" |
+| `{&a\|b\|c}` | **Cycle** — loops through items repeatedly | "a" → "b" → "c" → "a" → ... |
+| `{!a\|b\|c}` | **Shuffle** — random pick each time | Random: "a", "c", "b", ... |
+| `{?a\|b\|c}` | **Once-only** — shows each item once, then empty | "a" → "b" → "c" → "" → "" |
+
+Items are separated by `|` and can contain nested expressions:
+
+```
+{~You have {gold} gold|You still have {gold} gold}
+{&Good morning|Good afternoon|Good evening}
+{?This is your first visit.|This is your second visit.|This is your last unique greeting.}
+```
+
+### Inline Commands
+
+Use `<<...>>` syntax for commands that execute during playtest but produce no visible text:
+
+#### Set Command
+
+Modify variables inline within dialogue text:
+
+```
+You found a gem!<<set gold += 50>> Now you have {gold} gold.
+<<set hp = hp + 20>>HP is now {hp}.
+<<set flag true>>
+```
+
+Supported assignment forms:
+
+| Form | Example | Description |
+|---|---|---|
+| `=` | `<<set gold = 100>>` | Direct assignment |
+| `+=` | `<<set gold += 25>>` | Add and assign |
+| `-=` | `<<set hp -= 30>>` | Subtract and assign |
+| `*=` | `<<set score *= 2>>` | Multiply and assign |
+| `/=` | `<<set score /= 2>>` | Divide and assign |
+| `%=` | `<<set x %= 3>>` | Modulo and assign |
+| *(no `=`)* | `<<set flag true>>` | Assignment without `=` |
+
+The right-hand side can be any expression: `<<set gold += bonus * 2>>`
+
+#### Generic Commands
+
+Other `<<...>>` commands are preserved as markers for game engines:
+
+```
+Hello<<wait 2>> world
+<<play_sound "door_open">>
+```
+
+These produce no output during playtest but are available in the raw text for engines to parse.
+
+### String Literals
+
+String literals in expressions use double quotes with escape sequences:
+
+| Escape | Result |
+|---|---|
+| `\n` | Newline |
+| `\t` | Tab |
+| `\\` | Backslash |
+| `\"` | Double quote |
+
 ### Operator Precedence
 
 From lowest to highest:
 
-1. `||` (or)
-2. `&&` (and)
-3. `==`, `!=` (equality)
-4. `>`, `<`, `>=`, `<=` (comparison)
-5. `+`, `-` (additive)
-6. `*`, `/`, `%` (multiplicative)
-7. `!`, `-` (unary not, negation)
+1. `? :` (ternary)
+2. `||` (or)
+3. `&&` (and)
+4. `==`, `!=` (equality)
+5. `>`, `<`, `>=`, `<=` (comparison)
+6. `+`, `-` (additive)
+7. `*`, `/`, `%` (multiplicative)
+8. `!`, `-` (unary not, negation)
+9. Function calls, parentheses
 
 Use parentheses to override: `{(a + b) * c}`
 
@@ -145,7 +265,7 @@ Use parentheses to override: `{(a + b) * c}`
 | Context | Behavior |
 |---|---|
 | **Playtest mode** | Expressions are evaluated and text is interpolated in real time |
-| **Exported JSON** | `{...}` syntax is preserved as-is for game engines to evaluate |
+| **Exported JSON** | `{...}` and `<<...>>` syntax is preserved as-is for game engines to evaluate |
 
 !!! tip
     A hint below the dialogue text editor reminds you of the `{variable}` syntax.
