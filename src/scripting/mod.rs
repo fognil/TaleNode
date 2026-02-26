@@ -1,5 +1,7 @@
+mod builtins;
 pub mod eval;
 pub mod expr;
+mod expr_parser;
 mod expr_tokenizer;
 pub mod interpolate;
 

@@ -24,6 +24,7 @@ pub fn eval_expr(expr: &Expr, ctx: &ScriptContext) -> Result<VariableValue, Stri
                 VariableValue::Text(_) => Err("Cannot negate text".to_string()),
             }
         }
+        Expr::FunctionCall { name, args } => eval_function(name, args, ctx),
         Expr::BinaryOp { left, op, right } => {
             let lv = eval_expr(left, ctx)?;
             // Short-circuit for && and ||
@@ -48,6 +49,16 @@ pub fn eval_expr(expr: &Expr, ctx: &ScriptContext) -> Result<VariableValue, Stri
             eval_binary(*op, &lv, &rv)
         }
     }
+}
+
+fn eval_function(
+    name: &str,
+    args: &[Expr],
+    ctx: &ScriptContext,
+) -> Result<VariableValue, String> {
+    let vals: Result<Vec<_>, _> = args.iter().map(|a| eval_expr(a, ctx)).collect();
+    let vals = vals?;
+    super::builtins::eval_builtin(name, &vals)
 }
 
 fn eval_binary(op: BinOp, lv: &VariableValue, rv: &VariableValue) -> Result<VariableValue, String> {

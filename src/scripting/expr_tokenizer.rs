@@ -12,6 +12,7 @@ pub enum Token {
     Minus,
     LParen,
     RParen,
+    Comma,
 }
 
 pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
@@ -28,6 +29,10 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             }
             ')' => {
                 tokens.push(Token::RParen);
+                i += 1;
+            }
+            ',' => {
+                tokens.push(Token::Comma);
                 i += 1;
             }
             '+' => {
@@ -274,5 +279,16 @@ mod tests {
     fn tokenize_whitespace_only() {
         let tokens = tokenize("   \t\n  ").unwrap();
         assert!(tokens.is_empty());
+    }
+
+    #[test]
+    fn tokenize_comma() {
+        let tokens = tokenize("clamp(x, 0, 100)").unwrap();
+        assert_eq!(tokens, vec![
+            Token::Ident("clamp".to_string()), Token::LParen,
+            Token::Ident("x".to_string()), Token::Comma,
+            Token::Int(0), Token::Comma,
+            Token::Int(100), Token::RParen,
+        ]);
     }
 }
