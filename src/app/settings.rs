@@ -167,4 +167,48 @@ mod tests {
         assert!(loaded.deepl_api_key.is_none());
         assert_eq!(loaded.collab_default_port, 9847);
     }
+
+    #[test]
+    fn write_and_read_settings_file() {
+        let dir = std::env::temp_dir().join("talenode_test_settings");
+        let _ = std::fs::create_dir_all(&dir);
+        let path = dir.join("settings.json");
+
+        let mut s = AppSettings::default();
+        s.deepl_api_key = Some("dk_test_123".to_string());
+        s.elevenlabs_api_key = Some("el_test_456".to_string());
+        s.collab_username = "TestUser".to_string();
+        s.collab_default_port = 8080;
+
+        let json = serde_json::to_string_pretty(&s).unwrap();
+        std::fs::write(&path, &json).unwrap();
+
+        let data = std::fs::read_to_string(&path).unwrap();
+        let loaded: AppSettings = serde_json::from_str(&data).unwrap();
+        assert_eq!(loaded.deepl_api_key.as_deref(), Some("dk_test_123"));
+        assert_eq!(loaded.elevenlabs_api_key.as_deref(), Some("el_test_456"));
+        assert_eq!(loaded.collab_username, "TestUser");
+        assert_eq!(loaded.collab_default_port, 8080);
+        assert!(!loaded.deepl_use_pro);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn all_fields_survive_roundtrip() {
+        let s = AppSettings {
+            deepl_api_key: Some("key1".to_string()),
+            deepl_use_pro: true,
+            elevenlabs_api_key: Some("key2".to_string()),
+            collab_username: "Bob".to_string(),
+            collab_default_port: 12345,
+        };
+        let json = serde_json::to_string(&s).unwrap();
+        let loaded: AppSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded.deepl_api_key, s.deepl_api_key);
+        assert_eq!(loaded.deepl_use_pro, true);
+        assert_eq!(loaded.elevenlabs_api_key, s.elevenlabs_api_key);
+        assert_eq!(loaded.collab_username, "Bob");
+        assert_eq!(loaded.collab_default_port, 12345);
+    }
 }

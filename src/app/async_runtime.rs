@@ -58,4 +58,49 @@ mod tests {
         let loaded: VoiceInfo = serde_json::from_str(json).unwrap();
         assert!(loaded.category.is_empty());
     }
+
+    #[test]
+    fn async_channel_translation_done() {
+        let (tx, rx) = std::sync::mpsc::channel();
+        tx.send(AsyncResult::TranslationDone {
+            locale: "fr".to_string(),
+            translations: vec![
+                ("dlg_abc".to_string(), "Bonjour".to_string()),
+                ("dlg_def".to_string(), "Au revoir".to_string()),
+            ],
+        })
+        .unwrap();
+        let result = rx.try_recv().unwrap();
+        if let AsyncResult::TranslationDone { locale, translations } = result {
+            assert_eq!(locale, "fr");
+            assert_eq!(translations.len(), 2);
+            assert_eq!(translations[0], ("dlg_abc".to_string(), "Bonjour".to_string()));
+        } else {
+            panic!("Wrong variant");
+        }
+    }
+
+    #[test]
+    fn async_channel_voice_generated() {
+        let (tx, rx) = std::sync::mpsc::channel();
+        let node_id = uuid::Uuid::new_v4();
+        tx.send(AsyncResult::VoiceGenerated {
+            node_id,
+            audio_path: "voices/dlg_abc.mp3".to_string(),
+        })
+        .unwrap();
+        let result = rx.try_recv().unwrap();
+        if let AsyncResult::VoiceGenerated { node_id: id, audio_path } = result {
+            assert_eq!(id, node_id);
+            assert_eq!(audio_path, "voices/dlg_abc.mp3");
+        } else {
+            panic!("Wrong variant");
+        }
+    }
+
+    #[test]
+    fn async_channel_empty_returns_none() {
+        let (_tx, rx) = std::sync::mpsc::channel::<AsyncResult>();
+        assert!(rx.try_recv().is_err());
+    }
 }

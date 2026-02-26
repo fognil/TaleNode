@@ -288,4 +288,143 @@ mod tests {
         );
         assert_eq!(graph.nodes.get(&id).unwrap().position, [100.0, 200.0]);
     }
+
+    #[test]
+    fn diff_then_apply_recreates_target() {
+        let mut old = DialogueGraph::new();
+        old.add_node(Node::new_start([0.0, 0.0]));
+        let dlg = Node::new_dialogue([100.0, 100.0]);
+        let dlg_id = dlg.id;
+        old.add_node(dlg);
+
+        let mut new = old.clone();
+        new.add_node(Node::new_choice([200.0, 200.0]));
+        new.remove_node(dlg_id);
+        new.nodes.values_mut().next().unwrap().position = [50.0, 50.0];
+
+        let ops = diff_to_ops(&old, &new);
+        assert!(!ops.is_empty());
+
+        let mut rebuilt = old.clone();
+        for op in &ops {
+            apply_op(&mut rebuilt, op);
+        }
+
+        assert_eq!(rebuilt.nodes.len(), new.nodes.len());
+        assert!(!rebuilt.nodes.contains_key(&dlg_id));
+    }
+
+    #[test]
+    fn diff_empty_graphs_produces_no_ops() {
+        let a = DialogueGraph::new();
+        let b = a.clone();
+        let ops = diff_to_ops(&a, &b);
+        assert!(ops.is_empty());
+    }
+
+    #[test]
+    fn diff_detects_node_type_change() {
+        let mut old = DialogueGraph::new();
+        let node = Node::new_dialogue([0.0, 0.0]);
+        let id = node.id;
+        old.add_node(node);
+
+        let mut new = old.clone();
+        if let Some(n) = new.nodes.get_mut(&id) {
+            if let crate::model::node::NodeType::Dialogue(ref mut d) = n.node_type {
+                d.text = "Changed text".to_string();
+            }
+        }
+
+        let ops = diff_to_ops(&old, &new);
+        assert!(ops
+            .iter()
+            .any(|o| matches!(o, CollabOp::EditNodeField { .. })));
+    }
+
+    #[test]
+    fn apply_add_and_edit_character() {
+        let mut graph = DialogueGraph::new();
+        let ch = crate::model::character::Character::new("Hero");
+        let ch_id = ch.id;
+        let json = serde_json::to_value(&ch).unwrap();
+
+        assert!(apply_op(
+            &mut graph,
+            &CollabOp::AddCharacter { char_json: json }
+        ));
+        assert_eq!(graph.characters.len(), 1);
+        assert_eq!(graph.characters[0].name, "Hero");
+
+        let mut updated = graph.characters[0].clone();
+        updated.name = "Villain".to_string();
+        let edit_json = serde_json::to_value(&updated).unwrap();
+        assert!(apply_op(
+            &mut graph,
+            &CollabOp::EditCharacter {
+                char_json: edit_json
+            }
+        ));
+        assert_eq!(graph.characters[0].name, "Villain");
+
+        assert!(apply_op(
+            &mut graph,
+            &CollabOp::RemoveCharacter { char_id: ch_id }
+        ));
+        assert!(graph.characters.is_empty());
+    }
+
+    #[test]
+    fn apply_add_and_remove_variable() {
+        let mut graph = DialogueGraph::new();
+        let var = crate::model::variable::Variable {
+            id: uuid::Uuid::new_v4(),
+            name: "health".to_string(),
+            var_type: crate::model::variable::VariableType::Int,
+            default_value: crate::model::node::VariableValue::Int(100),
+        };
+        let var_id = var.id;
+        let json = serde_json::to_value(&var).unwrap();
+
+        assert!(apply_op(
+            &mut graph,
+            &CollabOp::AddVariable { var_json: json }
+        ));
+        assert_eq!(graph.variables.len(), 1);
+        assert_eq!(graph.variables[0].name, "health");
+
+        assert!(apply_op(
+            &mut graph,
+            &CollabOp::RemoveVariable { var_id }
+        ));
+        assert!(graph.variables.is_empty());
+    }
+
+    #[test]
+    fn apply_op_on_missing_node_returns_false() {
+        let mut graph = DialogueGraph::new();
+        let fake_id = uuid::Uuid::new_v4();
+        assert!(!apply_op(
+            &mut graph,
+            &CollabOp::MoveNode {
+                node_id: fake_id,
+                position: [0.0, 0.0],
+            }
+        ));
+    }
+
+    #[test]
+    fn collab_op_serialization_roundtrip() {
+        let op = CollabOp::MoveNode {
+            node_id: uuid::Uuid::new_v4(),
+            position: [42.0, 99.0],
+        };
+        let json = serde_json::to_string(&op).unwrap();
+        let loaded: CollabOp = serde_json::from_str(&json).unwrap();
+        if let CollabOp::MoveNode { position, .. } = loaded {
+            assert_eq!(position, [42.0, 99.0]);
+        } else {
+            panic!("Wrong variant");
+        }
+    }
 }

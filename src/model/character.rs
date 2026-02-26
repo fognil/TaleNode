@@ -66,4 +66,28 @@ mod tests {
         assert_eq!(loaded.color, [255, 255, 255, 255]); // serde default
         assert!(loaded.portrait_path.is_empty());
     }
+
+    #[test]
+    fn voice_id_default_none() {
+        let c = Character::new("NPC");
+        assert!(c.voice_id.is_none());
+    }
+
+    #[test]
+    fn voice_id_roundtrip() {
+        let mut c = Character::new("Narrator");
+        c.voice_id = Some("elevenlabs_abc123".to_string());
+        let json = serde_json::to_string(&c).unwrap();
+        let loaded: Character = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded.voice_id.as_deref(), Some("elevenlabs_abc123"));
+    }
+
+    #[test]
+    fn backward_compat_missing_voice_id() {
+        // Old project files won't have voice_id — must deserialize fine
+        let json = r#"{"id":"00000000-0000-0000-0000-000000000002","name":"Old","color":[255,0,0,255],"portrait_path":""}"#;
+        let loaded: Character = serde_json::from_str(json).unwrap();
+        assert_eq!(loaded.name, "Old");
+        assert!(loaded.voice_id.is_none());
+    }
 }

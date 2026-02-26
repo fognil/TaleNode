@@ -128,4 +128,26 @@ mod tests {
         assert_eq!(resp.translations[0].text, "Bonjour");
         assert_eq!(resp.translations[1].text, "Monde");
     }
+
+    #[test]
+    fn deserialize_single_translation() {
+        let json = r#"{"translations":[{"text":"Hola"}]}"#;
+        let resp: DeepLResponse = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.translations.len(), 1);
+        assert_eq!(resp.translations[0].text, "Hola");
+    }
+
+    #[test]
+    fn deserialize_empty_translations() {
+        let json = r#"{"translations":[]}"#;
+        let resp: DeepLResponse = serde_json::from_str(json).unwrap();
+        assert!(resp.translations.is_empty());
+    }
+
+    #[test]
+    fn client_new_creates_instance() {
+        let client = DeepLClient::new("my-key".to_string(), true);
+        assert_eq!(client.api_key, "my-key");
+        assert!(client.use_pro);
+    }
 }
