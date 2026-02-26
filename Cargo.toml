@@ -21,6 +21,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
 tokio-tungstenite = "0.24"
 futures-util = "0.3"
 dirs = "6"
+image = { version = "0.25", default-features = false, features = ["png"] }
 
 [profile.release]
 opt-level = 3

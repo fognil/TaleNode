@@ -3521,6 +3521,7 @@ dependencies = [
  "egui",
  "egui_dock",
  "futures-util",
+ "image",
  "reqwest",
  "rfd",
  "roxmltree",
