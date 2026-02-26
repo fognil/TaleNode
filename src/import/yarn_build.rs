@@ -301,3 +301,80 @@ fn collect_speakers_and_vars(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::import::yarn_import::YarnLine;
+
+    fn dlg(speaker: Option<&str>, text: &str) -> YarnLine {
+        YarnLine::Dialogue { speaker: speaker.map(String::from), text: text.into() }
+    }
+
+    #[test]
+    fn guess_variable_value_bool() {
+        assert!(matches!(guess_variable_value("true"), VariableValue::Bool(true)));
+        assert!(matches!(guess_variable_value("false"), VariableValue::Bool(false)));
+    }
+
+    #[test]
+    fn guess_variable_value_int() {
+        assert!(matches!(guess_variable_value("42"), VariableValue::Int(42)));
+        assert!(matches!(guess_variable_value("-7"), VariableValue::Int(-7)));
+    }
+
+    #[test]
+    fn guess_variable_value_text() {
+        assert_eq!(guess_variable_value("hello"), VariableValue::Text("hello".into()));
+        assert_eq!(guess_variable_value("\"quoted\""), VariableValue::Text("quoted".into()));
+    }
+
+    #[test]
+    fn build_graph_simple_dialogue() {
+        let nodes = vec![YarnNode {
+            title: "Start".into(),
+            lines: vec![dlg(None, "Hello"), dlg(None, "World")],
+        }];
+        let g = build_graph(nodes).unwrap();
+        // Start + 2 Dialogue + End = 4 nodes
+        assert_eq!(g.nodes.len(), 4);
+        let starts = g.nodes.values().filter(|n| matches!(n.node_type, NodeType::Start)).count();
+        let dlgs = g.nodes.values().filter(|n| matches!(n.node_type, NodeType::Dialogue(_))).count();
+        let ends = g.nodes.values().filter(|n| matches!(n.node_type, NodeType::End(_))).count();
+        assert_eq!((starts, dlgs, ends), (1, 2, 1));
+    }
+
+    #[test]
+    fn build_graph_creates_characters() {
+        let nodes = vec![YarnNode {
+            title: "Start".into(),
+            lines: vec![dlg(Some("Guard"), "Halt!")],
+        }];
+        let g = build_graph(nodes).unwrap();
+        assert!(g.characters.iter().any(|c| c.name == "Guard"));
+    }
+
+    #[test]
+    fn build_graph_creates_variables() {
+        let nodes = vec![YarnNode {
+            title: "Start".into(),
+            lines: vec![YarnLine::SetCommand { variable: "gold".into(), value: "10".into() }],
+        }];
+        let g = build_graph(nodes).unwrap();
+        assert!(g.variables.iter().any(|v| v.name == "gold"));
+    }
+
+    #[test]
+    fn build_graph_with_choices() {
+        let nodes = vec![YarnNode {
+            title: "Start".into(),
+            lines: vec![
+                YarnLine::ShortcutOption { text: "Yes".into(), condition: None, body: vec![] },
+                YarnLine::ShortcutOption { text: "No".into(), condition: None, body: vec![] },
+            ],
+        }];
+        let g = build_graph(nodes).unwrap();
+        let choices = g.nodes.values().filter(|n| matches!(n.node_type, NodeType::Choice(_))).count();
+        assert_eq!(choices, 1);
+    }
+}

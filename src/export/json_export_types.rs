@@ -124,3 +124,122 @@ pub struct ExportedNode {
     #[serde(flatten)]
     pub data: serde_json::Value,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_zero_f32_true() {
+        assert!(is_zero_f32(&0.0));
+    }
+
+    #[test]
+    fn is_zero_f32_false() {
+        assert!(!is_zero_f32(&1.5));
+    }
+
+    #[test]
+    fn exported_variable_type_renamed() {
+        let var = ExportedVariable {
+            name: "hp".into(),
+            var_type: "int".into(),
+            default: serde_json::json!(100),
+        };
+        let json = serde_json::to_value(&var).unwrap();
+        assert!(json.get("type").is_some());
+        assert!(json.get("var_type").is_none());
+        assert_eq!(json["type"], "int");
+    }
+
+    #[test]
+    fn exported_node_data_flattened() {
+        let node = ExportedNode {
+            id: "dlg_1".into(),
+            node_type: "dialogue".into(),
+            data: serde_json::json!({"speaker": "Alice", "text": "Hello"}),
+        };
+        let json = serde_json::to_value(&node).unwrap();
+        assert_eq!(json["id"], "dlg_1");
+        assert_eq!(json["type"], "dialogue");
+        assert_eq!(json["speaker"], "Alice");
+        assert_eq!(json["text"], "Hello");
+        // data should not appear as a nested key
+        assert!(json.get("data").is_none());
+    }
+
+    #[test]
+    fn skip_empty_barks() {
+        let dialogue = ExportedDialogue {
+            version: "1.0".into(),
+            name: "Test".into(),
+            default_locale: Some("en".into()),
+            locales: None,
+            variables: vec![],
+            characters: vec![],
+            nodes: vec![],
+            strings: None,
+            barks: vec![],
+            quests: vec![],
+            world_entities: vec![],
+            timelines: vec![],
+        };
+        let json = serde_json::to_value(&dialogue).unwrap();
+        assert!(json.get("barks").is_none());
+    }
+
+    #[test]
+    fn skip_none_locale() {
+        let dialogue = ExportedDialogue {
+            version: "1.0".into(),
+            name: "Test".into(),
+            default_locale: None,
+            locales: None,
+            variables: vec![],
+            characters: vec![],
+            nodes: vec![],
+            strings: None,
+            barks: vec![],
+            quests: vec![],
+            world_entities: vec![],
+            timelines: vec![],
+        };
+        let json = serde_json::to_value(&dialogue).unwrap();
+        assert!(json.get("default_locale").is_none());
+    }
+
+    #[test]
+    fn timeline_step_skip_zero_delay() {
+        let step = ExportedTimelineStep {
+            action: serde_json::json!({"type": "wait", "seconds": 2.0}),
+            delay: 0.0,
+        };
+        let json = serde_json::to_value(&step).unwrap();
+        assert!(json.get("delay").is_none());
+    }
+
+    #[test]
+    fn timeline_skip_false_loop() {
+        let tl = ExportedTimeline {
+            name: "Intro".into(),
+            description: String::new(),
+            steps: vec![],
+            loop_playback: false,
+        };
+        let json = serde_json::to_value(&tl).unwrap();
+        assert!(json.get("loop_playback").is_none());
+    }
+
+    #[test]
+    fn exported_character_skip_empty_relationships() {
+        let ch = ExportedCharacter {
+            id: "char_1".into(),
+            name: "Alice".into(),
+            portrait: None,
+            color: "#ff0000".into(),
+            relationships: vec![],
+        };
+        let json = serde_json::to_value(&ch).unwrap();
+        assert!(json.get("relationships").is_none());
+    }
+}

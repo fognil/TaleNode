@@ -1,12 +1,14 @@
 use std::collections::HashMap;
 
 /// Parsed actor from Chat Mapper XML.
+#[derive(Debug)]
 pub(super) struct CmActor {
     pub id: String,
     pub name: String,
 }
 
 /// Parsed variable from Chat Mapper XML.
+#[derive(Debug)]
 pub(super) struct CmVariable {
     pub name: String,
     pub var_type: String,
@@ -14,6 +16,7 @@ pub(super) struct CmVariable {
 }
 
 /// Parsed dialogue entry from Chat Mapper XML.
+#[derive(Debug)]
 pub(super) struct CmEntry {
     pub id: String,
     pub conv_id: String,
@@ -24,12 +27,14 @@ pub(super) struct CmEntry {
 }
 
 /// A link from one dialogue entry to another.
+#[derive(Debug)]
 pub(super) struct CmLink {
     pub dest_conv_id: String,
     pub dest_dialog_id: String,
 }
 
 /// All data parsed from a Chat Mapper project XML.
+#[derive(Debug)]
 pub(super) struct CmProject {
     pub actors: Vec<CmActor>,
     pub variables: Vec<CmVariable>,
@@ -175,4 +180,177 @@ pub(super) fn build_entry_map(entries: &[CmEntry]) -> HashMap<String, usize> {
         map.insert(entry_key(&e.conv_id, &e.id), i);
     }
     map
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn full_xml() -> &'static str {
+        r#"<?xml version="1.0"?>
+<ChatMapperProject>
+  <Assets>
+    <Actors>
+      <Actor ID="1">
+        <Fields><Field><Title>Name</Title><Value>Alice</Value></Field></Fields>
+      </Actor>
+      <Actor ID="2">
+        <Fields><Field><Title>Name</Title><Value>Bob</Value></Field></Fields>
+      </Actor>
+    </Actors>
+    <Variables>
+      <Variable>
+        <Fields>
+          <Field><Title>Name</Title><Value>mood</Value></Field>
+          <Field><Title>Type</Title><Value>Text</Value></Field>
+          <Field><Title>Initial Value</Title><Value>happy</Value></Field>
+        </Fields>
+      </Variable>
+    </Variables>
+    <Conversations>
+      <Conversation ID="10">
+        <DialogEntries>
+          <DialogEntry ID="0" IsRoot="true">
+            <Fields>
+              <Field><Title>Dialogue Text</Title><Value>Hello!</Value></Field>
+              <Field><Title>Actor</Title><Value>1</Value></Field>
+            </Fields>
+            <OutgoingLinks>
+              <Link><DestinationConvoID>10</DestinationConvoID>
+                    <DestinationDialogID>1</DestinationDialogID></Link>
+            </OutgoingLinks>
+          </DialogEntry>
+          <DialogEntry ID="1" IsRoot="false">
+            <Fields>
+              <Field><Title>Dialogue Text</Title><Value>Hi there.</Value></Field>
+              <Field><Title>Actor</Title><Value>2</Value></Field>
+            </Fields>
+            <OutgoingLinks/>
+          </DialogEntry>
+        </DialogEntries>
+      </Conversation>
+    </Conversations>
+  </Assets>
+</ChatMapperProject>"#
+    }
+
+    #[test]
+    fn parse_valid_project() {
+        let proj = parse_chatmapper(full_xml()).unwrap();
+        assert_eq!(proj.actors.len(), 2);
+        assert_eq!(proj.actors[0].name, "Alice");
+        assert_eq!(proj.actors[1].id, "2");
+        assert_eq!(proj.variables.len(), 1);
+        assert_eq!(proj.variables[0].name, "mood");
+        assert_eq!(proj.entries.len(), 2);
+        assert_eq!(proj.entries[0].text, "Hello!");
+        assert_eq!(proj.entries[0].outgoing_links.len(), 1);
+        assert_eq!(proj.entries[0].outgoing_links[0].dest_dialog_id, "1");
+        assert_eq!(proj.entries[1].text, "Hi there.");
+    }
+
+    #[test]
+    fn parse_missing_assets_returns_error() {
+        let xml = r#"<?xml version="1.0"?><ChatMapperProject></ChatMapperProject>"#;
+        match parse_chatmapper(xml) {
+            Err(e) => assert!(e.contains("Assets"), "expected Assets error, got: {e}"),
+            Ok(_) => panic!("expected error for missing Assets"),
+        }
+    }
+
+    #[test]
+    fn parse_invalid_xml_returns_error() {
+        match parse_chatmapper("<not-closed") {
+            Err(e) => assert!(e.contains("XML parse error")),
+            Ok(_) => panic!("expected error for malformed XML"),
+        }
+    }
+
+    #[test]
+    fn parse_actors_skips_nameless() {
+        let xml = r#"<?xml version="1.0"?>
+<ChatMapperProject><Assets>
+  <Actors>
+    <Actor ID="1"><Fields></Fields></Actor>
+    <Actor ID="2">
+      <Fields><Field><Title>Name</Title><Value>Valid</Value></Field></Fields>
+    </Actor>
+  </Actors>
+  <Conversations/>
+</Assets></ChatMapperProject>"#;
+        let proj = parse_chatmapper(xml).unwrap();
+        assert_eq!(proj.actors.len(), 1);
+        assert_eq!(proj.actors[0].name, "Valid");
+    }
+
+    #[test]
+    fn parse_variables_extracts_types() {
+        let xml = r#"<?xml version="1.0"?>
+<ChatMapperProject><Assets>
+  <Variables>
+    <Variable><Fields>
+      <Field><Title>Name</Title><Value>hp</Value></Field>
+      <Field><Title>Type</Title><Value>Number</Value></Field>
+      <Field><Title>Initial Value</Title><Value>100</Value></Field>
+    </Fields></Variable>
+    <Variable><Fields>
+      <Field><Title>Name</Title><Value>alive</Value></Field>
+      <Field><Title>Type</Title><Value>Boolean</Value></Field>
+      <Field><Title>Initial Value</Title><Value>true</Value></Field>
+    </Fields></Variable>
+  </Variables>
+  <Conversations/>
+</Assets></ChatMapperProject>"#;
+        let proj = parse_chatmapper(xml).unwrap();
+        assert_eq!(proj.variables.len(), 2);
+        assert_eq!(proj.variables[0].var_type, "Number");
+        assert_eq!(proj.variables[0].initial_value, "100");
+        assert_eq!(proj.variables[1].var_type, "Boolean");
+        assert_eq!(proj.variables[1].initial_value, "true");
+    }
+
+    #[test]
+    fn parse_conversations_with_root_entry() {
+        let proj = parse_chatmapper(full_xml()).unwrap();
+        assert!(proj.entries[0].is_root);
+        assert_eq!(proj.entries[0].conv_id, "10");
+        assert_eq!(proj.entries[0].actor_id.as_deref(), Some("1"));
+        assert!(!proj.entries[1].is_root);
+    }
+
+    #[test]
+    fn entry_key_format() {
+        assert_eq!(entry_key("10", "3"), "10:3");
+        assert_eq!(entry_key("abc", "xyz"), "abc:xyz");
+    }
+
+    #[test]
+    fn build_entry_map_lookup() {
+        let entries = vec![
+            CmEntry {
+                id: "0".into(), conv_id: "1".into(), is_root: true,
+                actor_id: None, text: String::new(), outgoing_links: vec![],
+            },
+            CmEntry {
+                id: "5".into(), conv_id: "2".into(), is_root: false,
+                actor_id: None, text: String::new(), outgoing_links: vec![],
+            },
+        ];
+        let map = build_entry_map(&entries);
+        assert_eq!(map.len(), 2);
+        assert_eq!(map["1:0"], 0);
+        assert_eq!(map["2:5"], 1);
+    }
+
+    #[test]
+    fn parse_empty_sections() {
+        let xml = r#"<?xml version="1.0"?>
+<ChatMapperProject><Assets>
+  <Actors/><Variables/><Conversations/>
+</Assets></ChatMapperProject>"#;
+        let proj = parse_chatmapper(xml).unwrap();
+        assert!(proj.actors.is_empty());
+        assert!(proj.variables.is_empty());
+        assert!(proj.entries.is_empty());
+    }
 }

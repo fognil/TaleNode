@@ -177,3 +177,152 @@ fn find_child<'a>(node: &'a roxmltree::Node, tag: &str) -> Option<roxmltree::Nod
 fn child_text(node: &roxmltree::Node, tag: &str) -> Option<String> {
     find_child(node, tag).and_then(|n| n.text().map(|s| s.to_string()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn full_xml() -> String {
+        r#"<?xml version="1.0"?>
+<ArticyData>
+  <Content>
+    <Entities>
+      <Entity Id="ent_1" DisplayName="AttrNPC">
+        <DisplayName>Hero</DisplayName>
+      </Entity>
+      <Entity Id="ent_2">
+        <DisplayName>Villain</DisplayName>
+      </Entity>
+    </Entities>
+    <DialogueFragments>
+      <DialogueFragment Id="frag_1" Speaker="ent_1">
+        <Text>Hello world</Text>
+        <Pins>
+          <InputPin Id="pin_in_1"/>
+          <OutputPin Id="pin_out_1"/>
+        </Pins>
+      </DialogueFragment>
+    </DialogueFragments>
+    <Hubs>
+      <Hub Id="hub_1" DisplayName="Branch A">
+        <Pins>
+          <InputPin Id="pin_h_in"/>
+          <OutputPin Id="pin_h_out1"/>
+          <OutputPin Id="pin_h_out2"/>
+        </Pins>
+      </Hub>
+    </Hubs>
+    <Connections>
+      <Connection Source="pin_out_1" Target="pin_h_in"/>
+      <Connection Source="" Target="pin_h_in"/>
+      <Connection Source="pin_h_out1" Target="pin_in_1"/>
+    </Connections>
+    <GlobalVariables>
+      <VariableSet Name="Quest">
+        <Variable Name="Started" Type="Boolean" Value="false"/>
+        <Variable Name="Gold" Type="Integer" Value="100"/>
+      </VariableSet>
+    </GlobalVariables>
+  </Content>
+</ArticyData>"#.to_string()
+    }
+
+    #[test]
+    fn parse_valid_project() {
+        let proj = parse_articy(&full_xml()).unwrap();
+        assert_eq!(proj.entities.len(), 2);
+        assert_eq!(proj.fragments.len(), 1);
+        assert_eq!(proj.hubs.len(), 1);
+        // Connection with empty Source is skipped
+        assert_eq!(proj.connections.len(), 2);
+        assert_eq!(proj.variables.len(), 2);
+    }
+
+    #[test]
+    fn parse_missing_content_returns_error() {
+        let xml = r#"<?xml version="1.0"?><ArticyData><Other/></ArticyData>"#;
+        match parse_articy(xml) {
+            Err(e) => assert!(e.contains("Content"), "expected Content mention, got: {e}"),
+            Ok(_) => panic!("expected error for missing Content"),
+        }
+    }
+
+    #[test]
+    fn parse_invalid_xml_returns_error() {
+        match parse_articy("<broken><<>") {
+            Err(e) => assert!(e.contains("XML parse error")),
+            Ok(_) => panic!("expected error for malformed XML"),
+        }
+    }
+
+    #[test]
+    fn parse_entities_extracts_names() {
+        // Child element DisplayName takes priority over attribute
+        let proj = parse_articy(&full_xml()).unwrap();
+        assert_eq!(proj.entities[0].name, "Hero");
+        assert_eq!(proj.entities[1].name, "Villain");
+        assert_eq!(proj.entities[0].id, "ent_1");
+    }
+
+    #[test]
+    fn parse_fragments_with_speaker_and_pins() {
+        let proj = parse_articy(&full_xml()).unwrap();
+        let frag = &proj.fragments[0];
+        assert_eq!(frag.id, "frag_1");
+        assert_eq!(frag.speaker_id.as_deref(), Some("ent_1"));
+        assert_eq!(frag.text, "Hello world");
+        assert_eq!(frag.input_pins, vec!["pin_in_1"]);
+        assert_eq!(frag.output_pins, vec!["pin_out_1"]);
+    }
+
+    #[test]
+    fn parse_hubs_with_display_name() {
+        let proj = parse_articy(&full_xml()).unwrap();
+        let hub = &proj.hubs[0];
+        assert_eq!(hub.id, "hub_1");
+        assert_eq!(hub.display_name, "Branch A");
+        assert_eq!(hub.input_pins, vec!["pin_h_in"]);
+        assert_eq!(hub.output_pins, vec!["pin_h_out1", "pin_h_out2"]);
+    }
+
+    #[test]
+    fn parse_connections_filters_empty_source() {
+        let proj = parse_articy(&full_xml()).unwrap();
+        // The connection with Source="" should be filtered out
+        assert_eq!(proj.connections.len(), 2);
+        assert_eq!(proj.connections[0].source_pin, "pin_out_1");
+        assert_eq!(proj.connections[0].target_pin, "pin_h_in");
+        assert_eq!(proj.connections[1].source_pin, "pin_h_out1");
+    }
+
+    #[test]
+    fn parse_variables_with_set_prefix() {
+        let proj = parse_articy(&full_xml()).unwrap();
+        assert_eq!(proj.variables[0].name, "Quest.Started");
+        assert_eq!(proj.variables[0].var_type, "Boolean");
+        assert_eq!(proj.variables[0].value, "false");
+        assert_eq!(proj.variables[1].name, "Quest.Gold");
+        assert_eq!(proj.variables[1].var_type, "Integer");
+        assert_eq!(proj.variables[1].value, "100");
+    }
+
+    #[test]
+    fn parse_empty_sections() {
+        let xml = r#"<?xml version="1.0"?>
+<ArticyData>
+  <Content>
+    <Entities/>
+    <DialogueFragments/>
+    <Hubs/>
+    <Connections/>
+    <GlobalVariables/>
+  </Content>
+</ArticyData>"#;
+        let proj = parse_articy(xml).unwrap();
+        assert!(proj.entities.is_empty());
+        assert!(proj.fragments.is_empty());
+        assert!(proj.hubs.is_empty());
+        assert!(proj.connections.is_empty());
+        assert!(proj.variables.is_empty());
+    }
+}

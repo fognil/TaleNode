@@ -73,3 +73,111 @@ pub fn build_world_entities(graph: &DialogueGraph) -> Vec<ExportedWorldEntity> {
         })
         .collect()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::graph::DialogueGraph;
+    use crate::model::timeline::{Timeline, TimelineStep, TimelineAction};
+    use crate::model::world::{WorldEntity, EntityCategory, EntityProperty};
+
+    #[test]
+    fn build_timelines_empty() {
+        let graph = DialogueGraph::new();
+        let result = build_timelines(&graph);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn build_timelines_with_steps() {
+        let mut graph = DialogueGraph::new();
+        let mut tl = Timeline::new("Cutscene");
+        tl.description = "Opening".to_string();
+        tl.steps.push(TimelineStep::new(TimelineAction::Wait { seconds: 2.0 }));
+        tl.steps.push(TimelineStep::new(TimelineAction::Camera {
+            target: "player".into(),
+            duration: 1.5,
+        }));
+        tl.loop_playback = true;
+        graph.timelines.push(tl);
+
+        let result = build_timelines(&graph);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].name, "Cutscene");
+        assert_eq!(result[0].description, "Opening");
+        assert_eq!(result[0].steps.len(), 2);
+        assert!(result[0].loop_playback);
+        assert_eq!(result[0].steps[0].action["type"], "wait");
+        assert_eq!(result[0].steps[1].action["type"], "camera");
+    }
+
+    #[test]
+    fn build_world_entities_empty() {
+        let graph = DialogueGraph::new();
+        let result = build_world_entities(&graph);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn build_world_entities_with_properties() {
+        let mut graph = DialogueGraph::new();
+        let mut entity = WorldEntity::new("Sword", EntityCategory::Item);
+        entity.description = "A sharp blade".to_string();
+        entity.tags.push("weapon".to_string());
+        entity.properties.push(EntityProperty {
+            key: "damage".to_string(),
+            value: "50".to_string(),
+        });
+        graph.world_entities.push(entity);
+
+        let result = build_world_entities(&graph);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].name, "Sword");
+        assert_eq!(result[0].category, "Item");
+        assert_eq!(result[0].description, "A sharp blade");
+        assert_eq!(result[0].tags, vec!["weapon"]);
+        assert_eq!(result[0].properties.len(), 1);
+        assert_eq!(result[0].properties[0].key, "damage");
+        assert_eq!(result[0].properties[0].value, "50");
+    }
+
+    #[test]
+    fn timeline_action_dialogue_json() {
+        let action = TimelineAction::Dialogue { node_id: None };
+        let json = timeline_action_to_json(&action);
+        assert_eq!(json["type"], "dialogue");
+        assert!(json["node_id"].is_null());
+    }
+
+    #[test]
+    fn timeline_action_camera_json() {
+        let action = TimelineAction::Camera {
+            target: "npc".into(),
+            duration: 3.0,
+        };
+        let json = timeline_action_to_json(&action);
+        assert_eq!(json["type"], "camera");
+        assert_eq!(json["target"], "npc");
+        assert_eq!(json["duration"], 3.0);
+    }
+
+    #[test]
+    fn timeline_action_wait_json() {
+        let action = TimelineAction::Wait { seconds: 1.5 };
+        let json = timeline_action_to_json(&action);
+        assert_eq!(json["type"], "wait");
+        assert_eq!(json["seconds"], 1.5);
+    }
+
+    #[test]
+    fn timeline_action_custom_json() {
+        let action = TimelineAction::Custom {
+            action_type: "shake".into(),
+            data: "intensity=5".into(),
+        };
+        let json = timeline_action_to_json(&action);
+        assert_eq!(json["type"], "custom");
+        assert_eq!(json["action_type"], "shake");
+        assert_eq!(json["data"], "intensity=5");
+    }
+}

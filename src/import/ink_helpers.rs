@@ -110,3 +110,119 @@ pub(super) fn collect_info(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::graph::DialogueGraph;
+    use crate::model::node::Node;
+
+    #[test]
+    fn parse_speaker_text_with_speaker() {
+        let (speaker, text) = parse_speaker_text("Guard: Stay back!");
+        assert_eq!(speaker, Some("Guard".to_string()));
+        assert_eq!(text, "Stay back!");
+    }
+
+    #[test]
+    fn parse_speaker_text_without_colon() {
+        let (speaker, text) = parse_speaker_text("Hello there");
+        assert!(speaker.is_none());
+        assert_eq!(text, "Hello there");
+    }
+
+    #[test]
+    fn parse_speaker_text_special_chars_rejected() {
+        let (speaker, text) = parse_speaker_text("foo@bar: text");
+        assert!(speaker.is_none());
+        assert_eq!(text, "foo@bar: text");
+    }
+
+    #[test]
+    fn parse_speaker_text_empty_speaker() {
+        let (speaker, text) = parse_speaker_text(": text");
+        assert!(speaker.is_none());
+        assert_eq!(text, ": text");
+    }
+
+    #[test]
+    fn guess_value_bool_true() {
+        assert!(matches!(guess_value("true"), VariableValue::Bool(true)));
+    }
+
+    #[test]
+    fn guess_value_bool_false() {
+        assert!(matches!(guess_value("false"), VariableValue::Bool(false)));
+    }
+
+    #[test]
+    fn guess_value_int() {
+        assert!(matches!(guess_value("42"), VariableValue::Int(42)));
+    }
+
+    #[test]
+    fn guess_value_float() {
+        if let VariableValue::Float(f) = guess_value("3.14") {
+            assert!((f - 3.14).abs() < f64::EPSILON);
+        } else {
+            panic!("Expected Float variant");
+        }
+    }
+
+    #[test]
+    fn guess_value_text() {
+        assert!(matches!(guess_value("hello"), VariableValue::Text(ref s) if s == "hello"));
+    }
+
+    #[test]
+    fn guess_value_quoted_text() {
+        assert!(matches!(guess_value("\"hello\""), VariableValue::Text(ref s) if s == "hello"));
+    }
+
+    #[test]
+    fn connect_nodes_basic() {
+        let mut graph = DialogueGraph::new();
+        let n1 = Node::new_dialogue([0.0, 0.0]);
+        let n2 = Node::new_dialogue([100.0, 0.0]);
+        let id1 = n1.id;
+        let id2 = n2.id;
+        graph.nodes.insert(id1, n1);
+        graph.nodes.insert(id2, n2);
+
+        connect_nodes(&mut graph, id1, 0, id2);
+        assert_eq!(graph.connections.len(), 1);
+        assert_eq!(graph.connections[0].from_node, id1);
+        assert_eq!(graph.connections[0].to_node, id2);
+    }
+
+    #[test]
+    fn connect_nodes_invalid_node() {
+        let mut graph = DialogueGraph::new();
+        let fake_id1 = Uuid::new_v4();
+        let fake_id2 = Uuid::new_v4();
+
+        // Should not panic with nonexistent nodes
+        connect_nodes(&mut graph, fake_id1, 0, fake_id2);
+        assert!(graph.connections.is_empty());
+    }
+
+    #[test]
+    fn collect_info_extracts_speakers() {
+        let lines = vec![
+            InkLine::Dialogue {
+                text: "Guard: Halt!".to_string(),
+                tags: Vec::new(),
+            },
+            InkLine::Dialogue {
+                text: "Just narration.".to_string(),
+                tags: Vec::new(),
+            },
+        ];
+        let mut speakers = HashSet::new();
+        let mut var_names = HashSet::new();
+
+        collect_info(&lines, &mut speakers, &mut var_names);
+        assert!(speakers.contains("Guard"));
+        assert_eq!(speakers.len(), 1);
+    }
+}
