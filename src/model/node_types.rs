@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use uuid::Uuid;
 
 use super::graph::DialogueGraph;
@@ -36,7 +36,7 @@ pub struct DialogueData {
     #[serde(default)]
     pub audio_clip: Option<String>,
     #[serde(default)]
-    pub metadata: HashMap<String, String>,
+    pub metadata: BTreeMap<String, String>,
 }
 
 impl Default for DialogueData {
@@ -48,7 +48,7 @@ impl Default for DialogueData {
             emotion: "neutral".to_string(),
             portrait_override: None,
             audio_clip: None,
-            metadata: HashMap::new(),
+            metadata: BTreeMap::new(),
         }
     }
 }

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use uuid::Uuid;
 
 use super::{bark::BarkLine, character::Character, connection::Connection, group::NodeGroup,
@@ -10,7 +10,7 @@ use super::{bark::BarkLine, character::Character, connection::Connection, group:
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DialogueGraph {
     #[serde(default)]
-    pub nodes: HashMap<Uuid, Node>,
+    pub nodes: BTreeMap<Uuid, Node>,
     #[serde(default)]
     pub connections: Vec<Connection>,
     #[serde(default)]
@@ -20,15 +20,15 @@ pub struct DialogueGraph {
     #[serde(default)]
     pub groups: Vec<NodeGroup>,
     #[serde(default)]
-    pub review_statuses: HashMap<Uuid, ReviewStatus>,
+    pub review_statuses: BTreeMap<Uuid, ReviewStatus>,
     #[serde(default)]
     pub comments: Vec<NodeComment>,
     #[serde(default)]
-    pub node_tags: HashMap<Uuid, Vec<String>>,
+    pub node_tags: BTreeMap<Uuid, Vec<String>>,
     #[serde(default)]
     pub locale: LocaleSettings,
     #[serde(default)]
-    pub barks: HashMap<Uuid, Vec<BarkLine>>,
+    pub barks: BTreeMap<Uuid, Vec<BarkLine>>,
     #[serde(default)]
     pub quests: Vec<Quest>,
     #[serde(default)]
@@ -44,16 +44,16 @@ impl Default for DialogueGraph {
 impl DialogueGraph {
     pub fn new() -> Self {
         Self {
-            nodes: HashMap::new(),
+            nodes: BTreeMap::new(),
             connections: Vec::new(),
             variables: Vec::new(),
             characters: Vec::new(),
             groups: Vec::new(),
-            review_statuses: HashMap::new(),
+            review_statuses: BTreeMap::new(),
             comments: Vec::new(),
-            node_tags: HashMap::new(),
+            node_tags: BTreeMap::new(),
             locale: LocaleSettings::default(),
-            barks: HashMap::new(),
+            barks: BTreeMap::new(),
             quests: Vec::new(),
             world_entities: Vec::new(),
             timelines: Vec::new(),

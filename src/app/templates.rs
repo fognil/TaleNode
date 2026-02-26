@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::time::Instant;
 
 use uuid::Uuid;
@@ -70,7 +70,7 @@ impl TaleNodeApp {
             }
         }
 
-        let mut nodes = HashMap::new();
+        let mut nodes = BTreeMap::new();
         for id in &selected {
             if let Some(node) = self.graph.nodes.get(id) {
                 let mut n = node.clone();
@@ -147,7 +147,7 @@ impl TaleNodeApp {
 /// Regenerate all UUIDs inside a child graph (used for SubGraph duplication).
 pub(super) fn regenerate_child_ids(g: &mut DialogueGraph) {
     let (mut ids, mut ports) = (HashMap::new(), HashMap::new());
-    for (oid, mut n) in g.nodes.drain().collect::<Vec<_>>() {
+    for (oid, mut n) in std::mem::take(&mut g.nodes) {
         let nid = Uuid::new_v4();
         ids.insert(oid, nid);
         n.id = nid;

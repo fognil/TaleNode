@@ -101,7 +101,7 @@ impl CanvasState {
     /// Set pan and zoom to fit all nodes in view.
     pub fn zoom_to_fit(
         &mut self,
-        nodes: &std::collections::HashMap<uuid::Uuid, crate::model::node::Node>,
+        nodes: &std::collections::BTreeMap<uuid::Uuid, crate::model::node::Node>,
         screen_size: Vec2,
     ) {
         if nodes.is_empty() {

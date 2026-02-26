@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -19,7 +19,7 @@ pub struct NodeTemplate {
     pub description: String,
     #[serde(default)]
     pub is_builtin: bool,
-    pub nodes: HashMap<Uuid, Node>,
+    pub nodes: BTreeMap<Uuid, Node>,
     pub connections: Vec<Connection>,
 }
 
@@ -37,7 +37,7 @@ impl NodeTemplate {
             name: name.to_string(),
             description: String::new(),
             is_builtin: false,
-            nodes: HashMap::new(),
+            nodes: BTreeMap::new(),
             connections: Vec::new(),
         }
     }

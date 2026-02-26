@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use uuid::Uuid;
 
 use super::graph::DialogueGraph;
@@ -14,7 +14,7 @@ pub struct LocaleSettings {
     pub extra_locales: Vec<String>,
     /// string_key -> { locale_code -> translated_text }
     #[serde(default)]
-    pub translations: HashMap<String, HashMap<String, String>>,
+    pub translations: BTreeMap<String, BTreeMap<String, String>>,
 }
 
 fn default_locale() -> String {
@@ -26,7 +26,7 @@ impl Default for LocaleSettings {
         Self {
             default_locale: default_locale(),
             extra_locales: Vec::new(),
-            translations: HashMap::new(),
+            translations: BTreeMap::new(),
         }
     }
 }

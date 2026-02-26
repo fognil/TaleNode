@@ -2,7 +2,7 @@
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     use crate::model::character::Character;
     use crate::model::graph::DialogueGraph;
@@ -348,7 +348,7 @@ mod tests {
         }
 
         // --- Tags ---
-        let mut tags: HashMap<uuid::Uuid, Vec<String>> = HashMap::new();
+        let mut tags: BTreeMap<uuid::Uuid, Vec<String>> = BTreeMap::new();
         for &id in &[id_start, id_greet, id_warn, id_choice] {
             tags.insert(id, vec!["main_path".to_string(), "intro".to_string()]);
         }
