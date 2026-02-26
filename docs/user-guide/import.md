@@ -131,6 +131,25 @@ Imports an Inkle Ink `.ink` file.
 
 ---
 
+## CLI Import
+
+You can import files from the command line without opening the GUI:
+
+```bash
+# Convert Yarn file to .talenode
+talenode import yarn dialogue.yarn -o project.talenode
+
+# Convert Ink file, output to stdout
+talenode import ink story.ink
+
+# List available import formats
+talenode import --list
+```
+
+Supported formats: `yarn`, `ink`, `articy`, `chatmapper`.
+
+---
+
 ## After Import
 
 After importing from any format:

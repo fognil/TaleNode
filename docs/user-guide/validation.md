@@ -55,6 +55,24 @@ This makes it easy to find and fix issues in large graphs.
 !!! example "Empty dialogue"
     Select the Dialogue node and fill in the text field in the Inspector.
 
+## CLI Validation
+
+You can validate a `.talenode` file from the command line without opening the GUI:
+
+```bash
+talenode validate project.talenode
+```
+
+Output shows all errors and warnings with node IDs. The command exits with code **1** if any errors are found, making it suitable for CI/CD pipelines.
+
+```
+  ERROR [node 3a7f1b2c]: No Start node found
+  WARN  [node 9e4d5a8b]: Dialogue node has empty text
+  WARN  [node c1f2e3d4]: Disconnected output port
+
+1 error(s), 2 warning(s)
+```
+
 ## Tips
 
 !!! tip
