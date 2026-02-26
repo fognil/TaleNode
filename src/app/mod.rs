@@ -1,6 +1,7 @@
 mod async_handlers;
 pub mod async_runtime;
 mod canvas;
+mod collab_handlers;
 mod confirm;
 mod context_menu;
 mod dock;
@@ -105,6 +106,9 @@ pub struct TaleNodeApp {
     translation_in_progress: bool,
     voice_generation_in_progress: bool,
     available_voices: Vec<async_runtime::VoiceInfo>,
+    collab_state: Option<crate::collab::CollabState>,
+    collab_host_input: String,
+    collab_port_input: u16,
 }
 
 impl TaleNodeApp {
@@ -166,6 +170,9 @@ impl TaleNodeApp {
             translation_in_progress: false,
             voice_generation_in_progress: false,
             available_voices: Vec::new(),
+            collab_state: None,
+            collab_host_input: "127.0.0.1".to_string(),
+            collab_port_input: 9847,
         }
     }
 

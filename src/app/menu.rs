@@ -92,6 +92,34 @@ impl TaleNodeApp {
                     ui.close_menu();
                 }
             });
+            ui.menu_button("Collaborate", |ui| {
+                let mode = self
+                    .collab_state
+                    .as_ref()
+                    .map(|s| s.mode)
+                    .unwrap_or(crate::collab::CollabMode::Offline);
+                let is_offline = mode == crate::collab::CollabMode::Offline;
+                if ui.add_enabled(is_offline, egui::Button::new("Host...")).clicked() {
+                    self.dock_add_tab(super::dock::DockTab::Collaboration);
+                    ui.close_menu();
+                }
+                if ui.add_enabled(is_offline, egui::Button::new("Join...")).clicked() {
+                    self.dock_add_tab(super::dock::DockTab::Collaboration);
+                    ui.close_menu();
+                }
+                if ui
+                    .add_enabled(!is_offline, egui::Button::new("Disconnect"))
+                    .clicked()
+                {
+                    self.collab_state = None;
+                    self.status_message = Some((
+                        "Disconnected from collaboration".to_string(),
+                        std::time::Instant::now(),
+                        false,
+                    ));
+                    ui.close_menu();
+                }
+            });
             ui.menu_button("Settings", |ui| {
                 if ui.button("Settings...").clicked() {
                     self.settings_open = true;
@@ -204,6 +232,7 @@ impl TaleNodeApp {
                     (DockTab::Templates, "Template Library"),
                     (DockTab::Localization, "Localization"),
                     (DockTab::VoiceGeneration, "Voice Generation"),
+                    (DockTab::Collaboration, "Collaboration"),
                 ];
                 for &(tab, label) in toggles {
                     let mut open = self.dock_has_tab(tab);

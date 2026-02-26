@@ -19,6 +19,7 @@ egui_dock = { version = "0.16", features = ["serde"] }
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
 tokio-tungstenite = "0.24"
+futures-util = "0.3"
 dirs = "6"
 
 [profile.release]

@@ -1,5 +1,6 @@
 mod actions;
 mod app;
+mod collab;
 mod export;
 mod import;
 mod integrations;

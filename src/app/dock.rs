@@ -19,6 +19,7 @@ pub(super) enum DockTab {
     Templates,
     Localization,
     VoiceGeneration,
+    Collaboration,
 }
 
 /// Which dock region a tab belongs to (for smart placement).
@@ -46,6 +47,7 @@ impl DockTab {
             Self::Templates => "Templates",
             Self::Localization => "Localization",
             Self::VoiceGeneration => "Voice Generation",
+            Self::Collaboration => "Collaboration",
         }
     }
 
@@ -56,6 +58,7 @@ impl DockTab {
             Self::Inspector | Self::ScriptEditor => TabRegion::Right,
             Self::Localization => TabRegion::Bottom,
             Self::VoiceGeneration => TabRegion::Bottom,
+            Self::Collaboration => TabRegion::Bottom,
             _ => TabRegion::Bottom,
         }
     }
@@ -122,6 +125,7 @@ impl TabViewer for AppTabViewer<'_> {
             DockTab::Templates => self.app.render_templates_tab(ui),
             DockTab::Localization => self.app.render_locale_tab(ui),
             DockTab::VoiceGeneration => self.app.render_voice_tab(ui),
+            DockTab::Collaboration => self.app.render_collab_tab(ui),
         }
     }
 
