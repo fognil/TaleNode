@@ -79,6 +79,10 @@ nav:
     - Validation: user-guide/validation.md
     - Playtest Mode: user-guide/playtest.md
     - Localization: user-guide/localization.md
+    - Auto-Translation: user-guide/auto-translation.md
+    - Voice Synthesis: user-guide/voice-synthesis.md
+    - Collaboration: user-guide/collaboration.md
+    - Settings: user-guide/settings.md
     - File Operations: user-guide/file-operations.md
   - Export & Integration:
     - JSON Export Format: export/json-format.md

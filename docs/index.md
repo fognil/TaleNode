@@ -64,7 +64,22 @@ Define multiple locales, edit translations per-node or in bulk, export/import CS
 </div>
 
 <div class="feature-card" markdown>
-### Review & Collaboration
+### Auto-Translation
+One-click machine translation via DeepL API. Translate all untranslated strings in any locale, then refine with professional translators.
+</div>
+
+<div class="feature-card" markdown>
+### AI Voice Synthesis
+Generate speech audio for every dialogue node via ElevenLabs. Assign voices to characters, batch-generate MP3 files for your game.
+</div>
+
+<div class="feature-card" markdown>
+### Real-Time Collaboration
+Host a session on your LAN and edit the same graph simultaneously with your team. Live sync of nodes, connections, variables, and selections.
+</div>
+
+<div class="feature-card" markdown>
+### Review & Comments
 Comments per node, review status tracking (Draft/Needs Review/Approved), version history with diff comparison.
 </div>
 
@@ -83,5 +98,9 @@ Save node patterns as reusable templates. Analyze your graph with path stats, wo
 | [Quick Start](getting-started/quickstart.md) | Create your first dialogue in 5 minutes |
 | [Node Reference](reference/node-reference.md) | Detailed spec for all 8 node types |
 | [JSON Export Format](export/json-format.md) | Full export schema with examples |
+| [Settings](user-guide/settings.md) | API keys and collaboration preferences |
+| [Auto-Translation](user-guide/auto-translation.md) | DeepL-powered machine translation |
+| [Voice Synthesis](user-guide/voice-synthesis.md) | ElevenLabs AI voice generation |
+| [Collaboration](user-guide/collaboration.md) | Real-time multiplayer editing |
 | [Keyboard Shortcuts](reference/keyboard-shortcuts.md) | Complete shortcut table |
 | [FAQ](reference/faq.md) | Common questions answered |
