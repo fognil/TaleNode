@@ -115,6 +115,13 @@ Combine conditions with `&&` (and) and `||` (or), negate with `!`:
 {!is_hidden || has_detect}
 ```
 
+You can also use the keyword aliases `and`, `or`, `not` for readability:
+
+```
+{has_key and level > 5}
+{not is_hidden or has_detect}
+```
+
 ### Ternary Expressions
 
 Use `condition ? value_if_true : value_if_false` inline:
@@ -151,8 +158,19 @@ Functions can be used inside `{...}` expressions:
 | `str(x)` | Convert to text | `str(42)` → `"42"` |
 | `int(x)` | Convert to integer | `int(3.9)` → `3` |
 | `float(x)` | Convert to float | `float(5)` → `5.0` |
+| `visits()` | Visit count for current node | `visits()` → `3` |
+| `visits(id)` | Visit count for specific node | `visits("market")` → `2` |
+| `visited()` | Whether current node was visited | `visited()` → `true` |
+| `visited(id)` | Whether specific node was visited | `visited("market")` → `true` |
 
 Functions can be nested: `abs(min(-5, 3))` → `5`
+
+!!! tip
+    Use `visits()` and `visited()` to vary dialogue based on how many times the player has been to a node:
+    ```
+    {if visits() == 1}Welcome, stranger.{else}Back again, I see.{/if}
+    {visits("market") > 3 ? "You're a regular!" : "New around here?"}
+    ```
 
 ### Inline Conditionals
 
