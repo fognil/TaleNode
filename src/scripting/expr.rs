@@ -18,6 +18,11 @@ pub enum Expr {
         name: String,
         args: Vec<Expr>,
     },
+    Ternary {
+        condition: Box<Expr>,
+        then_expr: Box<Expr>,
+        else_expr: Box<Expr>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -222,5 +227,22 @@ mod tests {
     fn parse_function_in_expression() {
         let expr = parse_expr("len(name) + 1").unwrap();
         assert!(matches!(expr, Expr::BinaryOp { op: BinOp::Add, .. }));
+    }
+
+    #[test]
+    fn parse_ternary() {
+        let expr = parse_expr("x > 0 ? 1 : 0").unwrap();
+        assert!(matches!(expr, Expr::Ternary { .. }));
+    }
+
+    #[test]
+    fn parse_ternary_with_strings() {
+        let expr = parse_expr("gold > 100 ? \"rich\" : \"poor\"").unwrap();
+        assert!(matches!(expr, Expr::Ternary { .. }));
+    }
+
+    #[test]
+    fn parse_ternary_missing_colon() {
+        assert!(parse_expr("x ? 1").is_err());
     }
 }

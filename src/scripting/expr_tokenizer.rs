@@ -13,6 +13,8 @@ pub enum Token {
     LParen,
     RParen,
     Comma,
+    Question,
+    Colon,
 }
 
 pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
@@ -35,6 +37,14 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                 tokens.push(Token::Comma);
                 i += 1;
             }
+            '?' => {
+                tokens.push(Token::Question);
+                i += 1;
+            }
+            ':' => {
+                tokens.push(Token::Colon);
+                i += 1;
+            }
             '+' => {
                 tokens.push(Token::Op(BinOp::Add));
                 i += 1;
@@ -55,7 +65,15 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                 let is_unary = tokens.is_empty()
                     || matches!(
                         tokens.last(),
-                        Some(Token::Op(_) | Token::Not | Token::Minus | Token::LParen)
+                        Some(
+                            Token::Op(_)
+                                | Token::Not
+                                | Token::Minus
+                                | Token::LParen
+                                | Token::Question
+                                | Token::Colon
+                                | Token::Comma
+                        )
                     );
                 if is_unary {
                     tokens.push(Token::Minus);

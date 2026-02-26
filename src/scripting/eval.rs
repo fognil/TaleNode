@@ -25,6 +25,18 @@ pub fn eval_expr(expr: &Expr, ctx: &ScriptContext) -> Result<VariableValue, Stri
             }
         }
         Expr::FunctionCall { name, args } => eval_function(name, args, ctx),
+        Expr::Ternary {
+            condition,
+            then_expr,
+            else_expr,
+        } => {
+            let cond = eval_expr(condition, ctx)?;
+            if eval_to_bool(&cond) {
+                eval_expr(then_expr, ctx)
+            } else {
+                eval_expr(else_expr, ctx)
+            }
+        }
         Expr::BinaryOp { left, op, right } => {
             let lv = eval_expr(left, ctx)?;
             // Short-circuit for && and ||
@@ -343,5 +355,29 @@ mod tests {
         assert_eq!(eval_to_string(&VariableValue::Int(42)), "42");
         assert_eq!(eval_to_string(&VariableValue::Float(3.14)), "3.14");
         assert_eq!(eval_to_string(&VariableValue::Text("hi".to_string())), "hi");
+    }
+
+    #[test]
+    fn eval_ternary_true_branch() {
+        let ctx = ctx_with(&[("gold", VariableValue::Int(200))]);
+        assert_eq!(
+            eval("gold > 100 ? \"rich\" : \"poor\"", &ctx),
+            VariableValue::Text("rich".to_string())
+        );
+    }
+
+    #[test]
+    fn eval_ternary_false_branch() {
+        let ctx = ctx_with(&[("gold", VariableValue::Int(10))]);
+        assert_eq!(
+            eval("gold > 100 ? \"rich\" : \"poor\"", &ctx),
+            VariableValue::Text("poor".to_string())
+        );
+    }
+
+    #[test]
+    fn eval_ternary_numeric() {
+        let ctx = ctx_with(&[("x", VariableValue::Int(-5))]);
+        assert_eq!(eval("x < 0 ? -x : x", &ctx), VariableValue::Int(5));
     }
 }

@@ -6,6 +6,7 @@ use super::expr_tokenizer::Token;
 // --- Recursive descent parser ---
 
 // Precedence levels (low to high):
+// 0. ?: (ternary)
 // 1. || (or)
 // 2. && (and)
 // 3. == != (equality)
@@ -51,7 +52,26 @@ impl Parser {
     }
 
     pub(super) fn parse_expr(&mut self) -> Result<Expr, String> {
-        self.parse_or()
+        self.parse_ternary()
+    }
+
+    fn parse_ternary(&mut self) -> Result<Expr, String> {
+        let expr = self.parse_or()?;
+        if matches!(self.peek(), Some(Token::Question)) {
+            self.next(); // consume '?'
+            let then_expr = self.parse_ternary()?;
+            if self.next() != Some(Token::Colon) {
+                return Err("Expected ':' in ternary expression".to_string());
+            }
+            let else_expr = self.parse_ternary()?;
+            Ok(Expr::Ternary {
+                condition: Box::new(expr),
+                then_expr: Box::new(then_expr),
+                else_expr: Box::new(else_expr),
+            })
+        } else {
+            Ok(expr)
+        }
     }
 
     fn parse_or(&mut self) -> Result<Expr, String> {
