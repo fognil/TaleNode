@@ -22,6 +22,10 @@ pub(super) enum TextSegment {
     Cycle { items: Vec<Vec<TextSegment>> },
     /// Shuffle block `{!a|b|c}`: random pick each time.
     Shuffle { items: Vec<Vec<TextSegment>> },
+    /// Inline set command: `<<set var = expr>>`.
+    SetCommand { var_name: String, expr: Expr },
+    /// Generic command marker: `<<name args>>` (produces no output in playtest).
+    CommandMarker { _raw: String },
 }
 
 /// Evaluate interpolated text segments into a final string.
@@ -69,6 +73,14 @@ fn interpolate(segments: &[TextSegment], ctx: &mut ScriptContext, seq_idx: &mut 
                 let idx = seed % items.len();
                 result.push_str(&interpolate(&items[idx], ctx, seq_idx));
             }
+            TextSegment::SetCommand { var_name, expr } => {
+                if let Ok(val) = eval_expr(expr, ctx) {
+                    ctx.set(var_name, val);
+                }
+            }
+            TextSegment::CommandMarker { _raw } => {
+                // Generic commands produce no output in playtest
+            }
         }
     }
     result
@@ -76,8 +88,8 @@ fn interpolate(segments: &[TextSegment], ctx: &mut ScriptContext, seq_idx: &mut 
 
 /// Parse and interpolate text in one call. Returns original text on parse error.
 pub fn interpolate_text(text: &str, ctx: &mut ScriptContext) -> String {
-    // Quick check: if no braces, skip parsing
-    if !text.contains('{') {
+    // Quick check: if no interpolation markers, skip parsing
+    if !text.contains('{') && !text.contains("<<") {
         return text.to_string();
     }
     match parse_text(text) {
@@ -225,6 +237,38 @@ mod tests {
         let text = "{~You have {gold} gold|You still have {gold} gold}";
         assert_eq!(interpolate_text(text, &mut ctx), "You have 50 gold");
         assert_eq!(interpolate_text(text, &mut ctx), "You still have 50 gold");
+    }
+
+    #[test]
+    fn set_command_modifies_context() {
+        let mut ctx = ctx_with(&[("gold", VariableValue::Int(50))]);
+        let text = "You had {gold} gold.<<set gold = 100>> Now you have {gold}.";
+        let result = interpolate_text(text, &mut ctx);
+        assert_eq!(result, "You had 50 gold. Now you have 100.");
+        assert_eq!(ctx.get("gold"), Some(&VariableValue::Int(100)));
+    }
+
+    #[test]
+    fn set_command_with_expression() {
+        let mut ctx = ctx_with(&[("hp", VariableValue::Int(80))]);
+        let text = "<<set hp = hp + 20>>HP is now {hp}.";
+        let result = interpolate_text(text, &mut ctx);
+        assert_eq!(result, "HP is now 100.");
+    }
+
+    #[test]
+    fn set_command_without_equals() {
+        let mut ctx = ScriptContext::default();
+        let text = "<<set flag true>>Flag: {flag}";
+        let result = interpolate_text(text, &mut ctx);
+        assert_eq!(result, "Flag: true");
+    }
+
+    #[test]
+    fn generic_command_produces_no_output() {
+        let mut ctx = ScriptContext::default();
+        let text = "Hello<<wait 2>> world";
+        assert_eq!(interpolate_text(text, &mut ctx), "Hello world");
     }
 
     #[test]

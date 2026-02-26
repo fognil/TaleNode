@@ -110,6 +110,16 @@ fn parse_text_inner(
             let expr = parse_expr(&expr_str)?;
             segments.push(TextSegment::Expression(expr));
             literal_start = *pos;
+        } else if chars[*pos] == '<' && *pos + 1 < chars.len() && chars[*pos + 1] == '<' {
+            // Flush literal
+            if *pos > literal_start {
+                let lit: String = chars[literal_start..*pos].iter().collect();
+                segments.push(TextSegment::Literal(lit));
+            }
+            *pos += 2; // skip "<<"
+            let content = read_until_double_close(&chars, pos)?;
+            segments.push(parse_command(&content)?);
+            literal_start = *pos;
         } else {
             *pos += 1;
         }
@@ -189,6 +199,54 @@ fn parse_pipe_items(content: &str) -> Result<Vec<Vec<TextSegment>>, String> {
         items.push(parse_text(part)?);
     }
     Ok(items)
+}
+
+/// Read content between `<<` and `>>`.
+fn read_until_double_close(chars: &[char], pos: &mut usize) -> Result<String, String> {
+    let start = *pos;
+    while *pos + 1 < chars.len() {
+        if chars[*pos] == '>' && chars[*pos + 1] == '>' {
+            let content: String = chars[start..*pos].iter().collect();
+            *pos += 2; // skip ">>"
+            return Ok(content.trim().to_string());
+        }
+        *pos += 1;
+    }
+    Err("Unterminated '<<'".to_string())
+}
+
+/// Parse a `<<command args>>` into a TextSegment.
+fn parse_command(content: &str) -> Result<TextSegment, String> {
+    let content = content.trim();
+    if content.is_empty() {
+        return Err("Empty command <<>>".to_string());
+    }
+
+    // Check for "set var = expr" or "set var expr"
+    if let Some(rest) = content.strip_prefix("set ") {
+        let rest = rest.trim();
+        // Find variable name (first identifier)
+        let var_end = rest
+            .find(|c: char| !c.is_ascii_alphanumeric() && c != '_')
+            .unwrap_or(rest.len());
+        if var_end == 0 {
+            return Err("<<set>> missing variable name".to_string());
+        }
+        let var_name = rest[..var_end].to_string();
+        let after = rest[var_end..].trim();
+        // Strip optional '='
+        let expr_str = after.strip_prefix('=').unwrap_or(after).trim();
+        if expr_str.is_empty() {
+            return Err(format!("<<set {var_name}>> missing value expression"));
+        }
+        let expr = parse_expr(expr_str)?;
+        return Ok(TextSegment::SetCommand { var_name, expr });
+    }
+
+    // Generic command marker
+    Ok(TextSegment::CommandMarker {
+        _raw: content.to_string(),
+    })
 }
 
 fn check_stopped_at_else(chars: &[char], pos: usize) -> bool {
