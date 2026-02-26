@@ -120,14 +120,28 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
             }
             '"' => {
                 i += 1;
-                let start = i;
+                let mut s = String::new();
                 while i < chars.len() && chars[i] != '"' {
+                    if chars[i] == '\\' && i + 1 < chars.len() {
+                        i += 1;
+                        match chars[i] {
+                            'n' => s.push('\n'),
+                            't' => s.push('\t'),
+                            '\\' => s.push('\\'),
+                            '"' => s.push('"'),
+                            other => {
+                                s.push('\\');
+                                s.push(other);
+                            }
+                        }
+                    } else {
+                        s.push(chars[i]);
+                    }
                     i += 1;
                 }
                 if i >= chars.len() {
                     return Err("Unterminated string literal".to_string());
                 }
-                let s: String = chars[start..i].iter().collect();
                 tokens.push(Token::Str(s));
                 i += 1; // skip closing "
             }
@@ -308,5 +322,35 @@ mod tests {
             Token::Int(0), Token::Comma,
             Token::Int(100), Token::RParen,
         ]);
+    }
+
+    #[test]
+    fn tokenize_escape_newline() {
+        let tokens = tokenize("\"hello\\nworld\"").unwrap();
+        assert_eq!(tokens, vec![Token::Str("hello\nworld".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_escape_tab() {
+        let tokens = tokenize("\"col1\\tcol2\"").unwrap();
+        assert_eq!(tokens, vec![Token::Str("col1\tcol2".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_escape_quote() {
+        let tokens = tokenize("\"say \\\"hi\\\"\"").unwrap();
+        assert_eq!(tokens, vec![Token::Str("say \"hi\"".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_escape_backslash() {
+        let tokens = tokenize("\"path\\\\file\"").unwrap();
+        assert_eq!(tokens, vec![Token::Str("path\\file".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_unknown_escape_preserved() {
+        let tokens = tokenize("\"hello\\xworld\"").unwrap();
+        assert_eq!(tokens, vec![Token::Str("hello\\xworld".to_string())]);
     }
 }
