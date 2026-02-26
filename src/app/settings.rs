@@ -89,6 +89,7 @@ impl AppSettings {
 /// Action requested by the settings window.
 pub enum SettingsAction {
     FetchModels,
+    ProviderChanged,
 }
 
 /// Draw the settings window. Returns an optional action for the caller to handle.
@@ -190,6 +191,7 @@ pub fn show_settings_window(
                                 }
                             });
                         if settings.ai_provider != prev {
+                            action = Some(SettingsAction::ProviderChanged);
                             match settings.ai_provider {
                                 AIProvider::OpenAI => {
                                     settings.ai_base_url = ai_writing::default_ai_base_url();

@@ -287,8 +287,14 @@ impl eframe::App for TaleNodeApp {
                 &self.available_ai_models,
                 self.ai_models_loading,
             );
-            if let Some(settings::SettingsAction::FetchModels) = action {
-                self.start_fetch_ai_models();
+            match action {
+                Some(settings::SettingsAction::FetchModels) => {
+                    self.start_fetch_ai_models();
+                }
+                Some(settings::SettingsAction::ProviderChanged) => {
+                    self.available_ai_models.clear();
+                }
+                None => {}
             }
         }
 
