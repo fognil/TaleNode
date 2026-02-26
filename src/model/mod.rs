@@ -8,6 +8,7 @@ pub mod locale;
 pub mod group;
 pub mod node;
 pub mod node_types;
+pub mod plugin;
 pub mod port;
 pub mod project;
 pub mod quest;

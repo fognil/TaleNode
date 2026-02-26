@@ -247,6 +247,7 @@ impl TaleNodeApp {
                     (DockTab::Collaboration, "Collaboration"),
                     (DockTab::Barks, "Bark Dialogue"),
                     (DockTab::Quests, "Quests"),
+                    (DockTab::Extensions, "Extensions"),
                     (DockTab::Timeline, "Timeline"),
                     (DockTab::WorldDatabase, "World Database"),
                     (DockTab::WritingAssistant, "AI Writing Assistant"),

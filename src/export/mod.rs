@@ -9,6 +9,7 @@ mod json_export_extras;
 pub mod json_export_helpers;
 mod json_export_types;
 pub mod locale_export;
+pub mod plugin_api;
 pub mod plugin_export;
 pub mod screenplay_export;
 pub mod voice_export;

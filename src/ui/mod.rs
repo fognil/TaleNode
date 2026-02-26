@@ -5,6 +5,7 @@ pub mod bookmark_panel;
 pub mod canvas;
 pub mod collab_panel;
 pub mod comments_panel;
+pub mod extension_panel;
 pub mod connection_renderer;
 pub mod inspector;
 mod inspector_widgets;
