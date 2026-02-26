@@ -136,6 +136,7 @@ impl PlaytestState {
     /// Auto-advance through nodes that don't need user interaction.
     fn auto_advance(&mut self, graph: &DialogueGraph) {
         while let Some(id) = self.current_node {
+            self.variables.record_visit(&id.to_string());
             // Clone node_type + outputs to release borrow on subgraph_stack.
             let (node_type, outputs) = {
                 let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);

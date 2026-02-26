@@ -68,9 +68,34 @@ fn eval_function(
     args: &[Expr],
     ctx: &ScriptContext,
 ) -> Result<VariableValue, String> {
+    // Context-aware functions
+    match name {
+        "visits" => return eval_visits(args, ctx),
+        "visited" => return eval_visited(args, ctx),
+        _ => {}
+    }
     let vals: Result<Vec<_>, _> = args.iter().map(|a| eval_expr(a, ctx)).collect();
     let vals = vals?;
     super::builtins::eval_builtin(name, &vals)
+}
+
+fn eval_visit_count(args: &[Expr], ctx: &ScriptContext) -> Result<usize, String> {
+    match args.len() {
+        0 => Ok(ctx.current_visits()),
+        1 => {
+            let val = eval_expr(&args[0], ctx)?;
+            Ok(ctx.get_visits(&eval_to_string(&val)))
+        }
+        n => Err(format!("visits()/visited() expects 0 or 1 arg(s), got {n}")),
+    }
+}
+
+fn eval_visits(args: &[Expr], ctx: &ScriptContext) -> Result<VariableValue, String> {
+    eval_visit_count(args, ctx).map(|c| VariableValue::Int(c as i64))
+}
+
+fn eval_visited(args: &[Expr], ctx: &ScriptContext) -> Result<VariableValue, String> {
+    eval_visit_count(args, ctx).map(|c| VariableValue::Bool(c > 0))
 }
 
 fn eval_binary(op: BinOp, lv: &VariableValue, rv: &VariableValue) -> Result<VariableValue, String> {
@@ -259,14 +284,9 @@ mod tests {
     }
 
     #[test]
-    fn eval_variable() {
+    fn eval_variable_and_arithmetic() {
         let ctx = ctx_with(&[("gold", VariableValue::Int(50))]);
         assert_eq!(eval("gold", &ctx), VariableValue::Int(50));
-    }
-
-    #[test]
-    fn eval_arithmetic() {
-        let ctx = ctx_with(&[("gold", VariableValue::Int(50))]);
         assert_eq!(eval("gold + 10", &ctx), VariableValue::Int(60));
         assert_eq!(eval("100 - gold", &ctx), VariableValue::Int(50));
         assert_eq!(eval("gold * 2", &ctx), VariableValue::Int(100));
@@ -275,71 +295,41 @@ mod tests {
     }
 
     #[test]
-    fn eval_comparison() {
+    fn eval_comparison_and_boolean() {
         let ctx = ctx_with(&[("gold", VariableValue::Int(50))]);
         assert_eq!(eval("gold >= 100", &ctx), VariableValue::Bool(false));
         assert_eq!(eval("gold >= 50", &ctx), VariableValue::Bool(true));
         assert_eq!(eval("gold < 100", &ctx), VariableValue::Bool(true));
         assert_eq!(eval("gold == 50", &ctx), VariableValue::Bool(true));
         assert_eq!(eval("gold != 50", &ctx), VariableValue::Bool(false));
+        let ctx2 = ctx_with(&[("has_key", VariableValue::Bool(true)), ("level", VariableValue::Int(10))]);
+        assert_eq!(eval("has_key && level > 5", &ctx2), VariableValue::Bool(true));
+        assert_eq!(eval("has_key && level > 20", &ctx2), VariableValue::Bool(false));
+        assert_eq!(eval("false || has_key", &ctx2), VariableValue::Bool(true));
     }
 
     #[test]
-    fn eval_boolean_ops() {
-        let ctx = ctx_with(&[
-            ("has_key", VariableValue::Bool(true)),
-            ("level", VariableValue::Int(10)),
-        ]);
-        assert_eq!(eval("has_key && level > 5", &ctx), VariableValue::Bool(true));
-        assert_eq!(eval("has_key && level > 20", &ctx), VariableValue::Bool(false));
-        assert_eq!(eval("false || has_key", &ctx), VariableValue::Bool(true));
-    }
-
-    #[test]
-    fn eval_not() {
+    fn eval_unary_and_misc() {
         let ctx = ctx_with(&[("flag", VariableValue::Bool(true))]);
         assert_eq!(eval("!flag", &ctx), VariableValue::Bool(false));
         assert_eq!(eval("!false", &ctx), VariableValue::Bool(true));
+        let ctx2 = ScriptContext::default();
+        assert_eq!(eval("-5", &ctx2), VariableValue::Int(-5));
+        assert_eq!(eval("-3.14", &ctx2), VariableValue::Float(-3.14));
+        assert_eq!(eval("5 + 1.5", &ctx2), VariableValue::Float(6.5));
+        let ctx3 = ctx_with(&[("name", VariableValue::Text("Hero".to_string()))]);
+        assert_eq!(eval("name + \" the Brave\"", &ctx3), VariableValue::Text("Hero the Brave".to_string()));
     }
 
     #[test]
-    fn eval_negation() {
+    fn eval_error_cases() {
         let ctx = ScriptContext::default();
-        assert_eq!(eval("-5", &ctx), VariableValue::Int(-5));
-        assert_eq!(eval("-3.14", &ctx), VariableValue::Float(-3.14));
+        assert!(eval_expr(&parse_expr("10 / 0").unwrap(), &ctx).is_err());
+        assert!(eval_expr(&parse_expr("nonexistent").unwrap(), &ctx).is_err());
     }
 
     #[test]
-    fn eval_string_concat() {
-        let ctx = ctx_with(&[("name", VariableValue::Text("Hero".to_string()))]);
-        assert_eq!(
-            eval("name + \" the Brave\"", &ctx),
-            VariableValue::Text("Hero the Brave".to_string())
-        );
-    }
-
-    #[test]
-    fn eval_int_float_promotion() {
-        let ctx = ScriptContext::default();
-        assert_eq!(eval("5 + 1.5", &ctx), VariableValue::Float(6.5));
-    }
-
-    #[test]
-    fn eval_division_by_zero() {
-        let ctx = ScriptContext::default();
-        let expr = parse_expr("10 / 0").unwrap();
-        assert!(eval_expr(&expr, &ctx).is_err());
-    }
-
-    #[test]
-    fn eval_undefined_variable() {
-        let ctx = ScriptContext::default();
-        let expr = parse_expr("nonexistent").unwrap();
-        assert!(eval_expr(&expr, &ctx).is_err());
-    }
-
-    #[test]
-    fn eval_to_bool_values() {
+    fn eval_to_bool_and_string() {
         assert!(eval_to_bool(&VariableValue::Bool(true)));
         assert!(!eval_to_bool(&VariableValue::Bool(false)));
         assert!(eval_to_bool(&VariableValue::Int(1)));
@@ -347,10 +337,6 @@ mod tests {
         assert!(eval_to_bool(&VariableValue::Text("yes".to_string())));
         assert!(!eval_to_bool(&VariableValue::Text("".to_string())));
         assert!(!eval_to_bool(&VariableValue::Text("false".to_string())));
-    }
-
-    #[test]
-    fn eval_to_string_values() {
         assert_eq!(eval_to_string(&VariableValue::Bool(true)), "true");
         assert_eq!(eval_to_string(&VariableValue::Int(42)), "42");
         assert_eq!(eval_to_string(&VariableValue::Float(3.14)), "3.14");
@@ -358,26 +344,42 @@ mod tests {
     }
 
     #[test]
-    fn eval_ternary_true_branch() {
+    fn eval_ternary() {
         let ctx = ctx_with(&[("gold", VariableValue::Int(200))]);
-        assert_eq!(
-            eval("gold > 100 ? \"rich\" : \"poor\"", &ctx),
-            VariableValue::Text("rich".to_string())
-        );
+        assert_eq!(eval("gold > 100 ? \"rich\" : \"poor\"", &ctx), VariableValue::Text("rich".to_string()));
+        let ctx2 = ctx_with(&[("gold", VariableValue::Int(10))]);
+        assert_eq!(eval("gold > 100 ? \"rich\" : \"poor\"", &ctx2), VariableValue::Text("poor".to_string()));
+        let ctx3 = ctx_with(&[("x", VariableValue::Int(-5))]);
+        assert_eq!(eval("x < 0 ? -x : x", &ctx3), VariableValue::Int(5));
     }
 
     #[test]
-    fn eval_ternary_false_branch() {
-        let ctx = ctx_with(&[("gold", VariableValue::Int(10))]);
-        assert_eq!(
-            eval("gold > 100 ? \"rich\" : \"poor\"", &ctx),
-            VariableValue::Text("poor".to_string())
-        );
+    fn eval_visits_and_visited() {
+        let mut ctx = ScriptContext::default();
+        ctx.set_seq_scope("node_abc");
+        assert_eq!(eval("visits()", &ctx), VariableValue::Int(0));
+        assert_eq!(eval("visited()", &ctx), VariableValue::Bool(false));
+        ctx.record_visit("node_abc");
+        assert_eq!(eval("visits()", &ctx), VariableValue::Int(1));
+        assert_eq!(eval("visited()", &ctx), VariableValue::Bool(true));
+        ctx.record_visit("node_abc");
+        assert_eq!(eval("visits()", &ctx), VariableValue::Int(2));
+        // Specific node lookup
+        ctx.record_visit("market");
+        ctx.record_visit("market");
+        assert_eq!(eval("visits(\"market\")", &ctx), VariableValue::Int(2));
+        assert_eq!(eval("visits(\"tavern\")", &ctx), VariableValue::Int(0));
+        assert_eq!(eval("visited(\"market\")", &ctx), VariableValue::Bool(true));
     }
 
     #[test]
-    fn eval_ternary_numeric() {
-        let ctx = ctx_with(&[("x", VariableValue::Int(-5))]);
-        assert_eq!(eval("x < 0 ? -x : x", &ctx), VariableValue::Int(5));
+    fn eval_keyword_aliases() {
+        let ctx = ctx_with(&[
+            ("a", VariableValue::Bool(true)),
+            ("b", VariableValue::Bool(false)),
+        ]);
+        assert_eq!(eval("a and not b", &ctx), VariableValue::Bool(true));
+        assert_eq!(eval("a or b", &ctx), VariableValue::Bool(true));
+        assert_eq!(eval("not a", &ctx), VariableValue::Bool(false));
     }
 }

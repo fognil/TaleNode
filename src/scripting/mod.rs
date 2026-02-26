@@ -23,6 +23,8 @@ pub struct ScriptContext {
     seq_counters: HashMap<String, usize>,
     /// Current scope prefix for sequence counters (usually a node UUID).
     seq_scope: String,
+    /// Node visit counts, keyed by node UUID string.
+    visit_counts: HashMap<String, usize>,
 }
 
 impl ScriptContext {
@@ -72,6 +74,21 @@ impl ScriptContext {
         let val = *count;
         *count += 1;
         val
+    }
+
+    /// Record a visit to a node (increment counter).
+    pub fn record_visit(&mut self, node_id: &str) {
+        *self.visit_counts.entry(node_id.to_string()).or_insert(0) += 1;
+    }
+
+    /// Get the visit count for a node (0 if never visited).
+    pub fn get_visits(&self, node_id: &str) -> usize {
+        self.visit_counts.get(node_id).copied().unwrap_or(0)
+    }
+
+    /// Get the visit count for the current scope (current node).
+    pub fn current_visits(&self) -> usize {
+        self.get_visits(&self.seq_scope)
     }
 
     /// Restore from owned (name, value) pairs.
