@@ -69,6 +69,9 @@ nav:
     - Inspector Panel: user-guide/inspector.md
     - Variables: user-guide/variables.md
     - Characters: user-guide/characters.md
+    - NPC Relationships: user-guide/relationships.md
+    - Bark Dialogue: user-guide/bark-dialogue.md
+    - Quests: user-guide/quests.md
     - Node Groups: user-guide/groups.md
     - Bookmarks & Tags: user-guide/bookmarks-tags.md
     - Comments & Review: user-guide/comments-review.md

@@ -101,6 +101,18 @@ Exports a drop-in runtime plugin to the selected game engine project folder. See
 
 Exports a CSV file listing all dialogue lines with speaker, text, emotion, and audio clip fields — ready for voice actors.
 
+### Export Markdown
+
+- **Menu**: File > Export Markdown (.md)...
+
+Exports the dialogue as a readable Markdown document with a characters table, variables table, quest checklists, and the full dialogue flow rendered via BFS traversal. Opens natively in any Markdown viewer, VS Code, or GitHub.
+
+### Export Word (RTF)
+
+- **Menu**: File > Export Word (.rtf)...
+
+Exports the dialogue as an RTF file that opens natively in Microsoft Word, Google Docs, LibreOffice, and other word processors. Contains the same content as the Markdown export in formatted rich text.
+
 ### Batch Assign Audio
 
 - **Menu**: File > Batch Assign Audio...

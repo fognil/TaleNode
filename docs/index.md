@@ -88,6 +88,31 @@ Comments per node, review status tracking (Draft/Needs Review/Approved), version
 Save node patterns as reusable templates. Analyze your graph with path stats, word counts, and dead-path detection.
 </div>
 
+<div class="feature-card" markdown>
+### Quest & Journal System
+Define quests with objectives, trigger quest events from dialogue, and track progression with start/complete/fail actions.
+</div>
+
+<div class="feature-card" markdown>
+### NPC Relationships
+Track affinity, trust, and reputation per character with named relationship tracks. Modify values via Event nodes and branch on them with Conditions.
+</div>
+
+<div class="feature-card" markdown>
+### Bark/Ambient Dialogue
+Per-character ambient dialogue lines with weights and conditions. Export as CSV for voice actors or include in your JSON export.
+</div>
+
+<div class="feature-card" markdown>
+### Theme Customization
+Dark, Light, and Custom presets. Adjustable font size and accent color for a personalized editing experience.
+</div>
+
+<div class="feature-card" markdown>
+### Document Export
+Export your dialogue as readable Markdown or RTF documents — complete with character tables, quest checklists, and full dialogue flow.
+</div>
+
 </div>
 
 ## Quick Links
@@ -98,7 +123,10 @@ Save node patterns as reusable templates. Analyze your graph with path stats, wo
 | [Quick Start](getting-started/quickstart.md) | Create your first dialogue in 5 minutes |
 | [Node Reference](reference/node-reference.md) | Detailed spec for all 8 node types |
 | [JSON Export Format](export/json-format.md) | Full export schema with examples |
-| [Settings](user-guide/settings.md) | API keys and collaboration preferences |
+| [Settings](user-guide/settings.md) | Theme, API keys, and collaboration preferences |
+| [Quests](user-guide/quests.md) | Quest/journal system with objectives |
+| [NPC Relationships](user-guide/relationships.md) | Character affinity and reputation tracks |
+| [Bark Dialogue](user-guide/bark-dialogue.md) | Ambient dialogue per character |
 | [Auto-Translation](user-guide/auto-translation.md) | DeepL-powered machine translation |
 | [Voice Synthesis](user-guide/voice-synthesis.md) | ElevenLabs AI voice generation |
 | [Collaboration](user-guide/collaboration.md) | Real-time multiplayer editing |

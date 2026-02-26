@@ -180,7 +180,7 @@ Each **EventAction**:
 | `key` | String | Target variable/item name |
 | `value` | VariableValue | Value to set |
 
-**EventActionType values:** `SetVariable`, `AddItem`, `RemoveItem`, `PlaySound`, `Custom(String)`
+**EventActionType values:** `SetVariable`, `AddItem`, `RemoveItem`, `PlaySound`, `ModifyRelationship`, `StartQuest`, `CompleteObjective`, `FailQuest`, `Custom(String)`
 
 | Port | Direction | Count |
 |---|---|---|
@@ -196,8 +196,10 @@ Each **EventAction**:
   "id": "evt_1",
   "type": "event",
   "actions": [
-    { "action": "SetVariable", "key": "has_key", "value": true },
-    { "action": "AddItem", "key": "iron_sword", "value": 1 }
+    { "action": "set_variable", "key": "has_key", "value": true },
+    { "action": "add_item", "key": "iron_sword", "value": 1 },
+    { "action": "modify_relationship", "key": "Guard.Trust", "value": 10 },
+    { "action": "start_quest", "key": "find_artifact", "value": "" }
   ],
   "next": "dlg_6"
 }

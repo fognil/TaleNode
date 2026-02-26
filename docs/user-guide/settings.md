@@ -20,6 +20,18 @@ The file is created automatically when you first save settings.
 
 ## Settings Sections
 
+### Appearance
+
+| Field | Description |
+|---|---|
+| **Theme Preset** | Choose from **Dark**, **Light**, or **Custom**. Dark is the default |
+| **Font Size** | Slider to adjust UI font size (range: 10–24, default: 14) |
+| **Accent Color** | RGB color picker for the UI accent color (used for buttons, highlights, selections) |
+
+You can also cycle through theme presets quickly via **View > Theme: ... ->** in the menu bar.
+
+The Custom preset uses the Dark theme as a base but applies your chosen accent color. Light and Dark presets use their respective default accent colors.
+
 ### DeepL Translation
 
 | Field | Description |

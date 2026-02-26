@@ -10,7 +10,9 @@ When you export via **File > Export JSON...**, TaleNode produces a clean, flat J
   "name": "My Dialogue",
   "variables": [...],
   "characters": [...],
-  "nodes": [...]
+  "nodes": [...],
+  "barks": [...],
+  "quests": [...]
 }
 ```
 
@@ -19,8 +21,10 @@ When you export via **File > Export JSON...**, TaleNode produces a clean, flat J
 | `version` | string | Format version, currently `"1.0"` |
 | `name` | string | Project name |
 | `variables` | array | Variable definitions with defaults |
-| `characters` | array | Character database |
+| `characters` | array | Character database (with optional relationships) |
 | `nodes` | array | Flat list of all nodes with baked connections |
+| `barks` | array | *(optional)* Bark/ambient dialogue groups per character |
+| `quests` | array | *(optional)* Quest definitions with objectives |
 
 ## Node IDs
 
@@ -71,11 +75,16 @@ IDs are assigned deterministically, sorted by node position (top-to-bottom, left
       "id": "char_1",
       "name": "Guard",
       "color": "#4A90D9",
-      "portrait": "portraits/guard.png"
+      "portrait": "portraits/guard.png",
+      "relationships": [
+        { "name": "Trust", "default_value": 0, "min": -100, "max": 100 }
+      ]
     }
   ]
 }
 ```
+
+The `relationships` array is omitted when a character has no relationships defined.
 
 ## Node Types in Export
 
@@ -176,7 +185,7 @@ IDs are assigned deterministically, sorted by node position (top-to-bottom, left
 }
 ```
 
-- `action` types: `SetVariable`, `AddItem`, `RemoveItem`, `PlaySound`, `Custom`
+- `action` types: `set_variable`, `add_item`, `remove_item`, `play_sound`, `modify_relationship`, `start_quest`, `complete_objective`, `fail_quest`, `custom`
 
 ### Random
 
@@ -240,6 +249,48 @@ When the project has extra locales defined, three additional top-level fields ap
 - String keys in `strings` use the same readable IDs as nodes (`dlg_1`, `choice_1`, `opt_choice_1_0`)
 - The `text` fields in nodes still contain the default locale text
 - See [Localization](../user-guide/localization.md) for the full localization workflow
+
+## Barks
+
+When characters have bark/ambient dialogue lines defined, a `barks` array is included:
+
+```json
+{
+  "barks": [
+    {
+      "character": "Guard",
+      "lines": [
+        { "text": "Move along.", "weight": 1.0 },
+        { "text": "Stay out of trouble.", "weight": 1.0, "condition": "is_night" }
+      ]
+    }
+  ]
+}
+```
+
+The `barks` array is omitted when no characters have bark lines.
+
+## Quests
+
+When quests are defined, a `quests` array is included:
+
+```json
+{
+  "quests": [
+    {
+      "name": "Find the Lost Artifact",
+      "description": "The elder has asked you to recover the ancient artifact.",
+      "objectives": [
+        { "text": "Talk to the elder", "optional": false },
+        { "text": "Search the ruins", "optional": false },
+        { "text": "Find the secret passage", "optional": true }
+      ]
+    }
+  ]
+}
+```
+
+The `quests` array is omitted when no quests are defined. The `description` field is omitted when empty.
 
 ## Key Design Decisions
 

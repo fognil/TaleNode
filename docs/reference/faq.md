@@ -110,8 +110,33 @@ Yes. TaleNode supports multiple export formats:
 
 - **JSON** — Standard game engine data format. See [JSON Export Format](../export/json-format.md).
 - **XML** — Alternative structured format.
+- **Markdown (.md)** — Readable document with characters, variables, quests, and dialogue flow.
+- **RTF (.rtf)** — Rich text document that opens in Word, Google Docs, and LibreOffice.
 - **Voice Script (CSV)** — CSV with speaker, text, emotion, and audio clip fields for voice actors.
+- **Bark Dialogue (CSV)** — CSV with ambient/bark lines per character.
 - **Runtime Plugins** — Drop-in plugins for Godot, Unity, and Unreal Engine. See [Plugin Export](../export/plugin-export.md).
+
+### Can I export my dialogue as a readable document?
+
+Yes. Use **File > Export Markdown (.md)...** for a Markdown file or **File > Export Word (.rtf)...** for an RTF file. Both include characters, variables, quests, and the full dialogue flow. RTF opens natively in Word and Google Docs.
+
+## Characters & Quests
+
+### Can I track NPC relationships/affinity?
+
+Yes. Each character can have named relationship tracks (e.g., Friendship, Trust) with numeric values and min/max ranges. Use Event nodes with the `ModifyRelationship` action to change values during dialogue. See [NPC Relationships](../user-guide/relationships.md).
+
+### What are bark/ambient dialogue lines?
+
+Barks are short context-sensitive lines that characters speak outside the main dialogue tree. They're attached to characters (not the node graph) and selected at runtime based on weight and optional conditions. See [Bark Dialogue](../user-guide/bark-dialogue.md).
+
+### Does TaleNode support quests?
+
+Yes. Define quests with objectives in the Quests panel, then use Event nodes to start quests, complete objectives, or fail quests during dialogue. See [Quests](../user-guide/quests.md).
+
+### Can I customize the editor theme?
+
+Yes. Go to **Settings > Settings... > Appearance** to choose between Dark, Light, or Custom presets, adjust font size (10–24), and pick an accent color. You can also cycle presets via **View > Theme: ... ->**.
 
 ## Troubleshooting
 

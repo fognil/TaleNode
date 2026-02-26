@@ -30,15 +30,27 @@ A colored indicator square is shown next to each character name in the left pane
 
 Click the delete button to remove a character. Dialogue nodes that reference the removed character will retain the speaker name as plain text.
 
+### Relationships
+
+Each character can have named relationship tracks (e.g., Friendship, Trust, Fear) with numeric values and configurable min/max ranges. Relationships are managed in a collapsible **Relationships** section within each character.
+
+See [NPC Relationships](relationships.md) for full details on defining relationships, modifying them via Event nodes, and using them in conditions.
+
 ## Using Characters in Dialogue Nodes
 
 When editing a Dialogue node in the Inspector, the **Speaker** field lets you type a character name. Characters you've defined are available for consistent reference.
 
 The `speaker_id` field in the data model links the Dialogue node to a specific Character by UUID, ensuring updates to the character name propagate correctly.
 
+### Bark Dialogue
+
+Characters can also have bark/ambient dialogue lines — short context-sensitive lines for use outside the main dialogue tree. Manage barks in the dedicated **Barks** panel.
+
+See [Bark Dialogue](bark-dialogue.md) for full details.
+
 ## Characters in Export
 
-Characters are exported with human-readable IDs:
+Characters are exported with human-readable IDs. Relationships are included when defined:
 
 ```json
 {
@@ -47,7 +59,10 @@ Characters are exported with human-readable IDs:
       "id": "char_1",
       "name": "Guard",
       "color": "#4A90D9",
-      "portrait": "portraits/guard.png"
+      "portrait": "portraits/guard.png",
+      "relationships": [
+        { "name": "Trust", "default_value": 0, "min": -100, "max": 100 }
+      ]
     },
     {
       "id": "char_2",
