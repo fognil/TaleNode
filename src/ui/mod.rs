@@ -18,6 +18,7 @@ pub mod playtest_panel;
 pub mod quest_panel;
 pub mod script_panel;
 pub mod template_panel;
+pub mod timeline_panel;
 pub mod version_panel;
 pub mod voice_panel;
 pub mod world_panel;

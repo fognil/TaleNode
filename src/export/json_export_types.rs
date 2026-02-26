@@ -20,6 +20,8 @@ pub struct ExportedDialogue {
     pub quests: Vec<ExportedQuest>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub world_entities: Vec<ExportedWorldEntity>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub timelines: Vec<ExportedTimeline>,
 }
 
 #[derive(Debug, Serialize)]
@@ -94,6 +96,25 @@ pub struct ExportedEntityProperty {
     pub key: String,
     pub value: String,
 }
+
+#[derive(Debug, Serialize)]
+pub struct ExportedTimeline {
+    pub name: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub description: String,
+    pub steps: Vec<ExportedTimelineStep>,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub loop_playback: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExportedTimelineStep {
+    pub action: serde_json::Value,
+    #[serde(skip_serializing_if = "is_zero_f32")]
+    pub delay: f32,
+}
+
+fn is_zero_f32(v: &f32) -> bool { *v == 0.0 }
 
 #[derive(Debug, Serialize)]
 pub struct ExportedNode {

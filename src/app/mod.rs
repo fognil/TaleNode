@@ -18,6 +18,7 @@ pub mod settings;
 mod subgraph_nav;
 mod templates;
 pub(super) mod theme;
+mod timeline_handlers;
 mod voice_handlers;
 mod world_handlers;
 mod writing_handlers;

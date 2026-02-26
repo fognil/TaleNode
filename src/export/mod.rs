@@ -5,6 +5,7 @@ pub mod flatten;
 pub mod html_export;
 mod html_template;
 pub mod json_export;
+mod json_export_extras;
 pub mod json_export_helpers;
 mod json_export_types;
 pub mod locale_export;

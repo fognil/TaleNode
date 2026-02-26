@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use super::{bark::BarkLine, character::Character, connection::Connection, group::NodeGroup,
     locale::LocaleSettings, node::Node, port::{PortDirection, PortId}, quest::Quest,
-    review::{NodeComment, ReviewStatus}, variable::Variable, world::WorldEntity};
+    review::{NodeComment, ReviewStatus}, timeline::Timeline, variable::Variable, world::WorldEntity};
 
 /// The central data structure holding the entire dialogue graph.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,12 +33,12 @@ pub struct DialogueGraph {
     pub quests: Vec<Quest>,
     #[serde(default)]
     pub world_entities: Vec<WorldEntity>,
+    #[serde(default)]
+    pub timelines: Vec<Timeline>,
 }
 
 impl Default for DialogueGraph {
-    fn default() -> Self {
-        Self::new()
-    }
+    fn default() -> Self { Self::new() }
 }
 
 impl DialogueGraph {
@@ -56,6 +56,7 @@ impl DialogueGraph {
             barks: HashMap::new(),
             quests: Vec::new(),
             world_entities: Vec::new(),
+            timelines: Vec::new(),
         }
     }
 

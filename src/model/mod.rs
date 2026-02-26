@@ -14,6 +14,7 @@ pub mod quest;
 pub mod relationship;
 pub mod review;
 pub mod template;
+pub mod timeline;
 pub mod variable;
 pub mod version;
 pub mod world;
