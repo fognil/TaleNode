@@ -1,7 +1,5 @@
 <div class="tx-hero" markdown>
 
-<img src="assets/logo.png" alt="TaleNode logo" width="96" style="margin-bottom: 0.5rem;">
-
 # TaleNode
 
 <p class="tx-hero__tagline">
