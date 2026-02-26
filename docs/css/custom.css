@@ -5,7 +5,7 @@
   margin: 0 -0.8rem;
   padding: 4rem 1rem;
   text-align: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 50%, #1e1e1e 100%);
   border-radius: 0.4rem;
   margin-bottom: 2rem;
 }
@@ -14,7 +14,7 @@
   font-size: 2.8rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  background: linear-gradient(90deg, #7c8cf8, #e8b931);
+  background: linear-gradient(90deg, #c0c0c0, #e8b931);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
