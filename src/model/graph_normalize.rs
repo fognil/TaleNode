@@ -136,4 +136,16 @@ mod tests {
         graph.normalize();
         assert_eq!(graph.get_tags(id), &["act1", "boss", "quest"]);
     }
+
+    #[test]
+    fn example_file_loads_and_resaves_deterministically() {
+        let path = "examples/dragon_quest.talenode";
+        let json = std::fs::read_to_string(path).unwrap();
+        let project = crate::model::project::Project::load_from_string(&json).unwrap();
+        assert!(!project.graph.nodes.is_empty());
+        // Save twice — output must be identical
+        let out1 = project.save_to_string().unwrap();
+        let out2 = project.save_to_string().unwrap();
+        assert_eq!(out1, out2);
+    }
 }
