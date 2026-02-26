@@ -93,20 +93,26 @@ pub fn show_playtest_panel(
         return;
     };
 
-    let active = state.active_graph(graph);
-    let Some(node) = active.nodes.get(&node_id) else {
-        ui.colored_label(Color32::from_rgb(255, 100, 100), "Error: node not found.");
-        return;
+    let node_type = {
+        let active = state.active_graph(graph);
+        match active.nodes.get(&node_id) {
+            Some(node) => node.node_type.clone(),
+            None => {
+                ui.colored_label(Color32::from_rgb(255, 100, 100), "Error: node not found.");
+                return;
+            }
+        }
     };
 
-    match &node.node_type {
+    state.variables.set_seq_scope(&node_id.to_string());
+    match &node_type {
         NodeType::Dialogue(data) => {
             let speaker = if data.speaker_name.is_empty() {
                 "???".to_string()
             } else {
                 data.speaker_name.clone()
             };
-            let text = interpolate_text(&data.text, &state.variables);
+            let text = interpolate_text(&data.text, &mut state.variables);
             ui.colored_label(Color32::from_rgb(150, 200, 255), &speaker);
             ui.label(&text);
             if !data.emotion.is_empty() {
@@ -126,13 +132,13 @@ pub fn show_playtest_panel(
         }
         NodeType::Choice(data) => {
             if !data.prompt.is_empty() {
-                let prompt = interpolate_text(&data.prompt, &state.variables);
+                let prompt = interpolate_text(&data.prompt, &mut state.variables);
                 ui.label(&prompt);
             }
             ui.add_space(4.0);
             let mut chosen = None;
             for (i, choice) in data.choices.iter().enumerate() {
-                let text = interpolate_text(&choice.text, &state.variables);
+                let text = interpolate_text(&choice.text, &mut state.variables);
                 let available = choice
                     .condition
                     .as_ref()

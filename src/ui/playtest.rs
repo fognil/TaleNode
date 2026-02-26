@@ -223,16 +223,18 @@ impl PlaytestState {
     /// Make a choice (for Choice nodes). `choice_index` is the output port index.
     pub fn make_choice(&mut self, graph: &DialogueGraph, choice_index: usize) {
         let Some(id) = self.current_node else { return };
-        let entry = {
+        let choice_text = {
             let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
             let Some(node) = g.nodes.get(&id) else { return };
             if let NodeType::Choice(data) = &node.node_type {
-                data.choices.get(choice_index).map(|choice| {
-                    let text = interpolate_text(&choice.text, &self.variables);
-                    PlaytestLogEntry { speaker: "[You]".to_string(), text }
-                })
+                data.choices.get(choice_index).map(|c| c.text.clone())
             } else { None }
         };
+        let entry = choice_text.map(|raw| {
+            self.variables.set_seq_scope(&id.to_string());
+            let text = interpolate_text(&raw, &mut self.variables);
+            PlaytestLogEntry { speaker: "[You]".to_string(), text }
+        });
         if let Some(e) = entry { self.log.push(e); }
         let next = {
             let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
@@ -247,7 +249,7 @@ impl PlaytestState {
     /// Advance past a Dialogue node (user clicked "Continue").
     pub fn advance_dialogue(&mut self, graph: &DialogueGraph) {
         let Some(id) = self.current_node else { return };
-        let entry = {
+        let dlg_info = {
             let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
             let Some(node) = g.nodes.get(&id) else { return };
             if let NodeType::Dialogue(data) = &node.node_type {
@@ -256,10 +258,14 @@ impl PlaytestState {
                 } else {
                     data.speaker_name.clone()
                 };
-                let text = interpolate_text(&data.text, &self.variables);
-                Some(PlaytestLogEntry { speaker, text })
+                Some((speaker, data.text.clone()))
             } else { None }
         };
+        let entry = dlg_info.map(|(speaker, raw)| {
+            self.variables.set_seq_scope(&id.to_string());
+            let text = interpolate_text(&raw, &mut self.variables);
+            PlaytestLogEntry { speaker, text }
+        });
         if let Some(e) = entry { self.log.push(e); }
         let g = self.subgraph_stack.last().map_or(graph, |f| &f.graph);
         self.current_node = follow_first_output(g, id);

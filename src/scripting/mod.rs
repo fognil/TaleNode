@@ -4,6 +4,7 @@ pub mod expr;
 mod expr_parser;
 mod expr_tokenizer;
 pub mod interpolate;
+mod interpolate_parse;
 
 use std::collections::HashMap;
 
@@ -18,6 +19,10 @@ use self::eval::eval_to_bool;
 #[derive(Debug, Clone, Default)]
 pub struct ScriptContext {
     vars: HashMap<String, VariableValue>,
+    /// Visit counters for sequence/cycle blocks, keyed by "{scope}_{index}".
+    seq_counters: HashMap<String, usize>,
+    /// Current scope prefix for sequence counters (usually a node UUID).
+    seq_scope: String,
 }
 
 impl ScriptContext {
@@ -27,7 +32,10 @@ impl ScriptContext {
         for v in variables {
             vars.insert(v.name.clone(), v.default_value.clone());
         }
-        Self { vars }
+        Self {
+            vars,
+            ..Default::default()
+        }
     }
 
     pub fn get(&self, name: &str) -> Option<&VariableValue> {
@@ -52,10 +60,25 @@ impl ScriptContext {
         pairs
     }
 
+    /// Set the scope prefix for sequence/cycle counters (usually a node UUID).
+    pub fn set_seq_scope(&mut self, scope: &str) {
+        self.seq_scope = scope.to_string();
+    }
+
+    /// Get and increment the visit counter for a sequence at the given index.
+    pub fn next_seq_count(&mut self, seq_index: usize) -> usize {
+        let key = format!("{}_{}", self.seq_scope, seq_index);
+        let count = self.seq_counters.entry(key).or_insert(0);
+        let val = *count;
+        *count += 1;
+        val
+    }
+
     /// Restore from owned (name, value) pairs.
     pub fn from_pairs(pairs: Vec<(String, VariableValue)>) -> Self {
         Self {
             vars: pairs.into_iter().collect(),
+            ..Default::default()
         }
     }
 }
