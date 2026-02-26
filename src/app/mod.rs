@@ -15,6 +15,7 @@ mod search;
 pub mod settings;
 mod subgraph_nav;
 mod templates;
+pub(super) mod theme;
 mod voice_handlers;
 
 use egui::Pos2;
@@ -72,7 +73,6 @@ pub struct TaleNodeApp {
     search_index: usize,
     replace_query: String,
     show_replace: bool,
-    dark_theme: bool,
     playtest: PlaytestState,
     last_auto_save: Instant,
     status_message: Option<(String, Instant, bool)>,
@@ -135,7 +135,6 @@ impl TaleNodeApp {
             search_index: 0,
             replace_query: String::new(),
             show_replace: false,
-            dark_theme: true,
             playtest: PlaytestState::new(),
             last_auto_save: Instant::now(),
             status_message: None,
@@ -188,11 +187,8 @@ impl TaleNodeApp {
 impl eframe::App for TaleNodeApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Apply theme
-        ctx.set_visuals(if self.dark_theme {
-            egui::Visuals::dark()
-        } else {
-            egui::Visuals::light()
-        });
+        ctx.set_visuals(theme::build_visuals(&self.settings.theme));
+        theme::apply_font_size(ctx, self.settings.theme.font_size);
 
         // Run validation each frame (cheap for typical graph sizes)
         self.validation_warnings = validator::validate(&self.graph);

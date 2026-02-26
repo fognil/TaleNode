@@ -255,15 +255,12 @@ impl TaleNodeApp {
                     self.canvas.zoom_to_fit(&self.graph.nodes, size);
                     ui.close_menu();
                 }
-                if ui
-                    .button(if self.dark_theme {
-                        "Light Theme"
-                    } else {
-                        "Dark Theme"
-                    })
-                    .clicked()
-                {
-                    self.dark_theme = !self.dark_theme;
+                let theme_label = format!(
+                    "Theme: {} ->",
+                    self.settings.theme.preset.label()
+                );
+                if ui.button(theme_label).clicked() {
+                    self.settings.theme.preset = self.settings.theme.preset.next();
                     ui.close_menu();
                 }
             });

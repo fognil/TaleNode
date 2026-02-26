@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use super::theme::ThemeConfig;
+
 /// Persistent application settings stored at ~/.talenode/settings.json.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppSettings {
@@ -14,6 +16,8 @@ pub struct AppSettings {
     pub collab_username: String,
     #[serde(default = "default_collab_port")]
     pub collab_default_port: u16,
+    #[serde(default)]
+    pub theme: ThemeConfig,
 }
 
 fn default_collab_port() -> u16 {
@@ -28,6 +32,7 @@ impl Default for AppSettings {
             elevenlabs_api_key: None,
             collab_username: whoami().unwrap_or_else(|| "User".to_string()),
             collab_default_port: default_collab_port(),
+            theme: ThemeConfig::default(),
         }
     }
 }
@@ -79,6 +84,39 @@ pub fn show_settings_window(
         .resizable(true)
         .default_width(420.0)
         .show(ctx, |ui| {
+            egui::CollapsingHeader::new("Appearance")
+                .default_open(true)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Theme:");
+                        egui::ComboBox::from_id_salt("theme_preset")
+                            .selected_text(settings.theme.preset.label())
+                            .show_ui(ui, |ui| {
+                                for preset in super::theme::ThemePreset::ALL {
+                                    ui.selectable_value(
+                                        &mut settings.theme.preset,
+                                        preset,
+                                        preset.label(),
+                                    );
+                                }
+                            });
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Font Size:");
+                        let mut size = settings.theme.font_size as i32;
+                        if ui
+                            .add(egui::Slider::new(&mut size, 10..=24))
+                            .changed()
+                        {
+                            settings.theme.font_size = size as u16;
+                        }
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Accent Color:");
+                        ui.color_edit_button_srgb(&mut settings.theme.accent_color);
+                    });
+                });
+
             egui::CollapsingHeader::new("DeepL Translation")
                 .default_open(true)
                 .show(ui, |ui| {
@@ -202,6 +240,7 @@ mod tests {
             elevenlabs_api_key: Some("key2".to_string()),
             collab_username: "Bob".to_string(),
             collab_default_port: 12345,
+            theme: ThemeConfig::default(),
         };
         let json = serde_json::to_string(&s).unwrap();
         let loaded: AppSettings = serde_json::from_str(&json).unwrap();
