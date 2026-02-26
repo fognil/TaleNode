@@ -51,4 +51,4 @@ The diff summary shows:
     Save versions before making major structural changes. It's much easier to compare and revert than relying on undo history alone.
 
 !!! tip
-    Version snapshots are stored in the `.talenode` project file. They increase file size, so save versions at meaningful milestones rather than after every small change.
+    Version snapshots are stored in a separate `.talenode.versions` sidecar file alongside your project. This keeps the main `.talenode` file small and git-friendly. If you use version control, you can optionally add `*.talenode.versions` to `.gitignore` to exclude snapshots from your repository.

@@ -49,7 +49,7 @@ The `.talenode` format is pretty-printed JSON containing:
   "version": "1.0.0",
   "name": "My Dialogue",
   "graph": {
-    "nodes": [...],
+    "nodes": {...},
     "connections": [...],
     "variables": [...],
     "characters": [...],
@@ -58,10 +58,48 @@ The `.talenode` format is pretty-printed JSON containing:
 }
 ```
 
-This includes everything: node positions, port data, all connections, variables, characters, groups, and metadata. The file is fully self-contained.
+This includes everything: node positions, port data, all connections, variables, characters, groups, and metadata.
+
+When version snapshots exist, they are stored in a separate **sidecar file** named `project.talenode.versions` alongside the main `.talenode` file. This keeps the main file small and diff-friendly.
 
 !!! note
-    `.talenode` files are backward compatible — new fields use `#[serde(default)]` so older files open in newer versions without issues.
+    `.talenode` files are backward compatible — new fields use `#[serde(default)]` so older files open in newer versions without issues. Old files with inline versions also load correctly.
+
+## Version Control (Git)
+
+`.talenode` files are designed to work well with Git and other version control systems.
+
+### Deterministic Serialization
+
+TaleNode ensures that saving the same project twice produces **byte-identical output**:
+
+- **Sorted keys** — Node maps, tags, review statuses, and all keyed data use sorted maps. Keys always appear in the same order regardless of insertion order.
+- **Sorted lists** — Connections, variables, characters, groups, comments, quests, world entities, and timelines are sorted by name (or composite key) before saving.
+- **No random shuffling** — Two people saving the same graph state get identical JSON, eliminating spurious diffs.
+
+### Minimal Diffs
+
+When you change a single node, only that node's JSON block changes in the file. This means:
+
+- `git diff` shows exactly what was edited
+- Merge conflicts are limited to the lines that actually changed
+- Code review of `.talenode` changes is practical
+
+### Version Snapshots as Sidecar
+
+Version history snapshots are saved to a separate `.talenode.versions` file. This prevents version snapshots (which can be large) from bloating the main file and creating noisy diffs.
+
+You can choose to:
+
+- **Track both files** in Git if you want version history shared across the team
+- **Gitignore the sidecar** (`*.talenode.versions`) if you only want the current graph in version control
+
+### Recommended .gitignore
+
+```gitignore
+# Optional: ignore version snapshots to keep repo lean
+*.talenode.versions
+```
 
 ## Export
 
@@ -177,7 +215,7 @@ For detailed information on each import format, see [Import Formats](import.md).
     Save your project (++ctrl+s++) regularly. Auto-save is a safety net, not a replacement for manual saves.
 
 !!! tip
-    Keep your `.talenode` project files in version control (Git). They're plain JSON and diff well.
+    Keep your `.talenode` project files in version control (Git). They're plain JSON with deterministic serialization — diffs show exactly what changed.
 
 !!! tip
     Export JSON only when you're ready to integrate with your game. The `.talenode` file is your working format.
