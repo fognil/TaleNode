@@ -337,6 +337,44 @@ impl TaleNodeApp {
         }
     }
 
+    pub(super) fn do_export_markdown(&mut self) {
+        let path = rfd::FileDialog::new()
+            .add_filter("Markdown", &["md"])
+            .set_file_name(format!("{}.md", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            let graph = self.root_graph_for_export();
+            let md = crate::export::document_export::export_markdown(&graph, &self.project_name);
+            if let Err(e) = std::fs::write(&path, md) {
+                self.status_message =
+                    Some((format!("Failed to write Markdown: {e}"), Instant::now(), true));
+            } else {
+                self.status_message =
+                    Some(("Markdown exported".to_string(), Instant::now(), false));
+            }
+        }
+    }
+
+    pub(super) fn do_export_rtf(&mut self) {
+        let path = rfd::FileDialog::new()
+            .add_filter("RTF", &["rtf"])
+            .set_file_name(format!("{}.rtf", self.project_name))
+            .save_file();
+
+        if let Some(path) = path {
+            let graph = self.root_graph_for_export();
+            let rtf = crate::export::document_export::export_rtf(&graph, &self.project_name);
+            if let Err(e) = std::fs::write(&path, rtf) {
+                self.status_message =
+                    Some((format!("Failed to write RTF: {e}"), Instant::now(), true));
+            } else {
+                self.status_message =
+                    Some(("RTF exported".to_string(), Instant::now(), false));
+            }
+        }
+    }
+
     pub(super) fn do_new_project(&mut self) {
         self.graph = DialogueGraph::new();
         self.graph.add_node(Node::new_start([100.0, 200.0]));

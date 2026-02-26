@@ -74,6 +74,14 @@ impl TaleNodeApp {
                     self.do_export_bark_csv();
                     ui.close_menu();
                 }
+                if ui.button("Export Markdown (.md)...").clicked() {
+                    self.do_export_markdown();
+                    ui.close_menu();
+                }
+                if ui.button("Export Word (.rtf)...").clicked() {
+                    self.do_export_rtf();
+                    ui.close_menu();
+                }
                 if ui.button("Batch Assign Audio...").clicked() {
                     self.audio_manager.open = true;
                     ui.close_menu();
