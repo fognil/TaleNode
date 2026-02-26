@@ -2,6 +2,7 @@ mod async_handlers;
 pub mod async_runtime;
 mod bark_handlers;
 mod canvas;
+mod canvas_tooltip;
 mod collab_handlers;
 mod confirm;
 mod context_menu;

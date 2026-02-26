@@ -67,8 +67,11 @@ fn node_body_height(node: &Node) -> f32 {
 
 /// Get the bounding rect of a node in canvas coordinates.
 pub fn node_rect(node: &Node) -> Rect {
-    let body_h = node_body_height(node);
-    let total_h = NODE_HEADER_HEIGHT + body_h;
+    let total_h = if node.collapsed {
+        NODE_HEADER_HEIGHT
+    } else {
+        NODE_HEADER_HEIGHT + node_body_height(node)
+    };
     Rect::from_min_size(
         Pos2::new(node.position[0], node.position[1]),
         Vec2::new(NODE_WIDTH, total_h),
@@ -82,8 +85,19 @@ pub fn port_position(node: &Node, port_index: usize, is_output: bool) -> Pos2 {
     } else {
         node.position[0]
     };
-    let y = node.position[1] + NODE_PORT_Y_START + port_index as f32 * NODE_PORT_Y_SPACING;
+    let y = if node.collapsed {
+        node.position[1] + NODE_HEADER_HEIGHT * 0.5
+    } else {
+        node.position[1] + NODE_PORT_Y_START + port_index as f32 * NODE_PORT_Y_SPACING
+    };
     Pos2::new(x, y)
+}
+
+/// Clickable collapse toggle rect in canvas coordinates (triangle area in header).
+pub fn collapse_toggle_rect(node: &Node) -> Rect {
+    let x = node.position[0] + 2.0;
+    let y = node.position[1] + 2.0;
+    Rect::from_min_size(Pos2::new(x, y), Vec2::new(22.0, NODE_HEADER_HEIGHT - 4.0))
 }
 
 /// Draw a single node on the canvas.
@@ -112,36 +126,50 @@ pub fn draw_node(
     let body_color = Color32::from_rgb(50, 50, 50);
     let rounding = CornerRadius::same(NODE_ROUNDING);
 
-    // Node body background
-    painter.rect_filled(screen_rect, rounding, body_color);
-
     // Node header
     let header_rect = Rect::from_min_size(
         screen_rect.min,
         Vec2::new(screen_rect.width(), NODE_HEADER_HEIGHT * canvas.zoom),
     );
-    painter.rect_filled(
-        header_rect,
-        CornerRadius { nw: NODE_ROUNDING, ne: NODE_ROUNDING, sw: 0, se: 0 },
-        color,
-    );
 
-    // Title text
+    if node.collapsed {
+        // Collapsed: header only with full rounding
+        painter.rect_filled(screen_rect, rounding, color);
+    } else {
+        // Expanded: body background + header on top
+        painter.rect_filled(screen_rect, rounding, body_color);
+        painter.rect_filled(
+            header_rect,
+            CornerRadius { nw: NODE_ROUNDING, ne: NODE_ROUNDING, sw: 0, se: 0 },
+            color,
+        );
+    }
+
+    // Collapse toggle triangle
+    draw_collapse_triangle(painter, node, canvas, &header_rect);
+
+    // Title text (shifted right to make room for triangle)
     let title = node.title();
     let font_size = 14.0 * canvas.zoom;
+    let title_center = Pos2::new(
+        header_rect.center().x + 8.0 * canvas.zoom,
+        header_rect.center().y,
+    );
     painter.text(
-        header_rect.center(),
+        title_center,
         egui::Align2::CENTER_CENTER,
         title,
         FontId::proportional(font_size),
         Color32::WHITE,
     );
 
-    // Body content (type-specific — delegated to node_body module)
-    draw_node_body(painter, node, canvas, &screen_rect, &header_rect);
+    if !node.collapsed {
+        // Body content (type-specific — delegated to node_body module)
+        draw_node_body(painter, node, canvas, &screen_rect, &header_rect);
 
-    // Draw ports
-    draw_ports(painter, node, canvas, color, hovered_port);
+        // Draw ports
+        draw_ports(painter, node, canvas, color, hovered_port);
+    }
 
     // Border
     draw_border(
@@ -159,6 +187,35 @@ pub fn draw_node(
         );
         painter.circle_filled(badge_pos, badge_radius, badge_color);
     }
+}
+
+/// Draw the collapse/expand triangle indicator in the header.
+fn draw_collapse_triangle(
+    painter: &egui::Painter,
+    node: &Node,
+    canvas: &CanvasState,
+    header_rect: &Rect,
+) {
+    let size = 6.0 * canvas.zoom;
+    let cx = header_rect.min.x + 12.0 * canvas.zoom;
+    let cy = header_rect.center().y;
+    let points = if node.collapsed {
+        // Right-pointing triangle ▸
+        vec![
+            Pos2::new(cx - size * 0.4, cy - size),
+            Pos2::new(cx + size * 0.6, cy),
+            Pos2::new(cx - size * 0.4, cy + size),
+        ]
+    } else {
+        // Down-pointing triangle ▾
+        vec![
+            Pos2::new(cx - size, cy - size * 0.4),
+            Pos2::new(cx + size, cy - size * 0.4),
+            Pos2::new(cx, cy + size * 0.6),
+        ]
+    };
+    let color = Color32::from_rgba_premultiplied(255, 255, 255, 200);
+    painter.add(egui::Shape::convex_polygon(points, color, Stroke::NONE));
 }
 
 #[allow(clippy::too_many_arguments)]

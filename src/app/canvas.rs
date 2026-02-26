@@ -5,6 +5,7 @@ use crate::model::port::{PortDirection, PortId};
 use crate::ui::connection_renderer::{draw_bezier_wire, draw_connections};
 use crate::ui::node_widget::{self, draw_node, PORT_RADIUS};
 
+use super::canvas_tooltip::node_tooltip_text;
 use super::{DragWire, InteractionState, TaleNodeApp};
 
 impl TaleNodeApp {
@@ -28,6 +29,10 @@ impl TaleNodeApp {
         let hit_radius = (PORT_RADIUS + 4.0) * self.canvas.zoom;
 
         for node in self.graph.nodes.values() {
+            // Skip ports on collapsed nodes — they aren't visible
+            if node.collapsed {
+                continue;
+            }
             for (i, port) in node.outputs.iter().enumerate() {
                 let port_canvas = node_widget::port_position(node, i, true);
                 let port_screen = self.canvas.canvas_to_screen(port_canvas);
@@ -303,11 +308,26 @@ impl TaleNodeApp {
             }
         }
 
-        // Click to select node or deselect on empty space
+        // Click to toggle collapse, select node, or deselect on empty space
         if response.clicked() && matches!(self.interaction, InteractionState::Idle) {
+            let mut toggled = false;
             if let Some(node_id) = self.node_at_screen_pos(pointer_pos) {
-                self.selected_nodes.clear();
-                self.selected_nodes.push(node_id);
+                // Check if click hit the collapse toggle triangle
+                if let Some(node) = self.graph.nodes.get(&node_id) {
+                    let toggle_canvas = node_widget::collapse_toggle_rect(node);
+                    let toggle_screen = self.canvas.canvas_rect_to_screen(toggle_canvas);
+                    if toggle_screen.contains(pointer_pos) {
+                        self.snapshot();
+                        if let Some(node) = self.graph.nodes.get_mut(&node_id) {
+                            node.collapsed = !node.collapsed;
+                        }
+                        toggled = true;
+                    }
+                }
+                if !toggled {
+                    self.selected_nodes.clear();
+                    self.selected_nodes.push(node_id);
+                }
             } else {
                 self.selected_nodes.clear();
             }
@@ -351,46 +371,5 @@ impl TaleNodeApp {
             }
         }
         self.selected_nodes = new_ids;
-    }
-}
-
-/// Build tooltip text for a node (shows key content).
-fn node_tooltip_text(node: &crate::model::node::Node) -> String {
-    use crate::model::node::NodeType;
-    match &node.node_type {
-        NodeType::Dialogue(data) => {
-            let speaker = if data.speaker_name.is_empty() {
-                String::new()
-            } else {
-                format!("[{}] ", data.speaker_name)
-            };
-            format!("{}{}", speaker, data.text)
-        }
-        NodeType::Choice(data) => {
-            let mut s = data.prompt.clone();
-            for (i, c) in data.choices.iter().enumerate() {
-                s.push_str(&format!("\n  {}. {}", i + 1, c.text));
-            }
-            s
-        }
-        NodeType::Condition(data) => {
-            format!("{} {:?} {:?}", data.variable_name, data.operator, data.value)
-        }
-        NodeType::Event(data) => {
-            data.actions
-                .iter()
-                .map(|a| format!("{} = {:?}", a.key, a.value))
-                .collect::<Vec<_>>()
-                .join("\n")
-        }
-        NodeType::End(data) => {
-            if data.tag.is_empty() {
-                "End".to_string()
-            } else {
-                format!("End: {}", data.tag)
-            }
-        }
-        NodeType::SubGraph(data) => format!("Sub-graph: {}", data.name),
-        _ => String::new(),
     }
 }
