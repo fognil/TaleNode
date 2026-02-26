@@ -146,6 +146,9 @@ pub enum EventActionType {
     RemoveItem,
     PlaySound,
     ModifyRelationship,
+    StartQuest,
+    CompleteObjective,
+    FailQuest,
     Custom(String),
 }
 

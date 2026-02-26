@@ -84,6 +84,12 @@ fn build_export(graph: &DialogueGraph, name: &str) -> ExportedDialogue {
             None
         },
         barks,
+        quests: graph.quests.iter().map(|q| ExportedQuest {
+            name: q.name.clone(), description: q.description.clone(),
+            objectives: q.objectives.iter().map(|o| ExportedObjective {
+                text: o.text.clone(), optional: o.optional,
+            }).collect(),
+        }).collect(),
     }
 }
 

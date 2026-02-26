@@ -227,6 +227,9 @@ fn action_type_str(at: &crate::model::node::EventActionType) -> &'static str {
         EventActionType::RemoveItem => "remove_item",
         EventActionType::PlaySound => "play_sound",
         EventActionType::ModifyRelationship => "modify_relationship",
+        EventActionType::StartQuest => "start_quest",
+        EventActionType::CompleteObjective => "complete_objective",
+        EventActionType::FailQuest => "fail_quest",
         EventActionType::Custom(_) => "custom",
     }
 }

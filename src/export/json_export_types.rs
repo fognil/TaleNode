@@ -16,6 +16,22 @@ pub struct ExportedDialogue {
     pub strings: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub barks: Vec<ExportedBarkGroup>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub quests: Vec<ExportedQuest>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExportedQuest {
+    pub name: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub description: String,
+    pub objectives: Vec<ExportedObjective>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExportedObjective {
+    pub text: String,
+    pub optional: bool,
 }
 
 #[derive(Debug, Serialize)]

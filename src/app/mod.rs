@@ -12,6 +12,7 @@ mod file_io_locale;
 mod menu;
 mod panel_handlers;
 mod panels;
+mod quest_handlers;
 mod search;
 pub mod settings;
 mod subgraph_nav;

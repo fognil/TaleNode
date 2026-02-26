@@ -2,15 +2,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use super::bark::BarkLine;
-use super::character::Character;
-use super::connection::Connection;
-use super::group::NodeGroup;
-use super::locale::LocaleSettings;
-use super::node::Node;
-use super::port::{PortDirection, PortId};
-use super::review::{NodeComment, ReviewStatus};
-use super::variable::Variable;
+use super::{bark::BarkLine, character::Character, connection::Connection, group::NodeGroup,
+    locale::LocaleSettings, node::Node, port::{PortDirection, PortId}, quest::Quest,
+    review::{NodeComment, ReviewStatus}, variable::Variable};
 
 /// The central data structure holding the entire dialogue graph.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,9 +27,10 @@ pub struct DialogueGraph {
     pub node_tags: HashMap<Uuid, Vec<String>>,
     #[serde(default)]
     pub locale: LocaleSettings,
-    /// Bark/ambient dialogue lines per character (keyed by character UUID).
     #[serde(default)]
     pub barks: HashMap<Uuid, Vec<BarkLine>>,
+    #[serde(default)]
+    pub quests: Vec<Quest>,
 }
 
 impl Default for DialogueGraph {
@@ -57,6 +52,7 @@ impl DialogueGraph {
             node_tags: HashMap::new(),
             locale: LocaleSettings::default(),
             barks: HashMap::new(),
+            quests: Vec::new(),
         }
     }
 
