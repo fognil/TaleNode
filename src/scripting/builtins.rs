@@ -24,6 +24,7 @@ pub fn eval_builtin(name: &str, args: &[VariableValue]) -> Result<VariableValue,
         "str" => builtin_str(args),
         "int" => builtin_int(args),
         "float" => builtin_float(args),
+        "pow" => builtin_pow(args),
         _ => Err(format!("Unknown function: {name}")),
     }
 }
@@ -213,6 +214,23 @@ fn builtin_float(args: &[VariableValue]) -> Result<VariableValue, String> {
     Ok(VariableValue::Float(f))
 }
 
+fn builtin_pow(args: &[VariableValue]) -> Result<VariableValue, String> {
+    expect_args("pow", args, 2)?;
+    match (&args[0], &args[1]) {
+        (VariableValue::Int(base), VariableValue::Int(exp)) if *exp >= 0 => {
+            let result = base
+                .checked_pow(*exp as u32)
+                .ok_or("Integer overflow in pow()")?;
+            Ok(VariableValue::Int(result))
+        }
+        _ => {
+            let base = to_f64_val(&args[0])?;
+            let exp = to_f64_val(&args[1])?;
+            Ok(VariableValue::Float(base.powf(exp)))
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -347,17 +365,10 @@ mod tests {
     }
 
     #[test]
-    fn unknown_function_error() {
+    fn error_cases() {
         let ctx = ScriptContext::default();
-        let expr = parse_expr("foobar(1)").unwrap();
-        assert!(eval_expr(&expr, &ctx).is_err());
-    }
-
-    #[test]
-    fn wrong_arg_count_error() {
-        let ctx = ScriptContext::default();
-        let expr = parse_expr("abs(1, 2)").unwrap();
-        assert!(eval_expr(&expr, &ctx).is_err());
+        assert!(eval_expr(&parse_expr("foobar(1)").unwrap(), &ctx).is_err());
+        assert!(eval_expr(&parse_expr("abs(1, 2)").unwrap(), &ctx).is_err());
     }
 
     #[test]
@@ -371,5 +382,14 @@ mod tests {
     fn function_in_arithmetic() {
         let ctx = ctx_with(&[("name", VariableValue::Text("Hero".to_string()))]);
         assert_eq!(eval("len(name) + 1", &ctx), VariableValue::Int(5));
+    }
+
+    #[test]
+    fn pow_int_and_float() {
+        let ctx = ScriptContext::default();
+        assert_eq!(eval("pow(2, 10)", &ctx), VariableValue::Int(1024));
+        assert_eq!(eval("pow(3, 0)", &ctx), VariableValue::Int(1));
+        assert_eq!(eval("pow(2.0, 0.5)", &ctx), VariableValue::Float(2.0_f64.sqrt()));
+        assert_eq!(eval("pow(4, -1)", &ctx), VariableValue::Float(0.25));
     }
 }
