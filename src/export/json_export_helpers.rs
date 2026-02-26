@@ -177,7 +177,7 @@ pub fn export_node_data(
                 .iter()
                 .map(|a| {
                     serde_json::json!({
-                        "action": format!("{:?}", a.action_type).to_lowercase(),
+                        "action": action_type_str(&a.action_type),
                         "key": a.key,
                         "value": variable_value_to_json(&a.value),
                     })
@@ -216,6 +216,18 @@ pub fn export_node_data(
                 "next": next,
             }))
         }
+    }
+}
+
+fn action_type_str(at: &crate::model::node::EventActionType) -> &'static str {
+    use crate::model::node::EventActionType;
+    match at {
+        EventActionType::SetVariable => "set_variable",
+        EventActionType::AddItem => "add_item",
+        EventActionType::RemoveItem => "remove_item",
+        EventActionType::PlaySound => "play_sound",
+        EventActionType::ModifyRelationship => "modify_relationship",
+        EventActionType::Custom(_) => "custom",
     }
 }
 

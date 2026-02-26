@@ -47,6 +47,16 @@ pub struct ExportedCharacter {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub portrait: Option<String>,
     pub color: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub relationships: Vec<ExportedRelationship>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExportedRelationship {
+    pub name: String,
+    pub default_value: i32,
+    pub min: i32,
+    pub max: i32,
 }
 
 #[derive(Debug, Serialize)]

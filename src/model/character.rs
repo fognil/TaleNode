@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use super::relationship::Relationship;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Character {
     pub id: Uuid,
@@ -12,6 +14,8 @@ pub struct Character {
     pub portrait_path: String,
     #[serde(default)]
     pub voice_id: Option<String>,
+    #[serde(default)]
+    pub relationships: Vec<Relationship>,
 }
 
 fn default_color() -> [u8; 4] {
@@ -26,6 +30,7 @@ impl Character {
             color: [74, 144, 217, 255], // default blue
             portrait_path: String::new(),
             voice_id: None,
+            relationships: Vec::new(),
         }
     }
 }

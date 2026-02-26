@@ -34,7 +34,7 @@ mod tests {
 
         // --- Characters (4) ---
         fn chr(name: &str, color: [u8; 4], portrait: &str) -> Character {
-            Character { id: uuid::Uuid::new_v4(), name: name.into(), color, portrait_path: portrait.into(), voice_id: None }
+            Character { id: uuid::Uuid::new_v4(), name: name.into(), color, portrait_path: portrait.into(), voice_id: None, relationships: Vec::new() }
         }
         let elder = chr("Elder Aldric", [74, 144, 217, 255], "portraits/elder.png");
         let merchant = chr("Merchant Bria", [217, 165, 74, 255], "portraits/merchant.png");

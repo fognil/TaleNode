@@ -10,6 +10,7 @@ pub mod node;
 pub mod node_types;
 pub mod port;
 pub mod project;
+pub mod relationship;
 pub mod review;
 pub mod template;
 pub mod variable;

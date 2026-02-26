@@ -30,20 +30,13 @@ fn build_export(graph: &DialogueGraph, name: &str) -> ExportedDialogue {
         .characters
         .iter()
         .map(|c| ExportedCharacter {
-            id: id_map
-                .get(&c.id)
-                .cloned()
-                .unwrap_or_else(|| c.id.to_string()),
+            id: id_map.get(&c.id).cloned().unwrap_or_else(|| c.id.to_string()),
             name: c.name.clone(),
-            portrait: if c.portrait_path.is_empty() {
-                None
-            } else {
-                Some(c.portrait_path.clone())
-            },
-            color: format!(
-                "#{:02X}{:02X}{:02X}",
-                c.color[0], c.color[1], c.color[2]
-            ),
+            portrait: if c.portrait_path.is_empty() { None } else { Some(c.portrait_path.clone()) },
+            color: format!("#{:02X}{:02X}{:02X}", c.color[0], c.color[1], c.color[2]),
+            relationships: c.relationships.iter().map(|r| ExportedRelationship {
+                name: r.name.clone(), default_value: r.value, min: r.min, max: r.max,
+            }).collect(),
         })
         .collect();
 

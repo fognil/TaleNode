@@ -161,39 +161,48 @@ pub fn show_left_panel(
                     if !available_voices.is_empty() {
                         ui.horizontal(|ui| {
                             ui.label("Voice:");
-                            let current_label = ch
-                                .voice_id
-                                .as_ref()
-                                .and_then(|vid| {
-                                    available_voices
-                                        .iter()
-                                        .find(|v| &v.voice_id == vid)
-                                        .map(|v| v.name.as_str())
-                                })
+                            let current_label = ch.voice_id.as_ref()
+                                .and_then(|vid| available_voices.iter()
+                                    .find(|v| &v.voice_id == vid).map(|v| v.name.as_str()))
                                 .unwrap_or("(none)");
                             egui::ComboBox::from_id_salt(format!("voice_{}", ch.id))
                                 .selected_text(current_label)
                                 .show_ui(ui, |ui| {
-                                    if ui
-                                        .selectable_label(ch.voice_id.is_none(), "(none)")
-                                        .clicked()
-                                    {
+                                    if ui.selectable_label(ch.voice_id.is_none(), "(none)").clicked() {
                                         ch.voice_id = None;
                                         snapshot_needed = true;
                                     }
                                     for voice in available_voices {
-                                        let selected = ch.voice_id.as_ref()
-                                            == Some(&voice.voice_id);
-                                        if ui
-                                            .selectable_label(selected, &voice.name)
-                                            .clicked()
-                                        {
+                                        let selected = ch.voice_id.as_ref() == Some(&voice.voice_id);
+                                        if ui.selectable_label(selected, &voice.name).clicked() {
                                             ch.voice_id = Some(voice.voice_id.clone());
                                             snapshot_needed = true;
                                         }
                                     }
                                 });
                         });
+                    }
+                    // Relationships section
+                    if !ch.relationships.is_empty() || ui.small_button("+ Relationship").clicked() {
+                        if ch.relationships.is_empty() {
+                            ch.relationships.push(crate::model::relationship::Relationship::new("Friendship"));
+                            snapshot_needed = true;
+                        }
+                        let mut remove_rel = None;
+                        for (ri, rel) in ch.relationships.iter_mut().enumerate() {
+                            ui.horizontal(|ui| {
+                                ui.label("  ");
+                                if ui.add(egui::TextEdit::singleline(&mut rel.name)
+                                    .desired_width(80.0)).gained_focus() { snapshot_needed = true; }
+                                if ui.add(egui::DragValue::new(&mut rel.value)
+                                    .range(rel.min..=rel.max)).drag_started() { snapshot_needed = true; }
+                                if ui.small_button("X").clicked() {
+                                    remove_rel = Some(ri);
+                                    snapshot_needed = true;
+                                }
+                            });
+                        }
+                        if let Some(ri) = remove_rel { ch.relationships.remove(ri); }
                     }
                 });
 

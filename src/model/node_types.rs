@@ -145,6 +145,7 @@ pub enum EventActionType {
     AddItem,
     RemoveItem,
     PlaySound,
+    ModifyRelationship,
     Custom(String),
 }
 
