@@ -78,6 +78,7 @@
 .node-badge--event     { background: #AB47BC; }
 .node-badge--random    { background: #9E9E9E; }
 .node-badge--end       { background: #F44336; }
+.node-badge--subgraph  { background: #00BCD4; }
 
 /* Keyboard shortcut styling */
 .shortcut-table td:first-child {

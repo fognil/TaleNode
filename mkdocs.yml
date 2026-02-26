@@ -47,6 +47,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.keys
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -85,6 +86,12 @@ nav:
     - Auto-Translation: user-guide/auto-translation.md
     - Voice Synthesis: user-guide/voice-synthesis.md
     - Collaboration: user-guide/collaboration.md
+    - AI Writing Assistant: user-guide/ai-writing.md
+    - World Database: user-guide/world-database.md
+    - Timeline / Cutscene: user-guide/timeline.md
+    - Extensions: user-guide/extensions.md
+    - Import Formats: user-guide/import.md
+    - Dock & Panel Layout: user-guide/dock-layout.md
     - Settings: user-guide/settings.md
     - File Operations: user-guide/file-operations.md
   - Export & Integration:

@@ -103,6 +103,27 @@ Replace works on the same text fields as search: dialogue text, speaker names, c
 !!! tip
     Replace operations support undo — press ++ctrl+z++ to revert any replacement.
 
+## Collapsed Nodes
+
+Nodes can be collapsed to show only their header, hiding the body and ports. This reduces visual clutter on busy canvases.
+
+- **Collapse**: Click the triangle indicator (▾) on the left side of the node header
+- **Expand**: Click the triangle again (▸) to restore the full node
+
+When collapsed:
+
+- The node shrinks to header-only height with full rounded corners
+- Body content (text preview, action list) and ports are hidden
+- Existing wires connect to the center of the header edges instead of individual ports
+- Port hit-testing is disabled — you cannot start or end new connections on a collapsed node
+
+!!! tip
+    Collapsing supports undo — press ++ctrl+z++ to revert a collapse/expand toggle.
+
+## Zoom to Fit
+
+Press ++f++ to automatically zoom and pan the canvas so that **all nodes** are visible on screen. This is useful after importing a graph or when you've lost track of nodes placed far apart.
+
 ## Background Color
 
 The canvas background is dark gray (`rgb(30, 30, 30)`) by default. Switch to light theme via **View > Light/Dark Theme**.

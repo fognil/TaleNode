@@ -60,9 +60,32 @@ See [Variables — Text Interpolation](variables.md#text-interpolation) for full
 
 A scrollable log shows all dialogue entries you've passed through during the session. This is useful for reviewing the full conversation after testing.
 
+## SubGraph Traversal
+
+SubGraph nodes are handled automatically during playtest:
+
+1. When the playtest reaches a SubGraph node, it **enters the child graph** and finds the child's Start node
+2. The playtest runs through the child graph normally (dialogue, choices, events, conditions)
+3. When the child graph reaches an End node, the playtest **exits back** to the parent graph and continues from the SubGraph node's output
+4. Nested SubGraphs work the same way — the playtest maintains a stack and can go multiple levels deep
+
+## Checkpoints
+
+You can save and restore playtest state at any point during a session:
+
+- **Save checkpoint**: Captures the current node, all variable values, and dialogue log
+- **Load checkpoint**: Restores a previously saved checkpoint and continues from that point
+- **Maximum**: Up to 20 checkpoints can be stored per session
+
+Checkpoints are useful for testing different branches from the same decision point without replaying the entire dialogue from the start.
+
+## Playtest Glow
+
+While playtesting, the currently active node displays a **pulsing green glow** on the canvas. This animated border makes it easy to spot which node the playtest is currently on, even in a large graph.
+
 ## Canvas Sync
 
-While playtesting, the currently active node is **selected and highlighted** on the canvas. The canvas does not auto-pan, but you can see which node is active by its selection highlight.
+While playtesting, the currently active node is **selected and highlighted** on the canvas with the playtest glow effect. The canvas does not auto-pan, but you can see which node is active by its green pulsing border.
 
 ## Tips
 

@@ -160,8 +160,16 @@ Imports a Chat Mapper JSON file.
 
 Imports an articy:draft XML export file.
 
+### Import from Ink
+
+- **Menu**: File > Import from Ink...
+
+Imports an Inkle Ink `.ink` file. Knots and stitches are converted to nodes, choices become Choice nodes, diverts become connections, and `VAR` declarations become project variables.
+
 !!! note
     Importing replaces the current graph. The operation supports undo — press ++ctrl+z++ to revert.
+
+For detailed information on each import format, see [Import Formats](import.md).
 
 ## Tips
 
