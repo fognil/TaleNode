@@ -206,7 +206,7 @@ impl Node {
     pub fn new_subgraph(position: [f32; 2]) -> Self {
         Self {
             id: Uuid::new_v4(),
-            node_type: NodeType::SubGraph(SubGraphData::default()),
+            node_type: NodeType::SubGraph(Box::default()),
             position,
             collapsed: false,
             inputs: vec![Port::input()],

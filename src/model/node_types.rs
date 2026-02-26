@@ -16,7 +16,7 @@ pub enum NodeType {
     Event(EventData),
     Random(RandomData),
     End(EndData),
-    SubGraph(SubGraphData),
+    SubGraph(Box<SubGraphData>),
 }
 
 // --- Dialogue ---
