@@ -20,3 +20,4 @@ pub mod script_panel;
 pub mod template_panel;
 pub mod version_panel;
 pub mod voice_panel;
+pub mod writing_panel;

@@ -247,6 +247,7 @@ impl TaleNodeApp {
                     (DockTab::Collaboration, "Collaboration"),
                     (DockTab::Barks, "Bark Dialogue"),
                     (DockTab::Quests, "Quests"),
+                    (DockTab::WritingAssistant, "AI Writing Assistant"),
                 ];
                 for &(tab, label) in toggles {
                     let mut open = self.dock_has_tab(tab);

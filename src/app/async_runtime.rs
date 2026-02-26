@@ -24,6 +24,18 @@ pub enum AsyncResult {
     CollabMessage(String),
     /// Collaboration error.
     CollabError(String),
+    /// AI writing suggestions ready.
+    WritingSuggestionsReady {
+        node_id: uuid::Uuid,
+        suggestions: Vec<String>,
+    },
+    /// AI tone check completed.
+    ToneCheckReady {
+        node_id: uuid::Uuid,
+        report: String,
+    },
+    /// AI writing operation failed.
+    WritingError(String),
 }
 
 /// Metadata about an ElevenLabs voice.

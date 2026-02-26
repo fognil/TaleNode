@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 use super::theme::ThemeConfig;
+use crate::integrations::ai_writing::{self, AIProvider};
 
 /// Persistent application settings stored at ~/.talenode/settings.json.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,6 +19,14 @@ pub struct AppSettings {
     pub collab_default_port: u16,
     #[serde(default)]
     pub theme: ThemeConfig,
+    #[serde(default)]
+    pub ai_provider: AIProvider,
+    #[serde(default)]
+    pub ai_api_key: Option<String>,
+    #[serde(default = "ai_writing::default_ai_base_url")]
+    pub ai_base_url: String,
+    #[serde(default = "ai_writing::default_ai_model")]
+    pub ai_model: String,
 }
 
 fn default_collab_port() -> u16 {
@@ -33,6 +42,10 @@ impl Default for AppSettings {
             collab_username: whoami().unwrap_or_else(|| "User".to_string()),
             collab_default_port: default_collab_port(),
             theme: ThemeConfig::default(),
+            ai_provider: AIProvider::default(),
+            ai_api_key: None,
+            ai_base_url: ai_writing::default_ai_base_url(),
+            ai_model: ai_writing::default_ai_model(),
         }
     }
 }
@@ -151,6 +164,47 @@ pub fn show_settings_window(
                     });
                 });
 
+            egui::CollapsingHeader::new("AI Writing Assistant")
+                .default_open(true)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Provider:");
+                        egui::ComboBox::from_id_salt("ai_provider")
+                            .selected_text(settings.ai_provider.label())
+                            .show_ui(ui, |ui| {
+                                for provider in AIProvider::ALL {
+                                    ui.selectable_value(
+                                        &mut settings.ai_provider,
+                                        provider,
+                                        provider.label(),
+                                    );
+                                }
+                            });
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("API Key:");
+                        let mut key = settings.ai_api_key.clone().unwrap_or_default();
+                        if ui.add(
+                            egui::TextEdit::singleline(&mut key)
+                                .password(true)
+                                .desired_width(250.0),
+                        ).changed() {
+                            settings.ai_api_key =
+                                if key.is_empty() { None } else { Some(key) };
+                        }
+                    });
+                    if settings.ai_provider == AIProvider::OpenAI {
+                        ui.horizontal(|ui| {
+                            ui.label("Base URL:");
+                            ui.text_edit_singleline(&mut settings.ai_base_url);
+                        });
+                    }
+                    ui.horizontal(|ui| {
+                        ui.label("Model:");
+                        ui.text_edit_singleline(&mut settings.ai_model);
+                    });
+                });
+
             egui::CollapsingHeader::new("Collaboration")
                 .default_open(true)
                 .show(ui, |ui| {
@@ -185,6 +239,10 @@ mod tests {
         assert!(!s.deepl_use_pro);
         assert!(s.elevenlabs_api_key.is_none());
         assert_eq!(s.collab_default_port, 9847);
+        assert_eq!(s.ai_provider, AIProvider::OpenAI);
+        assert!(s.ai_api_key.is_none());
+        assert_eq!(s.ai_base_url, "https://api.openai.com/v1");
+        assert_eq!(s.ai_model, "gpt-4o");
     }
 
     #[test]
@@ -241,6 +299,10 @@ mod tests {
             collab_username: "Bob".to_string(),
             collab_default_port: 12345,
             theme: ThemeConfig::default(),
+            ai_provider: AIProvider::Anthropic,
+            ai_api_key: Some("sk-ant-test".to_string()),
+            ai_base_url: "https://custom.api.com/v1".to_string(),
+            ai_model: "claude-sonnet-4-20250514".to_string(),
         };
         let json = serde_json::to_string(&s).unwrap();
         let loaded: AppSettings = serde_json::from_str(&json).unwrap();
@@ -249,5 +311,8 @@ mod tests {
         assert_eq!(loaded.elevenlabs_api_key, s.elevenlabs_api_key);
         assert_eq!(loaded.collab_username, "Bob");
         assert_eq!(loaded.collab_default_port, 12345);
+        assert_eq!(loaded.ai_provider, AIProvider::Anthropic);
+        assert_eq!(loaded.ai_api_key.as_deref(), Some("sk-ant-test"));
+        assert_eq!(loaded.ai_model, "claude-sonnet-4-20250514");
     }
 }

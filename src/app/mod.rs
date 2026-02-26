@@ -19,6 +19,7 @@ mod subgraph_nav;
 mod templates;
 pub(super) mod theme;
 mod voice_handlers;
+mod writing_handlers;
 
 use egui::Pos2;
 use std::time::Instant;
@@ -112,6 +113,11 @@ pub struct TaleNodeApp {
     collab_host_input: String,
     collab_port_input: u16,
     bark_selected_character: Option<Uuid>,
+    writing_in_progress: bool,
+    writing_suggestions: Option<(Uuid, Vec<String>)>,
+    writing_tone_report: Option<(Uuid, String)>,
+    writing_instruction: String,
+    writing_choice_count: usize,
 }
 
 impl TaleNodeApp {
@@ -176,6 +182,11 @@ impl TaleNodeApp {
             collab_host_input: "127.0.0.1".to_string(),
             collab_port_input: 9847,
             bark_selected_character: None,
+            writing_in_progress: false,
+            writing_suggestions: None,
+            writing_tone_report: None,
+            writing_instruction: String::new(),
+            writing_choice_count: 3,
         }
     }
 

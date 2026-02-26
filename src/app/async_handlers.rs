@@ -70,6 +70,32 @@ impl TaleNodeApp {
                     self.status_message =
                         Some((format!("Collab error: {e}"), Instant::now(), true));
                 }
+                AsyncResult::WritingSuggestionsReady {
+                    node_id,
+                    suggestions,
+                } => {
+                    self.writing_suggestions = Some((node_id, suggestions));
+                    self.writing_in_progress = false;
+                    self.status_message = Some((
+                        "Suggestions ready".to_string(),
+                        Instant::now(),
+                        false,
+                    ));
+                }
+                AsyncResult::ToneCheckReady { node_id, report } => {
+                    self.writing_tone_report = Some((node_id, report));
+                    self.writing_in_progress = false;
+                    self.status_message = Some((
+                        "Tone check complete".to_string(),
+                        Instant::now(),
+                        false,
+                    ));
+                }
+                AsyncResult::WritingError(e) => {
+                    self.writing_in_progress = false;
+                    self.status_message =
+                        Some((format!("AI writing error: {e}"), Instant::now(), true));
+                }
             }
         }
     }

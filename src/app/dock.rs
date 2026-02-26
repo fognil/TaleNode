@@ -22,6 +22,7 @@ pub(super) enum DockTab {
     Collaboration,
     Barks,
     Quests,
+    WritingAssistant,
 }
 
 /// Which dock region a tab belongs to (for smart placement).
@@ -52,6 +53,7 @@ impl DockTab {
             Self::Collaboration => "Collaboration",
             Self::Barks => "Barks",
             Self::Quests => "Quests",
+            Self::WritingAssistant => "AI Writer",
         }
     }
 
@@ -65,6 +67,7 @@ impl DockTab {
             Self::Collaboration => TabRegion::Bottom,
             Self::Barks => TabRegion::Bottom,
             Self::Quests => TabRegion::Bottom,
+            Self::WritingAssistant => TabRegion::Right,
             _ => TabRegion::Bottom,
         }
     }
@@ -134,6 +137,7 @@ impl TabViewer for AppTabViewer<'_> {
             DockTab::Collaboration => self.app.render_collab_tab(ui),
             DockTab::Barks => self.app.render_barks_tab(ui),
             DockTab::Quests => self.app.render_quests_tab(ui),
+            DockTab::WritingAssistant => self.app.render_writing_assistant_tab(ui),
         }
     }
 
