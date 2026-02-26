@@ -10,10 +10,10 @@ pub(super) enum TextSegment {
     Literal(String),
     /// An expression to evaluate and insert: `{expr}`.
     Expression(Expr),
-    /// Conditional block: `{if cond}...{else}...{/if}`.
+    /// Conditional block: `{if cond}...{elseif cond}...{else}...{/if}`.
     Conditional {
-        condition: Expr,
-        then_text: Vec<TextSegment>,
+        /// Chain of (condition, body) — first is `if`, rest are `elseif`.
+        branches: Vec<(Expr, Vec<TextSegment>)>,
         else_text: Vec<TextSegment>,
     },
     /// Sequence block `{~a|b|c}`: shows items in order, sticks on last.
@@ -22,6 +22,8 @@ pub(super) enum TextSegment {
     Cycle { items: Vec<Vec<TextSegment>> },
     /// Shuffle block `{!a|b|c}`: random pick each time.
     Shuffle { items: Vec<Vec<TextSegment>> },
+    /// Once-only block `{?a|b|c}`: shows each item once in order, then empty.
+    OnceOnly { items: Vec<Vec<TextSegment>> },
     /// Inline set command: `<<set var = expr>>`.
     SetCommand { var_name: String, expr: Expr },
     /// Generic command marker: `<<name args>>` (produces no output in playtest).
@@ -39,16 +41,21 @@ fn interpolate(segments: &[TextSegment], ctx: &mut ScriptContext, seq_idx: &mut 
                 Err(_) => result.push_str("???"),
             },
             TextSegment::Conditional {
-                condition,
-                then_text,
+                branches,
                 else_text,
             } => {
-                let cond_val = eval_expr(condition, ctx)
-                    .map(|v| eval_to_bool(&v))
-                    .unwrap_or(false);
-                if cond_val {
-                    result.push_str(&interpolate(then_text, ctx, seq_idx));
-                } else {
+                let mut matched = false;
+                for (cond, body) in branches {
+                    let cond_val = eval_expr(cond, ctx)
+                        .map(|v| eval_to_bool(&v))
+                        .unwrap_or(false);
+                    if cond_val {
+                        result.push_str(&interpolate(body, ctx, seq_idx));
+                        matched = true;
+                        break;
+                    }
+                }
+                if !matched {
                     result.push_str(&interpolate(else_text, ctx, seq_idx));
                 }
             }
@@ -72,6 +79,14 @@ fn interpolate(segments: &[TextSegment], ctx: &mut ScriptContext, seq_idx: &mut 
                     .subsec_nanos() as usize;
                 let idx = seed % items.len();
                 result.push_str(&interpolate(&items[idx], ctx, seq_idx));
+            }
+            TextSegment::OnceOnly { items } => {
+                let count = ctx.next_seq_count(*seq_idx);
+                *seq_idx += 1;
+                if count < items.len() {
+                    result.push_str(&interpolate(&items[count], ctx, seq_idx));
+                }
+                // Once all items exhausted, produce nothing
             }
             TextSegment::SetCommand { var_name, expr } => {
                 if let Ok(val) = eval_expr(expr, ctx) {
@@ -312,5 +327,61 @@ mod tests {
         assert_eq!(interpolate_text(text, &mut ctx), "first");
         ctx.set_seq_scope("node_a");
         assert_eq!(interpolate_text(text, &mut ctx), "second");
+    }
+
+    #[test]
+    fn elseif_first_branch() {
+        let mut ctx = ctx_with(&[("gold", VariableValue::Int(200))]);
+        let text = "{if gold >= 100}Rich!{elseif gold >= 50}Okay.{else}Poor.{/if}";
+        assert_eq!(interpolate_text(text, &mut ctx), "Rich!");
+    }
+
+    #[test]
+    fn elseif_second_branch() {
+        let mut ctx = ctx_with(&[("gold", VariableValue::Int(75))]);
+        let text = "{if gold >= 100}Rich!{elseif gold >= 50}Okay.{else}Poor.{/if}";
+        assert_eq!(interpolate_text(text, &mut ctx), "Okay.");
+    }
+
+    #[test]
+    fn elseif_else_branch() {
+        let mut ctx = ctx_with(&[("gold", VariableValue::Int(10))]);
+        let text = "{if gold >= 100}Rich!{elseif gold >= 50}Okay.{else}Poor.{/if}";
+        assert_eq!(interpolate_text(text, &mut ctx), "Poor.");
+    }
+
+    #[test]
+    fn elseif_chain_no_else() {
+        let mut ctx = ctx_with(&[("x", VariableValue::Int(0))]);
+        let text = "{if x == 1}one{elseif x == 2}two{elseif x == 3}three{/if}";
+        assert_eq!(interpolate_text(text, &mut ctx), "");
+    }
+
+    #[test]
+    fn elseif_multiple_branches() {
+        let mut ctx = ctx_with(&[("x", VariableValue::Int(3))]);
+        let text = "{if x == 1}one{elseif x == 2}two{elseif x == 3}three{/if}";
+        assert_eq!(interpolate_text(text, &mut ctx), "three");
+    }
+
+    #[test]
+    fn once_only_shows_each_then_empty() {
+        let mut ctx = ScriptContext::default();
+        ctx.set_seq_scope("test_node");
+        let text = "{?first|second|third}";
+        assert_eq!(interpolate_text(text, &mut ctx), "first");
+        assert_eq!(interpolate_text(text, &mut ctx), "second");
+        assert_eq!(interpolate_text(text, &mut ctx), "third");
+        assert_eq!(interpolate_text(text, &mut ctx), "");
+        assert_eq!(interpolate_text(text, &mut ctx), "");
+    }
+
+    #[test]
+    fn once_only_single_item() {
+        let mut ctx = ScriptContext::default();
+        ctx.set_seq_scope("test_node");
+        let text = "{?Hello!}";
+        assert_eq!(interpolate_text(text, &mut ctx), "Hello!");
+        assert_eq!(interpolate_text(text, &mut ctx), "");
     }
 }
