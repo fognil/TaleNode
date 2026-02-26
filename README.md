@@ -1,4 +1,5 @@
 <p align="center">
+  <img src="talenode.png" alt="TaleNode logo" width="128">
   <h1 align="center">TaleNode</h1>
   <p align="center">
     <strong>Node-based dialogue & quest editor for game developers</strong><br>
