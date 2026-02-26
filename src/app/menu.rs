@@ -247,6 +247,7 @@ impl TaleNodeApp {
                     (DockTab::Collaboration, "Collaboration"),
                     (DockTab::Barks, "Bark Dialogue"),
                     (DockTab::Quests, "Quests"),
+                    (DockTab::WorldDatabase, "World Database"),
                     (DockTab::WritingAssistant, "AI Writing Assistant"),
                 ];
                 for &(tab, label) in toggles {

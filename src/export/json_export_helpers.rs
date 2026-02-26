@@ -247,6 +247,31 @@ pub fn build_bark_groups(graph: &DialogueGraph) -> Vec<super::json_export_types:
     }).collect()
 }
 
+/// Build exported world entities.
+pub fn build_world_entities(
+    graph: &DialogueGraph,
+) -> Vec<super::json_export_types::ExportedWorldEntity> {
+    use super::json_export_types::{ExportedEntityProperty, ExportedWorldEntity};
+    graph
+        .world_entities
+        .iter()
+        .map(|e| ExportedWorldEntity {
+            name: e.name.clone(),
+            category: e.category.label().to_string(),
+            description: e.description.clone(),
+            tags: e.tags.clone(),
+            properties: e
+                .properties
+                .iter()
+                .map(|p| ExportedEntityProperty {
+                    key: p.key.clone(),
+                    value: p.value.clone(),
+                })
+                .collect(),
+        })
+        .collect()
+}
+
 /// Map a UUID-based locale key to a readable key using the node's readable ID.
 pub fn readable_key_for_locale(
     key: &str,

@@ -19,6 +19,7 @@ mod subgraph_nav;
 mod templates;
 pub(super) mod theme;
 mod voice_handlers;
+mod world_handlers;
 mod writing_handlers;
 
 use egui::Pos2;
@@ -113,6 +114,7 @@ pub struct TaleNodeApp {
     collab_host_input: String,
     collab_port_input: u16,
     bark_selected_character: Option<Uuid>,
+    world_category_filter: Option<crate::model::world::EntityCategory>,
     writing_in_progress: bool,
     writing_suggestions: Option<(Uuid, Vec<String>)>,
     writing_tone_report: Option<(Uuid, String)>,
@@ -182,6 +184,7 @@ impl TaleNodeApp {
             collab_host_input: "127.0.0.1".to_string(),
             collab_port_input: 9847,
             bark_selected_character: None,
+            world_category_filter: None,
             writing_in_progress: false,
             writing_suggestions: None,
             writing_tone_report: None,

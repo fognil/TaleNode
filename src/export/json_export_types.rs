@@ -18,6 +18,8 @@ pub struct ExportedDialogue {
     pub barks: Vec<ExportedBarkGroup>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub quests: Vec<ExportedQuest>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub world_entities: Vec<ExportedWorldEntity>,
 }
 
 #[derive(Debug, Serialize)]
@@ -73,6 +75,24 @@ pub struct ExportedRelationship {
     pub default_value: i32,
     pub min: i32,
     pub max: i32,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExportedWorldEntity {
+    pub name: String,
+    pub category: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub description: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub properties: Vec<ExportedEntityProperty>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExportedEntityProperty {
+    pub key: String,
+    pub value: String,
 }
 
 #[derive(Debug, Serialize)]
