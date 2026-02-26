@@ -36,6 +36,10 @@ pub enum AsyncResult {
     },
     /// AI writing operation failed.
     WritingError(String),
+    /// AI model list fetched from provider API.
+    ModelsLoaded(Vec<String>),
+    /// Failed to fetch AI model list.
+    ModelsError(String),
 }
 
 /// Metadata about an ElevenLabs voice.

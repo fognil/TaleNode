@@ -86,12 +86,20 @@ impl AppSettings {
     }
 }
 
-/// Draw the settings window. Returns `true` if the window is still open.
+/// Action requested by the settings window.
+pub enum SettingsAction {
+    FetchModels,
+}
+
+/// Draw the settings window. Returns an optional action for the caller to handle.
 pub fn show_settings_window(
     ctx: &egui::Context,
     settings: &mut AppSettings,
     open: &mut bool,
-) {
+    available_models: &[String],
+    models_loading: bool,
+) -> Option<SettingsAction> {
+    let mut action = None;
     egui::Window::new("Settings")
         .open(open)
         .resizable(true)
@@ -169,6 +177,7 @@ pub fn show_settings_window(
                 .show(ui, |ui| {
                     ui.horizontal(|ui| {
                         ui.label("Provider:");
+                        let prev = settings.ai_provider;
                         egui::ComboBox::from_id_salt("ai_provider")
                             .selected_text(settings.ai_provider.label())
                             .show_ui(ui, |ui| {
@@ -180,6 +189,22 @@ pub fn show_settings_window(
                                     );
                                 }
                             });
+                        if settings.ai_provider != prev {
+                            match settings.ai_provider {
+                                AIProvider::OpenAI => {
+                                    settings.ai_base_url = ai_writing::default_ai_base_url();
+                                    settings.ai_model = ai_writing::default_ai_model();
+                                }
+                                AIProvider::Anthropic => {
+                                    settings.ai_base_url = String::new();
+                                    settings.ai_model = "claude-sonnet-4-6".to_string();
+                                }
+                                AIProvider::Gemini => {
+                                    settings.ai_base_url = ai_writing::default_gemini_base_url();
+                                    settings.ai_model = ai_writing::default_gemini_model();
+                                }
+                            }
+                        }
                     });
                     ui.horizontal(|ui| {
                         ui.label("API Key:");
@@ -193,7 +218,7 @@ pub fn show_settings_window(
                                 if key.is_empty() { None } else { Some(key) };
                         }
                     });
-                    if settings.ai_provider == AIProvider::OpenAI {
+                    if matches!(settings.ai_provider, AIProvider::OpenAI | AIProvider::Gemini) {
                         ui.horizontal(|ui| {
                             ui.label("Base URL:");
                             ui.text_edit_singleline(&mut settings.ai_base_url);
@@ -201,7 +226,37 @@ pub fn show_settings_window(
                     }
                     ui.horizontal(|ui| {
                         ui.label("Model:");
-                        ui.text_edit_singleline(&mut settings.ai_model);
+                        if available_models.is_empty() {
+                            ui.text_edit_singleline(&mut settings.ai_model);
+                        } else {
+                            egui::ComboBox::from_id_salt("ai_model_select")
+                                .selected_text(&settings.ai_model)
+                                .show_ui(ui, |ui| {
+                                    for model in available_models {
+                                        ui.selectable_value(
+                                            &mut settings.ai_model,
+                                            model.clone(),
+                                            model,
+                                        );
+                                    }
+                                });
+                        }
+                    });
+                    ui.horizontal(|ui| {
+                        let has_key = settings
+                            .ai_api_key
+                            .as_ref()
+                            .is_some_and(|k| !k.is_empty());
+                        let enabled = has_key && !models_loading;
+                        if ui
+                            .add_enabled(enabled, egui::Button::new("Fetch Models"))
+                            .clicked()
+                        {
+                            action = Some(SettingsAction::FetchModels);
+                        }
+                        if models_loading {
+                            ui.spinner();
+                        }
                     });
                 });
 
@@ -226,6 +281,7 @@ pub fn show_settings_window(
                 settings.save();
             }
         });
+    action
 }
 
 #[cfg(test)]
@@ -314,5 +370,15 @@ mod tests {
         assert_eq!(loaded.ai_provider, AIProvider::Anthropic);
         assert_eq!(loaded.ai_api_key.as_deref(), Some("sk-ant-test"));
         assert_eq!(loaded.ai_model, "claude-sonnet-4-20250514");
+
+        // Verify Gemini variant roundtrips
+        let mut s2 = AppSettings::default();
+        s2.ai_provider = AIProvider::Gemini;
+        s2.ai_base_url = ai_writing::default_gemini_base_url();
+        s2.ai_model = ai_writing::default_gemini_model();
+        let json2 = serde_json::to_string(&s2).unwrap();
+        let loaded2: AppSettings = serde_json::from_str(&json2).unwrap();
+        assert_eq!(loaded2.ai_provider, AIProvider::Gemini);
+        assert_eq!(loaded2.ai_model, "gemini-2.0-flash");
     }
 }

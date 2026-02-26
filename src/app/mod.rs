@@ -124,6 +124,8 @@ pub struct TaleNodeApp {
     writing_tone_report: Option<(Uuid, String)>,
     writing_instruction: String,
     writing_choice_count: usize,
+    available_ai_models: Vec<String>,
+    ai_models_loading: bool,
 }
 
 impl TaleNodeApp {
@@ -196,6 +198,8 @@ impl TaleNodeApp {
             writing_tone_report: None,
             writing_instruction: String::new(),
             writing_choice_count: 3,
+            available_ai_models: Vec::new(),
+            ai_models_loading: false,
         }
     }
 
@@ -276,7 +280,16 @@ impl eframe::App for TaleNodeApp {
 
         // Settings window (floating)
         if self.settings_open {
-            settings::show_settings_window(ctx, &mut self.settings, &mut self.settings_open);
+            let action = settings::show_settings_window(
+                ctx,
+                &mut self.settings,
+                &mut self.settings_open,
+                &self.available_ai_models,
+                self.ai_models_loading,
+            );
+            if let Some(settings::SettingsAction::FetchModels) = action {
+                self.start_fetch_ai_models();
+            }
         }
 
         // Dockable panel layout (replaces all SidePanel/CentralPanel calls)

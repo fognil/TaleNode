@@ -255,4 +255,64 @@ impl TaleNodeApp {
                 .push(crate::model::port::Port::output_with_label(text));
         }
     }
+
+    /// Spawn an async task to fetch available models from the current AI provider.
+    pub(super) fn start_fetch_ai_models(&mut self) {
+        let api_key = match &self.settings.ai_api_key {
+            Some(k) if !k.is_empty() => k.clone(),
+            _ => {
+                self.status_message = Some((
+                    "Set an API key first".to_string(),
+                    std::time::Instant::now(),
+                    true,
+                ));
+                return;
+            }
+        };
+
+        let provider = self.settings.ai_provider;
+        if provider == crate::integrations::ai_writing::AIProvider::Anthropic {
+            self.available_ai_models =
+                crate::integrations::ai_writing::hardcoded_anthropic_models();
+            self.status_message = Some((
+                "Anthropic models loaded".to_string(),
+                std::time::Instant::now(),
+                false,
+            ));
+            return;
+        }
+
+        let base_url = self.settings.ai_base_url.clone();
+        let tx = self.async_tx.clone();
+        self.ai_models_loading = true;
+        self.status_message = Some((
+            "Fetching models...".to_string(),
+            std::time::Instant::now(),
+            false,
+        ));
+
+        self.tokio_runtime.spawn(async move {
+            let result = match provider {
+                crate::integrations::ai_writing::AIProvider::OpenAI => {
+                    crate::integrations::ai_writing::fetch_openai_models(&base_url, &api_key).await
+                }
+                crate::integrations::ai_writing::AIProvider::Gemini => {
+                    crate::integrations::ai_writing::fetch_gemini_models(&base_url, &api_key).await
+                }
+                _ => unreachable!(),
+            };
+            match result {
+                Ok(models) => {
+                    let _ = tx.send(
+                        crate::app::async_runtime::AsyncResult::ModelsLoaded(models),
+                    );
+                }
+                Err(e) => {
+                    let _ = tx.send(
+                        crate::app::async_runtime::AsyncResult::ModelsError(e),
+                    );
+                }
+            }
+        });
+    }
 }

@@ -96,6 +96,20 @@ impl TaleNodeApp {
                     self.status_message =
                         Some((format!("AI writing error: {e}"), Instant::now(), true));
                 }
+                AsyncResult::ModelsLoaded(models) => {
+                    self.available_ai_models = models;
+                    self.ai_models_loading = false;
+                    self.status_message = Some((
+                        "AI models loaded".to_string(),
+                        Instant::now(),
+                        false,
+                    ));
+                }
+                AsyncResult::ModelsError(e) => {
+                    self.ai_models_loading = false;
+                    self.status_message =
+                        Some((format!("Failed to fetch models: {e}"), Instant::now(), true));
+                }
             }
         }
     }

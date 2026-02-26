@@ -6,6 +6,7 @@ pub enum AIProvider {
     #[default]
     OpenAI,
     Anthropic,
+    Gemini,
 }
 
 impl AIProvider {
@@ -13,10 +14,11 @@ impl AIProvider {
         match self {
             Self::OpenAI => "OpenAI-compatible",
             Self::Anthropic => "Anthropic Claude",
+            Self::Gemini => "Google Gemini",
         }
     }
 
-    pub const ALL: [AIProvider; 2] = [AIProvider::OpenAI, AIProvider::Anthropic];
+    pub const ALL: [AIProvider; 3] = [AIProvider::OpenAI, AIProvider::Anthropic, AIProvider::Gemini];
 }
 
 pub fn default_ai_base_url() -> String {
@@ -25,6 +27,14 @@ pub fn default_ai_base_url() -> String {
 
 pub fn default_ai_model() -> String {
     "gpt-4o".to_string()
+}
+
+pub fn default_gemini_base_url() -> String {
+    "https://generativelanguage.googleapis.com/v1beta".to_string()
+}
+
+pub fn default_gemini_model() -> String {
+    "gemini-2.0-flash".to_string()
 }
 
 /// AI writing assistant HTTP client.
@@ -118,6 +128,7 @@ impl AIWritingClient {
         match self.provider {
             AIProvider::OpenAI => self.call_openai(prompt).await,
             AIProvider::Anthropic => self.call_anthropic(prompt).await,
+            AIProvider::Gemini => self.call_gemini(prompt).await,
         }
     }
 
@@ -195,6 +206,42 @@ impl AIWritingClient {
             .map(|s| s.to_string())
             .ok_or_else(|| "Unexpected Anthropic response format".to_string())
     }
+
+    async fn call_gemini(&self, prompt: &str) -> Result<String, String> {
+        let url = format!(
+            "{}/models/{}:generateContent?key={}",
+            self.base_url, self.model, self.api_key
+        );
+        let body = serde_json::json!({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.8}
+        });
+
+        let resp = self
+            .client
+            .post(&url)
+            .header("Content-Type", "application/json")
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| format!("Gemini request failed: {e}"))?;
+
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let body_text = resp.text().await.unwrap_or_default();
+            return Err(format!("Gemini API error {status}: {body_text}"));
+        }
+
+        let data: serde_json::Value = resp
+            .json()
+            .await
+            .map_err(|e| format!("Gemini parse error: {e}"))?;
+
+        data["candidates"][0]["content"]["parts"][0]["text"]
+            .as_str()
+            .map(|s| s.to_string())
+            .ok_or_else(|| "Unexpected Gemini response format".to_string())
+    }
 }
 
 /// Parse a JSON string array from the AI response text.
@@ -217,7 +264,73 @@ fn parse_json_string_array(text: &str, expected: usize) -> Result<Vec<String>, S
     result.truncate(expected);
     Ok(result)
 }
-
+/// Fetch chat-compatible models from an OpenAI-compatible `/models` endpoint.
+pub async fn fetch_openai_models(base_url: &str, api_key: &str) -> Result<Vec<String>, String> {
+    let resp = reqwest::Client::new()
+        .get(format!("{base_url}/models"))
+        .header("Authorization", format!("Bearer {api_key}"))
+        .send().await.map_err(|e| format!("Failed to fetch models: {e}"))?;
+    if !resp.status().is_success() {
+        let s = resp.status();
+        return Err(format!("Models API error {s}: {}", resp.text().await.unwrap_or_default()));
+    }
+    let data: serde_json::Value =
+        resp.json().await.map_err(|e| format!("Models parse error: {e}"))?;
+    let prefixes = ["gpt-", "o1", "o3", "o4", "chatgpt-"];
+    let mut models: Vec<String> = data["data"]
+        .as_array()
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|m| m["id"].as_str().map(String::from))
+                .filter(|id| prefixes.iter().any(|p| id.starts_with(p)))
+                .collect()
+        })
+        .unwrap_or_default();
+    models.sort();
+    Ok(models)
+}
+/// Fetch main Gemini models (filters out nano, embedding, dated variants).
+pub async fn fetch_gemini_models(base_url: &str, api_key: &str) -> Result<Vec<String>, String> {
+    let resp = reqwest::Client::new()
+        .get(format!("{base_url}/models?key={api_key}&pageSize=200"))
+        .send().await.map_err(|e| format!("Failed to fetch Gemini models: {e}"))?;
+    if !resp.status().is_success() {
+        let s = resp.status();
+        return Err(format!("Gemini API error {s}: {}", resp.text().await.unwrap_or_default()));
+    }
+    let data: serde_json::Value =
+        resp.json().await.map_err(|e| format!("Gemini models parse error: {e}"))?;
+    fn is_main_model(name: &str) -> bool {
+        name.starts_with("gemini-")
+            && !name.contains("nano")
+            && !name.contains("embedding")
+            && !name.contains("aqa")
+            && !name.chars().last().is_some_and(|c| c.is_ascii_digit())
+    }
+    let mut models: Vec<String> = data["models"]
+        .as_array()
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|m| {
+                    m["name"].as_str().map(|n| n.strip_prefix("models/").unwrap_or(n).to_string())
+                })
+                .filter(|n| is_main_model(n))
+                .collect()
+        })
+        .unwrap_or_default();
+    models.sort();
+    Ok(models)
+}
+/// Hardcoded Anthropic model list (no public list endpoint).
+pub fn hardcoded_anthropic_models() -> Vec<String> {
+    vec![
+        "claude-opus-4-6".to_string(),
+        "claude-sonnet-4-6".to_string(),
+        "claude-haiku-4-5-20251001".to_string(),
+        "claude-sonnet-4-20250514".to_string(),
+        "claude-opus-4-20250514".to_string(),
+    ]
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -231,12 +344,19 @@ mod tests {
     fn provider_labels() {
         assert_eq!(AIProvider::OpenAI.label(), "OpenAI-compatible");
         assert_eq!(AIProvider::Anthropic.label(), "Anthropic Claude");
+        assert_eq!(AIProvider::Gemini.label(), "Google Gemini");
+        assert_eq!(AIProvider::ALL.len(), 3);
     }
 
     #[test]
     fn default_urls_and_model() {
         assert_eq!(default_ai_base_url(), "https://api.openai.com/v1");
         assert_eq!(default_ai_model(), "gpt-4o");
+        assert_eq!(
+            default_gemini_base_url(),
+            "https://generativelanguage.googleapis.com/v1beta"
+        );
+        assert_eq!(default_gemini_model(), "gemini-2.0-flash");
     }
 
     #[test]
@@ -272,5 +392,9 @@ mod tests {
         let json = serde_json::to_string(&AIProvider::Anthropic).unwrap();
         let loaded: AIProvider = serde_json::from_str(&json).unwrap();
         assert_eq!(loaded, AIProvider::Anthropic);
+
+        let json = serde_json::to_string(&AIProvider::Gemini).unwrap();
+        let loaded: AIProvider = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded, AIProvider::Gemini);
     }
 }
