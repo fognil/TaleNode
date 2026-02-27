@@ -26,6 +26,7 @@ mod world_handlers;
 mod writing_handlers;
 
 use egui::Pos2;
+use std::collections::HashSet;
 use std::time::Instant;
 use uuid::Uuid;
 
@@ -67,7 +68,7 @@ enum InteractionState {
 pub struct TaleNodeApp {
     pub graph: DialogueGraph,
     pub canvas: CanvasState,
-    pub selected_nodes: Vec<Uuid>,
+    pub selected_nodes: HashSet<Uuid>,
     interaction: InteractionState,
     context_menu_pos: Option<[f32; 2]>,
     project_name: String,
@@ -75,9 +76,11 @@ pub struct TaleNodeApp {
     dock_state: Option<egui_dock::DockState<dock::DockTab>>,
     history: UndoHistory,
     validation_warnings: Vec<ValidationWarning>,
+    validation_dirty: bool,
     search_query: String,
     show_search: bool,
     search_results: Vec<Uuid>,
+    search_results_set: HashSet<Uuid>,
     search_index: usize,
     replace_query: String,
     show_replace: bool,
@@ -141,7 +144,7 @@ impl TaleNodeApp {
                 g
             },
             canvas: CanvasState::default(),
-            selected_nodes: Vec::new(),
+            selected_nodes: HashSet::new(),
             interaction: InteractionState::Idle,
             context_menu_pos: None,
             project_name: "Untitled".to_string(),
@@ -149,9 +152,11 @@ impl TaleNodeApp {
             dock_state: Some(dock::default_dock_state()),
             history: UndoHistory::new(),
             validation_warnings: Vec::new(),
+            validation_dirty: true,
             search_query: String::new(),
             show_search: false,
             search_results: Vec::new(),
+            search_results_set: HashSet::new(),
             search_index: 0,
             replace_query: String::new(),
             show_replace: false,
@@ -211,6 +216,7 @@ impl TaleNodeApp {
     fn snapshot(&mut self) {
         self.history.save_snapshot(&self.graph);
         self.spatial_grid.mark_dirty();
+        self.validation_dirty = true;
         if self.has_script_tab() {
             self.script_panel_stale = true;
         }
@@ -219,42 +225,32 @@ impl TaleNodeApp {
 
 impl eframe::App for TaleNodeApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Apply theme
         ctx.set_visuals(theme::build_visuals(&self.settings.theme));
         theme::apply_font_size(ctx, self.settings.theme.font_size);
 
-        // Run validation each frame (cheap for typical graph sizes)
-        self.validation_warnings = validator::validate(&self.graph);
+        if self.validation_dirty {
+            self.validation_warnings = validator::validate(&self.graph);
+            self.validation_dirty = false;
+        }
 
-        // Auto-save every 60 seconds if project has a save path
         if self.project_path.is_some() && self.last_auto_save.elapsed().as_secs() >= 60 {
             self.last_auto_save = Instant::now();
             self.do_save(false);
             self.status_message = Some(("Auto-saved".to_string(), Instant::now(), false));
         }
 
-        // Poll async results (translation, voice, collab)
         self.poll_async_results();
-
-        // Keyboard shortcuts
         self.handle_keyboard_shortcuts(ctx);
-
-        // Confirmation dialog (modal)
         self.show_confirmation_dialog(ctx);
 
-        // Menu bar at top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             self.show_menu_bar(ui);
         });
-
-        // Search bar (below menu bar)
         if self.show_search {
             egui::TopBottomPanel::top("search_bar").show(ctx, |ui| {
                 self.show_search_bar(ui);
             });
         }
-
-        // Breadcrumb bar for sub-graph navigation
         if self.is_in_subgraph() {
             egui::TopBottomPanel::top("breadcrumb_bar").show(ctx, |ui| {
                 ui.horizontal(|ui| {
@@ -271,12 +267,9 @@ impl eframe::App for TaleNodeApp {
             });
         }
 
-        // Status bar at bottom
         egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
             self.show_status_bar(ui);
         });
-
-        // Audio manager window (floating, stays outside dock)
         crate::ui::audio_manager::show_audio_manager(
             ctx,
             &mut self.audio_manager,
@@ -333,6 +326,7 @@ impl TaleNodeApp {
                 self.graph = prev;
                 self.selected_nodes.clear();
                 self.spatial_grid.mark_dirty();
+                self.validation_dirty = true;
             }
         }
         if ctx.input(|i| {
@@ -342,6 +336,7 @@ impl TaleNodeApp {
                 self.graph = next;
                 self.selected_nodes.clear();
                 self.spatial_grid.mark_dirty();
+                self.validation_dirty = true;
             }
         }
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::F)) {
@@ -380,6 +375,7 @@ impl TaleNodeApp {
                 self.show_replace = false;
                 self.search_query.clear();
                 self.search_results.clear();
+                self.search_results_set.clear();
                 self.replace_query.clear();
             } else if self.is_in_subgraph() {
                 self.exit_subgraph();

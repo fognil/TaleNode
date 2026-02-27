@@ -23,7 +23,7 @@ impl TaleNodeApp {
             });
             return;
         }
-        let selected_id = self.selected_nodes[0];
+        let Some(&selected_id) = self.selected_nodes.iter().next() else { return };
         let pre_graph = self.graph.clone();
         egui::ScrollArea::vertical().show(ui, |ui| {
             let changed = crate::ui::inspector::show_inspector(
@@ -85,8 +85,8 @@ impl TaleNodeApp {
     }
 
     pub(super) fn render_comments_tab(&mut self, ui: &mut egui::Ui) {
-        if let Some(first) = self.selected_nodes.first() {
-            self.comment_target_node = Some(*first);
+        if let Some(&first) = self.selected_nodes.iter().next() {
+            self.comment_target_node = Some(first);
         }
         let action = crate::ui::comments_panel::show_comments_panel(
             ui,
@@ -97,7 +97,7 @@ impl TaleNodeApp {
         );
         match action {
             crate::ui::comments_panel::CommentsPanelAction::Navigate(node_id) => {
-                self.selected_nodes = vec![node_id];
+                self.selected_nodes = std::collections::HashSet::from([node_id]);
                 if let Some(node) = self.graph.nodes.get(&node_id) {
                     self.canvas.pan_offset = egui::Vec2::new(
                         -node.position[0] * self.canvas.zoom,
@@ -125,7 +125,7 @@ impl TaleNodeApp {
     }
 
     pub(super) fn render_bookmarks_tab(&mut self, ui: &mut egui::Ui) {
-        let sel = self.selected_nodes.first().copied();
+        let sel = self.selected_nodes.iter().next().copied();
         let action = crate::ui::bookmark_panel::show_bookmark_panel(
             ui,
             &self.graph,
@@ -135,7 +135,7 @@ impl TaleNodeApp {
         );
         match action {
             crate::ui::bookmark_panel::BookmarkAction::Navigate(id) => {
-                self.selected_nodes = vec![id];
+                self.selected_nodes = std::collections::HashSet::from([id]);
                 if let Some(node) = self.graph.nodes.get(&id) {
                     self.canvas.pan_offset = egui::Vec2::new(
                         -node.position[0] * self.canvas.zoom,
@@ -274,7 +274,7 @@ impl TaleNodeApp {
                 self.graph.locale.set_translation(key, locale, text);
             }
             crate::ui::locale_panel::LocalePanelAction::Navigate(node_id) => {
-                self.selected_nodes = vec![node_id];
+                self.selected_nodes = std::collections::HashSet::from([node_id]);
                 if let Some(node) = self.graph.nodes.get(&node_id) {
                     self.canvas.pan_offset = egui::Vec2::new(
                         -node.position[0] * self.canvas.zoom,

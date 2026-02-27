@@ -45,7 +45,7 @@ impl TaleNodeApp {
                         if ui.button("Group Selected").clicked() {
                             self.snapshot();
                             let mut group = crate::model::group::NodeGroup::new("Group");
-                            group.node_ids = self.selected_nodes.clone();
+                            group.node_ids = self.selected_nodes.iter().copied().collect();
                             self.graph.groups.push(group);
                             close_menu = true;
                         }

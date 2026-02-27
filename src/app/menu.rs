@@ -150,6 +150,7 @@ impl TaleNodeApp {
                         self.graph = prev;
                         self.selected_nodes.clear();
                         self.spatial_grid.mark_dirty();
+                        self.validation_dirty = true;
                     }
                     ui.close_menu();
                 }
@@ -165,6 +166,7 @@ impl TaleNodeApp {
                         self.graph = next;
                         self.selected_nodes.clear();
                         self.spatial_grid.mark_dirty();
+                        self.validation_dirty = true;
                     }
                     ui.close_menu();
                 }
@@ -198,7 +200,7 @@ impl TaleNodeApp {
                     .clicked()
                 {
                     self.snapshot();
-                    let ids: Vec<uuid::Uuid> = self.selected_nodes.drain(..).collect();
+                    let ids: Vec<uuid::Uuid> = self.selected_nodes.drain().collect();
                     for id in ids {
                         self.graph.remove_node(id);
                     }

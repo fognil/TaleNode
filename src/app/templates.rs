@@ -18,7 +18,7 @@ impl TaleNodeApp {
         self.snapshot();
         let mut id_map: HashMap<Uuid, Uuid> = HashMap::new();
         let mut port_map: HashMap<PortId, PortId> = HashMap::new();
-        let mut new_ids = Vec::new();
+        let mut new_ids = HashSet::new();
 
         for (&old_id, node) in &template.nodes {
             let mut dup = node.clone();
@@ -35,7 +35,7 @@ impl TaleNodeApp {
             if let NodeType::SubGraph(ref mut data) = dup.node_type {
                 regenerate_child_ids(&mut data.child_graph);
             }
-            new_ids.push(new_id);
+            new_ids.insert(new_id);
             self.graph.add_node(dup);
         }
 
@@ -55,7 +55,7 @@ impl TaleNodeApp {
 
     /// Save the current selection as a named template.
     pub(super) fn save_selection_as_template(&mut self, name: String) {
-        let selected: HashSet<Uuid> = self.selected_nodes.iter().copied().collect();
+        let selected = self.selected_nodes.clone();
         if selected.is_empty() {
             return;
         }

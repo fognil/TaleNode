@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use egui::{Color32, Pos2, Rect, Sense, Stroke, StrokeKind};
 use uuid::Uuid;
 
@@ -63,17 +65,10 @@ impl TaleNodeApp {
         let painter = ui.painter_at(canvas_rect);
 
         self.spatial_grid.rebuild_if_dirty(&self.graph.nodes);
-
-        // Handle pan/zoom
         self.canvas.handle_input(&response, ui);
-
-        // Draw grid
         self.canvas.draw_grid(&painter, canvas_rect);
-
-        // Draw groups (below connections and nodes)
         self.draw_groups(&painter);
 
-        // Compute canvas-space viewport for culling
         let canvas_viewport = egui::Rect::from_min_max(
             self.canvas.screen_to_canvas(canvas_rect.min),
             self.canvas.screen_to_canvas(canvas_rect.max),
@@ -110,7 +105,7 @@ impl TaleNodeApp {
             }
             if let Some(node) = self.graph.nodes.get(id) {
                 let is_selected = self.selected_nodes.contains(id);
-                let is_search_match = self.search_results.contains(id);
+                let is_search_match = self.search_results_set.contains(id);
                 let review_status = self.graph.get_review_status(*id);
                 let hover_port = hovered_port_info
                     .and_then(|(nid, pid, _)| if nid == *id { Some(pid) } else { None });
@@ -228,7 +223,7 @@ impl TaleNodeApp {
             else if let Some(node_id) = self.node_at_screen_pos(pointer_pos) {
                 if !self.selected_nodes.contains(&node_id) {
                     self.selected_nodes.clear();
-                    self.selected_nodes.push(node_id);
+                    self.selected_nodes.insert(node_id);
                 }
                 // Snapshot before dragging for undo
                 self.snapshot();
@@ -248,9 +243,9 @@ impl TaleNodeApp {
             match &mut self.interaction {
                 InteractionState::DraggingNodes => {
                     let delta = response.drag_delta() / self.canvas.zoom;
-                    let ids: Vec<Uuid> = self.selected_nodes.clone();
-                    for id in ids {
-                        if let Some(node) = self.graph.nodes.get_mut(&id) {
+                    let ids: Vec<Uuid> = self.selected_nodes.iter().copied().collect();
+                    for id in &ids {
+                        if let Some(node) = self.graph.nodes.get_mut(id) {
                             node.position[0] += delta.x;
                             node.position[1] += delta.y;
                         }
@@ -311,7 +306,7 @@ impl TaleNodeApp {
                             let screen_rect =
                                 self.canvas.canvas_rect_to_screen(node_widget::node_rect(node));
                             if sel_rect.intersects(screen_rect) {
-                                self.selected_nodes.push(node.id);
+                                self.selected_nodes.insert(node.id);
                             }
                         }
                     }
@@ -351,7 +346,7 @@ impl TaleNodeApp {
                 }
                 if !toggled {
                     self.selected_nodes.clear();
-                    self.selected_nodes.push(node_id);
+                    self.selected_nodes.insert(node_id);
                 }
             } else {
                 self.selected_nodes.clear();
@@ -365,7 +360,7 @@ impl TaleNodeApp {
             });
             if delete_pressed {
                 self.snapshot();
-                let ids: Vec<Uuid> = self.selected_nodes.drain(..).collect();
+                let ids: Vec<Uuid> = self.selected_nodes.drain().collect();
                 for id in ids {
                     self.graph.remove_node(id);
                 }
@@ -378,9 +373,10 @@ impl TaleNodeApp {
             return;
         }
         self.snapshot();
-        let mut new_ids = Vec::new();
-        for &id in &self.selected_nodes.clone() {
-            if let Some(node) = self.graph.nodes.get(&id) {
+        let mut new_ids = HashSet::new();
+        let old_ids: Vec<Uuid> = self.selected_nodes.iter().copied().collect();
+        for id in &old_ids {
+            if let Some(node) = self.graph.nodes.get(id) {
                 let mut dup = node.clone();
                 dup.id = Uuid::new_v4();
                 dup.position[0] += 30.0;
@@ -391,7 +387,7 @@ impl TaleNodeApp {
                 if let crate::model::node::NodeType::SubGraph(ref mut data) = dup.node_type {
                     super::templates::regenerate_child_ids(&mut data.child_graph);
                 }
-                new_ids.push(dup.id);
+                new_ids.insert(dup.id);
                 self.graph.add_node(dup);
             }
         }

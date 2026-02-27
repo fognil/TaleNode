@@ -17,7 +17,7 @@ pub enum WritingAction {
 pub fn show_writing_panel(
     ui: &mut Ui,
     graph: &DialogueGraph,
-    selected_nodes: &[Uuid],
+    selected_nodes: &std::collections::HashSet<Uuid>,
     in_progress: bool,
     suggestions: &Option<(Uuid, Vec<String>)>,
     tone_report: &Option<(Uuid, String)>,
@@ -33,7 +33,7 @@ pub fn show_writing_panel(
         return action;
     }
 
-    let node_id = selected_nodes[0];
+    let Some(&node_id) = selected_nodes.iter().next() else { return action };
     let Some(node) = graph.nodes.get(&node_id) else {
         ui.label("Node not found");
         return action;

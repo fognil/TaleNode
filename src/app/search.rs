@@ -11,6 +11,7 @@ impl TaleNodeApp {
     /// Search nodes for matching text content.
     pub(super) fn update_search_results(&mut self) {
         self.search_results.clear();
+        self.search_results_set.clear();
         let query = self.search_query.to_lowercase();
         if query.is_empty() {
             return;
@@ -18,6 +19,7 @@ impl TaleNodeApp {
         for node in self.graph.nodes.values() {
             if node_matches_query(node, &query, &self.graph) {
                 self.search_results.push(node.id);
+                self.search_results_set.insert(node.id);
             }
         }
         if self.search_index >= self.search_results.len() {
@@ -28,7 +30,7 @@ impl TaleNodeApp {
     pub(super) fn focus_search_result(&mut self) {
         if let Some(&node_id) = self.search_results.get(self.search_index) {
             self.selected_nodes.clear();
-            self.selected_nodes.push(node_id);
+            self.selected_nodes.insert(node_id);
             if let Some(node) = self.graph.nodes.get(&node_id) {
                 self.canvas.pan_offset = egui::Vec2::new(
                     -node.position[0] * self.canvas.zoom,
@@ -75,6 +77,7 @@ impl TaleNodeApp {
                     self.show_replace = false;
                     self.search_query.clear();
                     self.search_results.clear();
+                    self.search_results_set.clear();
                     self.replace_query.clear();
                 }
                 let toggle_label = if self.show_replace {

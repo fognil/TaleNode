@@ -14,7 +14,7 @@ pub fn show_playtest_panel(
     ui: &mut egui::Ui,
     state: &mut PlaytestState,
     graph: &DialogueGraph,
-    selected_nodes: &mut Vec<Uuid>,
+    selected_nodes: &mut std::collections::HashSet<Uuid>,
 ) {
     ui.horizontal(|ui| {
         ui.heading("Playtest");
@@ -67,7 +67,7 @@ pub fn show_playtest_panel(
     if let Some(id) = state.current_node {
         if !selected_nodes.contains(&id) {
             selected_nodes.clear();
-            selected_nodes.push(id);
+            selected_nodes.insert(id);
         }
     }
 

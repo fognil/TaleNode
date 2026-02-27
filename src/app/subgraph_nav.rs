@@ -9,7 +9,7 @@ use crate::ui::canvas::CanvasState;
 pub(super) struct SubGraphFrame {
     pub graph: DialogueGraph,
     pub canvas: CanvasState,
-    pub selected_nodes: Vec<Uuid>,
+    pub selected_nodes: std::collections::HashSet<Uuid>,
     pub history: UndoHistory,
     /// The SubGraph node we entered in the parent graph.
     pub node_id: Uuid,
