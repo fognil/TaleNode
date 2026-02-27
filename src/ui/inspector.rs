@@ -29,6 +29,8 @@ pub fn show_inspector(
     selected: Uuid,
     new_tag_text: &mut String,
     active_locale: &mut Option<String>,
+    portrait_cache: &mut crate::ui::portrait_cache::PortraitCache,
+    project_dir: Option<&std::path::Path>,
 ) -> bool {
     let mut deferred = DeferredAction::None;
     let mut snapshot_needed = false;
@@ -60,8 +62,10 @@ pub fn show_inspector(
 
             NodeType::Dialogue(data) => {
                 let characters = graph.characters.clone();
-                if show_dialogue_inspector(ui, data, &characters, &editing_locale, &locale, &uuid8)
-                {
+                if show_dialogue_inspector(
+                    ui, data, &characters, &editing_locale, &locale, &uuid8,
+                    portrait_cache, project_dir,
+                ) {
                     snapshot_needed = true;
                 }
             }

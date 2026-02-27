@@ -6,6 +6,7 @@ use crate::model::node::{
     CompareOp, EventAction, EventActionType, VariableValue,
 };
 
+#[allow(clippy::too_many_arguments)]
 pub(super) fn show_dialogue_inspector(
     ui: &mut Ui,
     data: &mut crate::model::node::DialogueData,
@@ -13,6 +14,8 @@ pub(super) fn show_dialogue_inspector(
     editing_locale: &Option<String>,
     locale: &LocaleSettings,
     uuid8: &str,
+    portrait_cache: &mut crate::ui::portrait_cache::PortraitCache,
+    project_dir: Option<&std::path::Path>,
 ) -> bool {
     let mut snapshot_needed = false;
 
@@ -65,6 +68,48 @@ pub(super) fn show_dialogue_inspector(
             let matches_char = characters.iter().any(|c| c.name == data.speaker_name);
             if !matches_char {
                 data.speaker_id = None;
+            }
+        }
+    });
+
+    // Portrait preview + override
+    let portrait_path = data.portrait_override.as_deref()
+        .filter(|s| !s.is_empty())
+        .or_else(|| {
+            data.speaker_id.and_then(|sid| {
+                characters.iter().find(|c| c.id == sid)
+                    .map(|c| c.portrait_path.as_str())
+                    .filter(|s| !s.is_empty())
+            })
+        })
+        .unwrap_or("");
+    let tex_id = portrait_cache
+        .get_or_load(ui.ctx(), portrait_path, project_dir)
+        .map(|h| h.id());
+    ui.horizontal(|ui| {
+        ui.label("Portrait:");
+        if let Some(id) = tex_id {
+            ui.image(egui::load::SizedTexture::new(id, [24.0, 24.0]));
+        }
+        let mut override_text = data.portrait_override.clone().unwrap_or_default();
+        let field_w = (ui.available_width() - 35.0).max(60.0);
+        let resp = ui.add(
+            egui::TextEdit::singleline(&mut override_text).desired_width(field_w),
+        );
+        if resp.gained_focus() {
+            snapshot_needed = true;
+        }
+        if resp.changed() {
+            data.portrait_override = if override_text.is_empty() { None } else { Some(override_text) };
+        }
+        if ui.small_button("[...]").on_hover_text("Browse for portrait image").clicked() {
+            snapshot_needed = true;
+            if let Some(path) = rfd::FileDialog::new()
+                .add_filter("Images", &["png", "jpg", "jpeg", "bmp", "gif"])
+                .pick_file()
+            {
+                let rel = crate::ui::portrait_cache::make_relative_path(&path, project_dir);
+                data.portrait_override = Some(rel);
             }
         }
     });

@@ -5,10 +5,13 @@ impl TaleNodeApp {
         let pre_graph = self.graph.clone();
         let voices = self.available_voices.clone();
         egui::ScrollArea::vertical().show(ui, |ui| {
+            let project_dir = self.project_path.as_ref().and_then(|p| p.parent());
             let changed = crate::ui::left_panel::show_left_panel(
                 ui,
                 &mut self.graph,
                 &voices,
+                &mut self.portrait_cache,
+                project_dir,
             );
             if changed {
                 self.history.push_undo(pre_graph);
@@ -26,12 +29,15 @@ impl TaleNodeApp {
         let Some(&selected_id) = self.selected_nodes.iter().next() else { return };
         let pre_graph = self.graph.clone();
         egui::ScrollArea::vertical().show(ui, |ui| {
+            let project_dir = self.project_path.as_ref().and_then(|p| p.parent());
             let changed = crate::ui::inspector::show_inspector(
                 ui,
                 &mut self.graph,
                 selected_id,
                 &mut self.inspector_new_tag_text,
                 &mut self.active_locale,
+                &mut self.portrait_cache,
+                project_dir,
             );
             if changed {
                 self.history.push_undo(pre_graph);

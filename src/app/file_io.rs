@@ -32,6 +32,10 @@ impl TaleNodeApp {
                 self.versions = project.versions;
                 self.project_path = Some(path);
                 self.selected_nodes.clear();
+                self.spatial_grid.mark_dirty();
+                self.minimap_bounds_dirty = true;
+                self.pending_zoom_fit = true;
+                self.portrait_cache.clear();
                 if let Some(ref layout) = project.dock_layout {
                     self.dock_state_from_json(layout);
                 }

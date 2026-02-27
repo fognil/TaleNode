@@ -117,6 +117,8 @@ pub fn draw_node(
     review_status: ReviewStatus,
     hovered_port: Option<PortId>,
     playtest_active: bool,
+    portrait_cache: &mut crate::ui::portrait_cache::PortraitCache,
+    project_dir: Option<&std::path::Path>,
 ) {
     let rect = node_rect(node);
     let screen_rect = canvas.canvas_rect_to_screen(rect);
@@ -160,11 +162,45 @@ pub fn draw_node(
     // LOD: Medium — header + body + ports as circles, skip text content and port labels
     let is_full_detail = zoom >= LOD_MEDIUM_ZOOM;
 
+    // Portrait icon for dialogue nodes (16x16 in header, after collapse triangle)
+    let has_portrait = if is_full_detail {
+        if let NodeType::Dialogue(data) = &node.node_type {
+            let portrait_path = data.portrait_override.as_deref()
+                .filter(|s| !s.is_empty())
+                .or_else(|| {
+                    data.speaker_id.and_then(|sid| {
+                        characters.iter().find(|c| c.id == sid)
+                            .map(|c| c.portrait_path.as_str())
+                            .filter(|s| !s.is_empty())
+                    })
+                });
+            if let Some(path) = portrait_path {
+                let tex_id = portrait_cache
+                    .get_or_load(painter.ctx(), path, project_dir)
+                    .map(|h| h.id());
+                if let Some(id) = tex_id {
+                    let icon_size = 16.0 * zoom;
+                    let portrait_rect = Rect::from_min_size(
+                        Pos2::new(
+                            header_rect.min.x + 22.0 * zoom,
+                            header_rect.center().y - icon_size * 0.5,
+                        ),
+                        Vec2::new(icon_size, icon_size),
+                    );
+                    let uv = Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0));
+                    painter.image(id, portrait_rect, uv, Color32::WHITE);
+                    true
+                } else { false }
+            } else { false }
+        } else { false }
+    } else { false };
+
     if is_full_detail {
         let title = node.title();
         let font_size = 14.0 * zoom;
+        let title_x_offset = if has_portrait { 18.0 } else { 8.0 };
         let title_center = Pos2::new(
-            header_rect.center().x + 8.0 * zoom,
+            header_rect.center().x + title_x_offset * zoom,
             header_rect.center().y,
         );
         painter.text(

@@ -63,6 +63,10 @@ impl TaleNodeApp {
         let painter = ui.painter_at(canvas_rect);
 
         self.spatial_grid.rebuild_if_dirty(&self.graph.nodes);
+        if self.pending_zoom_fit {
+            self.pending_zoom_fit = false;
+            self.canvas.zoom_to_fit(&self.graph.nodes, canvas_rect.size());
+        }
         self.canvas.handle_input(&response, ui);
         self.canvas.draw_grid(&painter, canvas_rect);
         self.draw_groups(&painter);
@@ -111,6 +115,7 @@ impl TaleNodeApp {
                 let review_status = self.graph.get_review_status(*id);
                 let hover_port = hovered_port_info
                     .and_then(|(nid, pid, _)| if nid == *id { Some(pid) } else { None });
+                let project_dir = self.project_path.as_ref().and_then(|p| p.parent());
                 draw_node(
                     &painter,
                     node,
@@ -121,6 +126,8 @@ impl TaleNodeApp {
                     review_status,
                     hover_port,
                     playtest_node == Some(*id),
+                    &mut self.portrait_cache,
+                    project_dir,
                 );
             }
         }
@@ -139,7 +146,10 @@ impl TaleNodeApp {
                                 ui.ctx(),
                                 ui.layer_id(),
                                 egui::Id::new("node_tooltip"),
-                                |ui| { ui.label(&tip); },
+                                |ui| {
+                                    ui.set_max_width(350.0);
+                                    ui.label(&tip);
+                                },
                             );
                         }
                     }
