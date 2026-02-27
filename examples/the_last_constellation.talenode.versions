@@ -1,0 +1,3792 @@
+[
+  {
+    "id": 1,
+    "timestamp": "2026-01-15 10:00:00 UTC",
+    "description": "Act 1 draft",
+    "graph": {
+      "nodes": {
+        "076063d7-c611-4c85-bc1d-fe3fe8dcced3": {
+          "id": "076063d7-c611-4c85-bc1d-fe3fe8dcced3",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "Welcome to Station Meridian, {player_name}. I am ARIA, the station's administrative intelligence. Your diplomatic credentials have been verified.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": "audio/aria_welcome.wav",
+              "metadata": {}
+            }
+          },
+          "position": [
+            400.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "aba2e5a3-96dc-4d9e-b9d5-72da6f241940",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "1d89139d-860c-4da4-be71-56f79a026293",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "0b64c75a-9a54-42a2-a56f-2c9449cd4b31": {
+          "id": "0b64c75a-9a54-42a2-a56f-2c9449cd4b31",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "has_weapon",
+                  "value": {
+                    "Bool": true
+                  }
+                },
+                {
+                  "action_type": "RemoveItem",
+                  "key": "credits",
+                  "value": {
+                    "Int": 200
+                  }
+                },
+                {
+                  "action_type": "AddItem",
+                  "key": "neural_disruptor",
+                  "value": {
+                    "Int": 1
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            2300.0,
+            800.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "7fafd56b-b52e-4cdf-acf7-8965835f734c",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "79fc1463-0d20-478c-82d2-b1cb5c181e68",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "3097e04b-63d3-4946-b381-f388f8de7bfb": {
+          "id": "3097e04b-63d3-4946-b381-f388f8de7bfb",
+          "node_type": {
+            "End": {
+              "tag": "tour_complete"
+            }
+          },
+          "position": [
+            2000.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "1167ab37-4fdd-47f6-adb3-82d729775bb6",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "34bdb6dd-09a1-4fed-a19e-fcea3284c6df": {
+          "id": "34bdb6dd-09a1-4fed-a19e-fcea3284c6df",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "Briefing summary: Station Meridian hosts 3,000 residents. The Solari delegation arrived 72 hours ago. The Umbral contingent arrived 48 hours ago. Three altercations have already been reported.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1700.0,
+            950.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "77fc0120-ea5c-450d-8a45-519190402570",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "fbe5afc8-b793-404f-b52e-0ecf317dbc28",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "3571589f-a448-499e-8204-76e7d403c295": {
+          "id": "3571589f-a448-499e-8204-76e7d403c295",
+          "node_type": {
+            "SubGraph": {
+              "name": "Station Tour",
+              "child_graph": {
+                "nodes": {
+                  "028ae6cb-e5d4-4e2b-a59e-e32cdb2837c8": {
+                    "id": "028ae6cb-e5d4-4e2b-a59e-e32cdb2837c8",
+                    "node_type": "Start",
+                    "position": [
+                      100.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [],
+                    "outputs": [
+                      {
+                        "id": "0dc84a51-aae2-4cff-bf6d-841c9e8183ee",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "3c580666-7be1-43c9-85d1-d05e600203c4": {
+                    "id": "3c580666-7be1-43c9-85d1-d05e600203c4",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+                        "speaker_name": "ARIA",
+                        "text": "The docking bay processes all arrivals. Security scanners ensure no contraband enters the station.",
+                        "emotion": "neutral",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      400.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "6db22ba6-a964-4e15-81be-592e1fa4ef97",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "d7fdf5ca-21e2-450b-8dc7-a6be77b05599",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "9e5a80c6-d360-4e60-902e-63b14c1a6c10": {
+                    "id": "9e5a80c6-d360-4e60-902e-63b14c1a6c10",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+                        "speaker_name": "ARIA",
+                        "text": "The observation deck offers a view of the Veil Nebula. Many find it calming. I find it... data-rich.",
+                        "emotion": "neutral",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      1000.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "27945f0c-610a-417e-b0e6-0080ef95e6f5",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "5740be8b-bb8d-4dbd-a7a1-ad821e927fd7",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "ca67772d-9bab-460d-a909-5c9f815e8a89": {
+                    "id": "ca67772d-9bab-460d-a909-5c9f815e8a89",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+                        "speaker_name": "ARIA",
+                        "text": "The commons area serves all three factions. Neutral ground — though 'neutral' is a generous term lately.",
+                        "emotion": "neutral",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      700.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "39f8405e-d713-4cdb-ad7b-9f0c02887635",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "abb83a34-bfe2-4b87-bd4b-02039da939ba",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "e2dea2ec-4e59-4ca8-a922-c05d5acc673b": {
+                    "id": "e2dea2ec-4e59-4ca8-a922-c05d5acc673b",
+                    "node_type": {
+                      "End": {
+                        "tag": ""
+                      }
+                    },
+                    "position": [
+                      1300.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "199e27c8-a35f-47a6-aca3-ab763ea21d08",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": []
+                  }
+                },
+                "connections": [
+                  {
+                    "id": "0788f99e-2b37-4e33-a241-f06410640210",
+                    "from_node": "028ae6cb-e5d4-4e2b-a59e-e32cdb2837c8",
+                    "from_port": "0dc84a51-aae2-4cff-bf6d-841c9e8183ee",
+                    "to_node": "3c580666-7be1-43c9-85d1-d05e600203c4",
+                    "to_port": "6db22ba6-a964-4e15-81be-592e1fa4ef97"
+                  },
+                  {
+                    "id": "abf38c78-8f8a-45ef-b722-50878f34169f",
+                    "from_node": "3c580666-7be1-43c9-85d1-d05e600203c4",
+                    "from_port": "d7fdf5ca-21e2-450b-8dc7-a6be77b05599",
+                    "to_node": "ca67772d-9bab-460d-a909-5c9f815e8a89",
+                    "to_port": "39f8405e-d713-4cdb-ad7b-9f0c02887635"
+                  },
+                  {
+                    "id": "cbbe0e58-570e-4824-b538-5d230608def5",
+                    "from_node": "9e5a80c6-d360-4e60-902e-63b14c1a6c10",
+                    "from_port": "5740be8b-bb8d-4dbd-a7a1-ad821e927fd7",
+                    "to_node": "e2dea2ec-4e59-4ca8-a922-c05d5acc673b",
+                    "to_port": "199e27c8-a35f-47a6-aca3-ab763ea21d08"
+                  },
+                  {
+                    "id": "8cb55c81-12d4-42fd-84ee-b9dd66db7a8c",
+                    "from_node": "ca67772d-9bab-460d-a909-5c9f815e8a89",
+                    "from_port": "abb83a34-bfe2-4b87-bd4b-02039da939ba",
+                    "to_node": "9e5a80c6-d360-4e60-902e-63b14c1a6c10",
+                    "to_port": "27945f0c-610a-417e-b0e6-0080ef95e6f5"
+                  }
+                ],
+                "variables": [],
+                "characters": [],
+                "groups": [],
+                "review_statuses": {},
+                "comments": [],
+                "node_tags": {},
+                "locale": {
+                  "default_locale": "en",
+                  "extra_locales": [],
+                  "translations": {}
+                },
+                "barks": {},
+                "quests": [],
+                "world_entities": [],
+                "timelines": []
+              }
+            }
+          },
+          "position": [
+            1700.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "ef7995c5-9ddd-44cb-a0a6-49be07e7d046",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "139447b8-0535-4ddc-88d1-9a1aa69d2e43",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "52a641b4-6eba-4bc5-84f9-105becf51f3f": {
+          "id": "52a641b4-6eba-4bc5-84f9-105becf51f3f",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "b2526a8f-6b60-43e5-b1a8-5691e855be52",
+              "speaker_name": "Commander Voss",
+              "text": "Agent. I'm Commander Voss. This station is a powder keg and you're the only diplomat the Council could spare. No pressure.",
+              "emotion": "neutral",
+              "portrait_override": "portraits/voss_serious.png",
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1700.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "630d58ee-a855-41ac-8e8f-cccdacfcf682",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "5b5edfc7-34f8-4778-80f1-0fb799653179",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "7416a140-867d-4896-ad8f-75f80b5892cd": {
+          "id": "7416a140-867d-4896-ad8f-75f80b5892cd",
+          "node_type": {
+            "Choice": {
+              "prompt": "Zeph offers you a compact neural disruptor.",
+              "choices": [
+                {
+                  "id": "bba4088b-39c0-449d-bda1-4e54c4f8ab2a",
+                  "text": "No thanks. I work by the book.",
+                  "condition": null
+                },
+                {
+                  "id": "8f437ab8-6785-4aac-b32d-74c5dc0b2b28",
+                  "text": "How much?",
+                  "condition": null
+                }
+              ]
+            }
+          },
+          "position": [
+            2000.0,
+            700.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "898de263-7d97-4de3-aa49-086372fdadc9",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "cd2e5912-aef8-4706-bb7d-84c4b0cd1f08",
+              "direction": "Output",
+              "label": "Refuse"
+            },
+            {
+              "id": "e495e60b-da0d-426b-b69b-caa35d4a863e",
+              "direction": "Output",
+              "label": "Buy weapon"
+            }
+          ]
+        },
+        "75e95b1b-e486-4729-b6fe-c4aaf992158d": {
+          "id": "75e95b1b-e486-4729-b6fe-c4aaf992158d",
+          "node_type": {
+            "Choice": {
+              "prompt": "What would you like to do?",
+              "choices": [
+                {
+                  "id": "96695435-4c49-4275-887d-26c13f78198a",
+                  "text": "Report to Commander Voss",
+                  "condition": null
+                },
+                {
+                  "id": "32d49f59-0619-4dff-a673-6cbc7dffbbae",
+                  "text": "Explore the station",
+                  "condition": null
+                },
+                {
+                  "id": "32ddf442-83e8-4c4e-b77c-cc69b9912bdb",
+                  "text": "Visit the bar",
+                  "condition": null
+                },
+                {
+                  "id": "206e3f68-d93a-4c43-9a66-08847157a598",
+                  "text": "Review mission briefing",
+                  "condition": null
+                }
+              ]
+            }
+          },
+          "position": [
+            1300.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "1363814c-943e-4c71-baa6-6bb18748d8e7",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "78c5f352-ae3a-43ad-85bf-c6955d66d214",
+              "direction": "Output",
+              "label": "Report to Commander Voss"
+            },
+            {
+              "id": "fad3c02d-98f9-477f-9ebc-e6b91894bf6d",
+              "direction": "Output",
+              "label": "Explore the station"
+            },
+            {
+              "id": "383c1a87-3b8e-4cca-bde9-203d287411e8",
+              "direction": "Output",
+              "label": "Visit the bar"
+            },
+            {
+              "id": "7a16cadd-f538-41d8-bafc-754637744d7e",
+              "direction": "Output",
+              "label": "Review mission briefing"
+            }
+          ]
+        },
+        "771cf224-6dd7-48c1-bb80-362754c3a7d9": {
+          "id": "771cf224-6dd7-48c1-bb80-362754c3a7d9",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "encounters",
+                  "value": {
+                    "Int": 1
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            2300.0,
+            650.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "0b545293-00f5-498b-9f23-8ed8ceb0af73",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "6329581e-4530-48bd-a2b9-d39db05544e3",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "784793d9-96e6-45f8-a1d7-421c25304e70": {
+          "id": "784793d9-96e6-45f8-a1d7-421c25304e70",
+          "node_type": {
+            "End": {
+              "tag": "act1_complete"
+            }
+          },
+          "position": [
+            2900.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "c9eec975-3692-4a7c-bdb4-d1e08dc3734c",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "9014b902-43bc-4bdf-b2a5-2655f86433f7": {
+          "id": "9014b902-43bc-4bdf-b2a5-2655f86433f7",
+          "node_type": {
+            "End": {
+              "tag": "weapon_bought"
+            }
+          },
+          "position": [
+            2600.0,
+            800.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "30c144a7-cf75-45e2-9d12-f0992bddfbc5",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "916f558f-0f5e-4f38-9776-081cd7196c27": {
+          "id": "916f558f-0f5e-4f38-9776-081cd7196c27",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "32c25667-f3c0-4ea9-bf69-d94433cb766d",
+              "speaker_name": "Zeph",
+              "text": "Psst! Hey, you look official. Name's Zeph. I deal in information — and occasionally other things. Interested?",
+              "emotion": "happy",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1700.0,
+            700.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "61b169c7-9dac-41c8-9a28-e2998fad1eee",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "f04336b0-a14c-427f-9764-91100949bef7",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "93e9d68f-abc4-4cc7-a4e7-e7cb49ee5988": {
+          "id": "93e9d68f-abc4-4cc7-a4e7-e7cb49ee5988",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "b2526a8f-6b60-43e5-b1a8-5691e855be52",
+              "speaker_name": "Commander Voss",
+              "text": "The Solari Dominion wants expansion rights. The Umbral Collective demands isolation. Find common ground before they tear this station apart.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {
+                "quest_hook": "true"
+              }
+            }
+          },
+          "position": [
+            2300.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "f8e5328c-af15-4bca-a613-be81808780ea",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "d31f56fe-f33c-4dc4-924e-52f616c6ea02",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "9c08acd4-0d51-40c6-adc1-3298a55b9c84": {
+          "id": "9c08acd4-0d51-40c6-adc1-3298a55b9c84",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "StartQuest",
+                  "key": "diplomatic_mission",
+                  "value": {
+                    "Bool": true
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            2000.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "62b85db4-00b6-41b7-bc60-2a0b8e62a9c2",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "601c3b6d-fa48-46c4-bdf5-2a40b6b77f5c",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "a198cc85-378b-4875-b86a-20e6c3977a00": {
+          "id": "a198cc85-378b-4875-b86a-20e6c3977a00",
+          "node_type": {
+            "End": {
+              "tag": "briefing_read"
+            }
+          },
+          "position": [
+            2000.0,
+            950.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "40621ec5-345f-4068-ae4f-4d92cb6d615f",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "af68663b-bae8-48b1-8597-8e9e9ffb5bb3": {
+          "id": "af68663b-bae8-48b1-8597-8e9e9ffb5bb3",
+          "node_type": "Start",
+          "position": [
+            100.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "e9303a9d-6eb0-4eda-9819-31a356ed37de",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "c3070e69-3bbd-49ef-8094-a9ca1b49b414": {
+          "id": "c3070e69-3bbd-49ef-8094-a9ca1b49b414",
+          "node_type": {
+            "End": {
+              "tag": "weapon_refused"
+            }
+          },
+          "position": [
+            2600.0,
+            650.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "71af647c-fd84-400b-a0a6-0bd50aeb67b3",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "e4e6f384-ba17-48ed-a81f-85912de4efea": {
+          "id": "e4e6f384-ba17-48ed-a81f-85912de4efea",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "Commander Voss has requested your presence in the command center. However, you are free to explore the station first. Tensions between the Solari and Umbral delegations are... elevated.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1000.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "d0a3a061-f275-4d72-8455-3ed5b4601cfc",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "37e8a374-c8f8-486d-aac0-84425c72586d",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "e87dfe7d-5e50-4c09-b7e9-ef32c8a304f1": {
+          "id": "e87dfe7d-5e50-4c09-b7e9-ef32c8a304f1",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "chapter",
+                  "value": {
+                    "Int": 1
+                  }
+                },
+                {
+                  "action_type": "PlaySound",
+                  "key": "station_ambient.wav",
+                  "value": {
+                    "Bool": true
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            700.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "34f365c1-f800-4719-958f-4ae3c75c7c51",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "935d8852-5dd2-419c-9fd8-aa7972a7a5b7",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "ea70c135-270e-46ba-bdb3-b23474ef548e": {
+          "id": "ea70c135-270e-46ba-bdb3-b23474ef548e",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "You are now oriented. The diplomatic sessions can begin whenever you are ready. Good luck, {player_name}.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            2600.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "2e66f57e-863f-4cda-b846-8fb1461b7c9e",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "55af4797-0903-4830-8297-70aeec284f5e",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        }
+      },
+      "connections": [
+        {
+          "id": "511f723c-7c7b-4c8e-a0b7-86ca7870e702",
+          "from_node": "076063d7-c611-4c85-bc1d-fe3fe8dcced3",
+          "from_port": "1d89139d-860c-4da4-be71-56f79a026293",
+          "to_node": "e87dfe7d-5e50-4c09-b7e9-ef32c8a304f1",
+          "to_port": "34f365c1-f800-4719-958f-4ae3c75c7c51"
+        },
+        {
+          "id": "c188d4ee-b9a9-4c37-b251-49fba28bae21",
+          "from_node": "0b64c75a-9a54-42a2-a56f-2c9449cd4b31",
+          "from_port": "79fc1463-0d20-478c-82d2-b1cb5c181e68",
+          "to_node": "9014b902-43bc-4bdf-b2a5-2655f86433f7",
+          "to_port": "30c144a7-cf75-45e2-9d12-f0992bddfbc5"
+        },
+        {
+          "id": "440f96e0-aa16-4c4a-b1f8-690fe6fe9447",
+          "from_node": "34bdb6dd-09a1-4fed-a19e-fcea3284c6df",
+          "from_port": "fbe5afc8-b793-404f-b52e-0ecf317dbc28",
+          "to_node": "a198cc85-378b-4875-b86a-20e6c3977a00",
+          "to_port": "40621ec5-345f-4068-ae4f-4d92cb6d615f"
+        },
+        {
+          "id": "6e97e91c-5f85-4423-b6c2-6e6ab5cd8925",
+          "from_node": "3571589f-a448-499e-8204-76e7d403c295",
+          "from_port": "139447b8-0535-4ddc-88d1-9a1aa69d2e43",
+          "to_node": "3097e04b-63d3-4946-b381-f388f8de7bfb",
+          "to_port": "1167ab37-4fdd-47f6-adb3-82d729775bb6"
+        },
+        {
+          "id": "2c0fbf8d-f357-4dd1-a4f7-d32c4b84d3a1",
+          "from_node": "52a641b4-6eba-4bc5-84f9-105becf51f3f",
+          "from_port": "5b5edfc7-34f8-4778-80f1-0fb799653179",
+          "to_node": "9c08acd4-0d51-40c6-adc1-3298a55b9c84",
+          "to_port": "62b85db4-00b6-41b7-bc60-2a0b8e62a9c2"
+        },
+        {
+          "id": "5d464d1b-d0cb-494a-bb9d-cea51e888ef0",
+          "from_node": "7416a140-867d-4896-ad8f-75f80b5892cd",
+          "from_port": "cd2e5912-aef8-4706-bb7d-84c4b0cd1f08",
+          "to_node": "771cf224-6dd7-48c1-bb80-362754c3a7d9",
+          "to_port": "0b545293-00f5-498b-9f23-8ed8ceb0af73"
+        },
+        {
+          "id": "fc0fa7af-619b-4a0e-9c0c-841d4a4128f1",
+          "from_node": "7416a140-867d-4896-ad8f-75f80b5892cd",
+          "from_port": "e495e60b-da0d-426b-b69b-caa35d4a863e",
+          "to_node": "0b64c75a-9a54-42a2-a56f-2c9449cd4b31",
+          "to_port": "7fafd56b-b52e-4cdf-acf7-8965835f734c"
+        },
+        {
+          "id": "5e7a2ad8-e272-43be-baa7-b1db38a16cdb",
+          "from_node": "75e95b1b-e486-4729-b6fe-c4aaf992158d",
+          "from_port": "383c1a87-3b8e-4cca-bde9-203d287411e8",
+          "to_node": "916f558f-0f5e-4f38-9776-081cd7196c27",
+          "to_port": "61b169c7-9dac-41c8-9a28-e2998fad1eee"
+        },
+        {
+          "id": "724a2cc5-6688-4762-8852-87fe3c647ed5",
+          "from_node": "75e95b1b-e486-4729-b6fe-c4aaf992158d",
+          "from_port": "78c5f352-ae3a-43ad-85bf-c6955d66d214",
+          "to_node": "52a641b4-6eba-4bc5-84f9-105becf51f3f",
+          "to_port": "630d58ee-a855-41ac-8e8f-cccdacfcf682"
+        },
+        {
+          "id": "2997922c-2ae2-45c5-ad06-3f362755aa00",
+          "from_node": "75e95b1b-e486-4729-b6fe-c4aaf992158d",
+          "from_port": "7a16cadd-f538-41d8-bafc-754637744d7e",
+          "to_node": "34bdb6dd-09a1-4fed-a19e-fcea3284c6df",
+          "to_port": "77fc0120-ea5c-450d-8a45-519190402570"
+        },
+        {
+          "id": "864d03ac-44db-4de9-a5ed-4c065e2bbb81",
+          "from_node": "75e95b1b-e486-4729-b6fe-c4aaf992158d",
+          "from_port": "fad3c02d-98f9-477f-9ebc-e6b91894bf6d",
+          "to_node": "3571589f-a448-499e-8204-76e7d403c295",
+          "to_port": "ef7995c5-9ddd-44cb-a0a6-49be07e7d046"
+        },
+        {
+          "id": "e7cb447d-265e-4acb-866b-25365a248f43",
+          "from_node": "771cf224-6dd7-48c1-bb80-362754c3a7d9",
+          "from_port": "6329581e-4530-48bd-a2b9-d39db05544e3",
+          "to_node": "c3070e69-3bbd-49ef-8094-a9ca1b49b414",
+          "to_port": "71af647c-fd84-400b-a0a6-0bd50aeb67b3"
+        },
+        {
+          "id": "8e853f63-3062-4b50-923c-68f7ee7ec192",
+          "from_node": "916f558f-0f5e-4f38-9776-081cd7196c27",
+          "from_port": "f04336b0-a14c-427f-9764-91100949bef7",
+          "to_node": "7416a140-867d-4896-ad8f-75f80b5892cd",
+          "to_port": "898de263-7d97-4de3-aa49-086372fdadc9"
+        },
+        {
+          "id": "29a9e8b3-912c-49db-b733-17bc828ca30e",
+          "from_node": "93e9d68f-abc4-4cc7-a4e7-e7cb49ee5988",
+          "from_port": "d31f56fe-f33c-4dc4-924e-52f616c6ea02",
+          "to_node": "ea70c135-270e-46ba-bdb3-b23474ef548e",
+          "to_port": "2e66f57e-863f-4cda-b846-8fb1461b7c9e"
+        },
+        {
+          "id": "9ecdb1d0-ec38-4731-84e9-f1c19639585d",
+          "from_node": "9c08acd4-0d51-40c6-adc1-3298a55b9c84",
+          "from_port": "601c3b6d-fa48-46c4-bdf5-2a40b6b77f5c",
+          "to_node": "93e9d68f-abc4-4cc7-a4e7-e7cb49ee5988",
+          "to_port": "f8e5328c-af15-4bca-a613-be81808780ea"
+        },
+        {
+          "id": "f0cf1bd0-40cc-4f46-9645-536bd9af6f5d",
+          "from_node": "af68663b-bae8-48b1-8597-8e9e9ffb5bb3",
+          "from_port": "e9303a9d-6eb0-4eda-9819-31a356ed37de",
+          "to_node": "076063d7-c611-4c85-bc1d-fe3fe8dcced3",
+          "to_port": "aba2e5a3-96dc-4d9e-b9d5-72da6f241940"
+        },
+        {
+          "id": "80d97ec2-b511-48d6-80c3-3b739b27025d",
+          "from_node": "e4e6f384-ba17-48ed-a81f-85912de4efea",
+          "from_port": "37e8a374-c8f8-486d-aac0-84425c72586d",
+          "to_node": "75e95b1b-e486-4729-b6fe-c4aaf992158d",
+          "to_port": "1363814c-943e-4c71-baa6-6bb18748d8e7"
+        },
+        {
+          "id": "e2534bc6-c989-4af5-a09f-2c2cc452a5ba",
+          "from_node": "e87dfe7d-5e50-4c09-b7e9-ef32c8a304f1",
+          "from_port": "935d8852-5dd2-419c-9fd8-aa7972a7a5b7",
+          "to_node": "e4e6f384-ba17-48ed-a81f-85912de4efea",
+          "to_port": "d0a3a061-f275-4d72-8455-3ed5b4601cfc"
+        },
+        {
+          "id": "b4b7eddd-f471-42c5-aab2-4eef3d99dd10",
+          "from_node": "ea70c135-270e-46ba-bdb3-b23474ef548e",
+          "from_port": "55af4797-0903-4830-8297-70aeec284f5e",
+          "to_node": "784793d9-96e6-45f8-a1d7-421c25304e70",
+          "to_port": "c9eec975-3692-4a7c-bdb4-d1e08dc3734c"
+        }
+      ],
+      "variables": [
+        {
+          "id": "e0e6b0dc-fe81-42ca-8057-c09b246558a4",
+          "name": "chapter",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 1
+          }
+        },
+        {
+          "id": "e3ec3aa0-a7e5-4f26-8d61-3b30df8bb264",
+          "name": "credits",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 500
+          }
+        },
+        {
+          "id": "eac19a3d-7a53-4c9c-81d3-806cfd1060ae",
+          "name": "discovered_conspiracy",
+          "var_type": "Bool",
+          "default_value": {
+            "Bool": false
+          }
+        },
+        {
+          "id": "6a449882-586e-4655-aad5-6a9d42957bd7",
+          "name": "encounters",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "3e472045-f206-4ead-8a93-0dc2ea35cf49",
+          "name": "faction_reputation_solari",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "62bebddd-8001-49a6-b100-0950bd91c905",
+          "name": "faction_reputation_umbral",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "aa7d4e10-5421-43c4-b494-c8adaec0f3d5",
+          "name": "has_evidence",
+          "var_type": "Bool",
+          "default_value": {
+            "Bool": false
+          }
+        },
+        {
+          "id": "57cd20ed-990a-44f1-98da-8f73f63e79cd",
+          "name": "has_weapon",
+          "var_type": "Bool",
+          "default_value": {
+            "Bool": false
+          }
+        },
+        {
+          "id": "19ae5979-03c7-460a-854d-3090ece6797d",
+          "name": "peace_progress",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "e9141bc9-7ae4-4640-bec4-74bb22bea1fb",
+          "name": "player_name",
+          "var_type": "Text",
+          "default_value": {
+            "Text": "Agent"
+          }
+        },
+        {
+          "id": "ab1027a4-11d8-478f-88de-4b6957280555",
+          "name": "trust_elara",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "2868ecbf-3417-42d1-be6b-a323b92782cf",
+          "name": "trust_kael",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        }
+      ],
+      "characters": [
+        {
+          "id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+          "name": "ARIA",
+          "color": [
+            100,
+            200,
+            220,
+            255
+          ],
+          "portrait_path": "portraits/aria.png",
+          "voice_id": "aria_synthetic_v2",
+          "relationships": []
+        },
+        {
+          "id": "f5ff1ea6-c277-4481-8967-7a34602e6328",
+          "name": "Ambassador Kael",
+          "color": [
+            220,
+            190,
+            80,
+            255
+          ],
+          "portrait_path": "portraits/kael.png",
+          "voice_id": null,
+          "relationships": [
+            {
+              "name": "Loyalty",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "b2526a8f-6b60-43e5-b1a8-5691e855be52",
+          "name": "Commander Voss",
+          "color": [
+            120,
+            144,
+            180,
+            255
+          ],
+          "portrait_path": "portraits/voss.png",
+          "voice_id": null,
+          "relationships": [
+            {
+              "name": "Trust",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            },
+            {
+              "name": "Respect",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "4e9448cf-ec0a-42e3-862b-404e98d7cab9",
+          "name": "Dr. Elara Chen",
+          "color": [
+            180,
+            220,
+            140,
+            255
+          ],
+          "portrait_path": "portraits/elara.png",
+          "voice_id": null,
+          "relationships": [
+            {
+              "name": "Trust",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "9e85ac7b-6b03-4afd-91c3-1a740d13d5b0",
+          "name": "Elder Saya",
+          "color": [
+            200,
+            200,
+            200,
+            255
+          ],
+          "portrait_path": "portraits/saya.png",
+          "voice_id": null,
+          "relationships": []
+        },
+        {
+          "id": "7b4bbb29-f627-4592-8564-ddb666502e56",
+          "name": "Warden Thrix",
+          "color": [
+            160,
+            80,
+            180,
+            255
+          ],
+          "portrait_path": "portraits/thrix.png",
+          "voice_id": null,
+          "relationships": []
+        },
+        {
+          "id": "32c25667-f3c0-4ea9-bf69-d94433cb766d",
+          "name": "Zeph",
+          "color": [
+            220,
+            140,
+            60,
+            255
+          ],
+          "portrait_path": "portraits/zeph.png",
+          "voice_id": null,
+          "relationships": []
+        }
+      ],
+      "groups": [],
+      "review_statuses": {},
+      "comments": [],
+      "node_tags": {},
+      "locale": {
+        "default_locale": "en",
+        "extra_locales": [],
+        "translations": {}
+      },
+      "barks": {},
+      "quests": [],
+      "world_entities": [],
+      "timelines": []
+    }
+  },
+  {
+    "id": 2,
+    "timestamp": "2026-02-01 14:30:00 UTC",
+    "description": "Acts 1-2 complete",
+    "graph": {
+      "nodes": {
+        "0235049b-decd-4ddd-b0bf-961456a36501": {
+          "id": "0235049b-decd-4ddd-b0bf-961456a36501",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "7b4bbb29-f627-4592-8564-ddb666502e56",
+              "speaker_name": "Warden Thrix",
+              "text": "You. Diplomat. I am Warden Thrix of the Umbral Collective. Speak quickly — I have little patience for politics.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            3500.0,
+            400.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "27792162-1b16-4008-bf45-515d3fb09d8e",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "c616ebaa-6b69-41fb-b1dc-b882f8198a88",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "0307a7dc-cfd9-4166-b712-e1c1b7cb534e": {
+          "id": "0307a7dc-cfd9-4166-b712-e1c1b7cb534e",
+          "node_type": {
+            "End": {
+              "tag": "tour_complete"
+            }
+          },
+          "position": [
+            2000.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "af8f1e84-2fa3-4567-9524-4722a5a95d98",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "2d4fe58b-5813-4404-b31d-db0c933fc814": {
+          "id": "2d4fe58b-5813-4404-b31d-db0c933fc814",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "StartQuest",
+                  "key": "smugglers_deal",
+                  "value": {
+                    "Bool": true
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            3800.0,
+            1000.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "0304302c-f4b6-4696-b819-f846538ed814",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "01c4ff87-aaef-4ca6-b3fc-97d83b17bd3e",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "2f691f03-49bc-4b01-9163-e83daab0dad6": {
+          "id": "2f691f03-49bc-4b01-9163-e83daab0dad6",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "discovered_conspiracy",
+                  "value": {
+                    "Bool": true
+                  }
+                },
+                {
+                  "action_type": "SetVariable",
+                  "key": "peace_progress",
+                  "value": {
+                    "Int": 1
+                  }
+                },
+                {
+                  "action_type": "SetVariable",
+                  "key": "has_evidence",
+                  "value": {
+                    "Bool": true
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            4700.0,
+            650.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "9e8889e8-bdd8-4833-86e6-0befa159f52e",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "ee08f15a-47a3-4025-9ca7-baf1fd4df165",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "2fd7707c-fc47-4771-b660-db72f804d92e": {
+          "id": "2fd7707c-fc47-4771-b660-db72f804d92e",
+          "node_type": {
+            "Choice": {
+              "prompt": "Zeph offers you a compact neural disruptor.",
+              "choices": [
+                {
+                  "id": "04991d48-a765-4a82-9511-bcb6baa6b0cf",
+                  "text": "No thanks. I work by the book.",
+                  "condition": null
+                },
+                {
+                  "id": "aa12cbe1-854c-4043-9dc5-6d9601fb49e8",
+                  "text": "How much?",
+                  "condition": null
+                }
+              ]
+            }
+          },
+          "position": [
+            2000.0,
+            700.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "e1502424-5677-45e8-ab08-452017783c9f",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "48694729-c255-4e2d-8c26-4427d1337919",
+              "direction": "Output",
+              "label": "Refuse"
+            },
+            {
+              "id": "db77c570-1f55-4f31-934d-55732982bd02",
+              "direction": "Output",
+              "label": "Buy weapon"
+            }
+          ]
+        },
+        "2fda72fe-75b9-4277-a115-fa080b9d58d2": {
+          "id": "2fda72fe-75b9-4277-a115-fa080b9d58d2",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "encounters",
+                  "value": {
+                    "Int": 1
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            2300.0,
+            650.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "c1f7e641-7baf-4e27-8299-f3d0b6b3265b",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "7c81198c-66ab-4bb3-9924-8522b406d9d5",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "3703bdea-390a-442a-891a-5e3acd1e3e92": {
+          "id": "3703bdea-390a-442a-891a-5e3acd1e3e92",
+          "node_type": {
+            "Random": {
+              "branches": [
+                {
+                  "id": "9e754820-25e4-4531-89f1-a59746faf823",
+                  "weight": 0.4
+                },
+                {
+                  "id": "52bd5607-ad63-4a63-9092-04ec70fdf6ff",
+                  "weight": 0.35
+                },
+                {
+                  "id": "b9765cfa-170f-4162-b416-d4be295d467d",
+                  "weight": 0.25
+                }
+              ]
+            }
+          },
+          "position": [
+            3800.0,
+            400.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "1d20af8a-d9e0-438b-b1d8-f098f6287c47",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "aa5c36d2-2de1-42b7-bc78-f1adb6ccc7fe",
+              "direction": "Output",
+              "label": "Aggressive (40%)"
+            },
+            {
+              "id": "18b4cbe5-3c7a-4ef7-8272-5e6952b157b7",
+              "direction": "Output",
+              "label": "Neutral (35%)"
+            },
+            {
+              "id": "2522ee1b-6250-42f3-9378-2789e1ed57f7",
+              "direction": "Output",
+              "label": "Respectful (25%)"
+            }
+          ]
+        },
+        "3a220414-8de2-4a63-80a1-d905053fa982": {
+          "id": "3a220414-8de2-4a63-80a1-d905053fa982",
+          "node_type": {
+            "Choice": {
+              "prompt": "What would you like to do?",
+              "choices": [
+                {
+                  "id": "e03446da-3e0b-4ce9-9a47-5427d984c8a0",
+                  "text": "Report to Commander Voss",
+                  "condition": null
+                },
+                {
+                  "id": "5e54e404-06d6-4607-b048-a6e561cdb34a",
+                  "text": "Explore the station",
+                  "condition": null
+                },
+                {
+                  "id": "c68b3473-5fe1-4cda-af95-e4138caaaa06",
+                  "text": "Visit the bar",
+                  "condition": null
+                },
+                {
+                  "id": "c2cc50db-b5b0-475b-9ef1-7935374962f9",
+                  "text": "Review mission briefing",
+                  "condition": null
+                }
+              ]
+            }
+          },
+          "position": [
+            1300.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "c93673ab-4aef-4fde-93a6-9fb537c4ad08",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "a884ea2f-4988-4d64-81b8-1a6fc95ec1fc",
+              "direction": "Output",
+              "label": "Report to Commander Voss"
+            },
+            {
+              "id": "002f38f5-7bf6-4047-a9f1-3079ad73f54f",
+              "direction": "Output",
+              "label": "Explore the station"
+            },
+            {
+              "id": "59a6a21e-fb0d-4e3d-b6b8-48a7d99ab45e",
+              "direction": "Output",
+              "label": "Visit the bar"
+            },
+            {
+              "id": "26537505-6a19-490b-a49d-40b9e25a06db",
+              "direction": "Output",
+              "label": "Review mission briefing"
+            }
+          ]
+        },
+        "3acae8ac-903e-48bb-bfe0-fc948a453a0a": {
+          "id": "3acae8ac-903e-48bb-bfe0-fc948a453a0a",
+          "node_type": {
+            "End": {
+              "tag": "saya_counsel"
+            }
+          },
+          "position": [
+            4100.0,
+            1250.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "713aab79-b93f-4a63-a356-bbc1bad0eafc",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "3ebe152a-7ac0-473d-859c-362f284a51f1": {
+          "id": "3ebe152a-7ac0-473d-859c-362f284a51f1",
+          "node_type": {
+            "End": {
+              "tag": "act1_complete"
+            }
+          },
+          "position": [
+            2900.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "165a7191-32ea-47c4-b39d-4093dbbd642d",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "415f7a43-cf5d-41bb-9d20-5234f7d3bb09": {
+          "id": "415f7a43-cf5d-41bb-9d20-5234f7d3bb09",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "f5ff1ea6-c277-4481-8967-7a34602e6328",
+              "speaker_name": "Ambassador Kael",
+              "text": "Ah, the diplomat arrives. Ambassador Kael of the Solari Dominion. I trust you appreciate the finer points of civilized negotiation.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            3500.0,
+            100.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "067307ae-d0ad-43a9-93f7-87771dab2452",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "a5c282ec-74f5-4cd5-b764-8d3ca0de5b2b",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "41ba3c1d-1575-4578-99fd-5e7a53b22a02": {
+          "id": "41ba3c1d-1575-4578-99fd-5e7a53b22a02",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "Welcome to Station Meridian, {player_name}. I am ARIA, the station's administrative intelligence. Your diplomatic credentials have been verified.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": "audio/aria_welcome.wav",
+              "metadata": {}
+            }
+          },
+          "position": [
+            400.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "2b5cb1d3-9d7e-4296-b22e-59fe3c3dbece",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "826a4b7e-f0bb-4cc0-a613-495f64b0898c",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "463e4c69-ee99-4da3-bf56-94c8de728e05": {
+          "id": "463e4c69-ee99-4da3-bf56-94c8de728e05",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "32c25667-f3c0-4ea9-bf69-d94433cb766d",
+              "speaker_name": "Zeph",
+              "text": "Psst! Hey, you look official. Name's Zeph. I deal in information — and occasionally other things. Interested?",
+              "emotion": "happy",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1700.0,
+            700.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "c2b81914-706a-4154-9986-129eb19c72bc",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "edbe2975-81b2-4114-b955-da930e2f7267",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "4dd68d4f-e6d5-4c0a-bc19-d7389e514ba4": {
+          "id": "4dd68d4f-e6d5-4c0a-bc19-d7389e514ba4",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "StartQuest",
+                  "key": "diplomatic_mission",
+                  "value": {
+                    "Bool": true
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            2000.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "98736247-0632-4d39-80dc-3938953b646c",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "dbe4ad93-b71e-4f2d-89cc-44f3a0fe71aa",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "553f6e6d-8243-4066-90b1-487c45f2cd97": {
+          "id": "553f6e6d-8243-4066-90b1-487c45f2cd97",
+          "node_type": {
+            "End": {
+              "tag": "thrix_neutral"
+            }
+          },
+          "position": [
+            4400.0,
+            400.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "fbfda17b-c05b-4ce5-b201-b1a2e819b5b9",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "59ef3ee2-b1fc-4ed8-9b1c-cf1b29e8b5e8": {
+          "id": "59ef3ee2-b1fc-4ed8-9b1c-cf1b29e8b5e8",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4e9448cf-ec0a-42e3-862b-404e98d7cab9",
+              "speaker_name": "Dr. Elara Chen",
+              "text": "Come back when we know each other better. Some secrets need trust to surface.",
+              "emotion": "sad",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            4400.0,
+            800.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "84f06b0b-b738-4f2b-ad06-08a4e8d9be84",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "500e2363-dfff-42fc-8d74-24ae1b4d8f92",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "66708fce-07f6-44ec-abea-6c3224917389": {
+          "id": "66708fce-07f6-44ec-abea-6c3224917389",
+          "node_type": {
+            "Condition": {
+              "variable_name": "faction_reputation_solari",
+              "operator": "Gt",
+              "value": {
+                "Int": 0
+              }
+            }
+          },
+          "position": [
+            3800.0,
+            100.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "a9c60623-1610-448c-a0c9-07e53a94276d",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "c2a4f870-571f-40dc-90f4-c5fb0030eea0",
+              "direction": "Output",
+              "label": "True"
+            },
+            {
+              "id": "22d7d359-aca1-4e68-9a02-ac8bce1cfac5",
+              "direction": "Output",
+              "label": "False"
+            }
+          ]
+        },
+        "7f9dfaa4-d50b-4662-bb62-61f6d06b0be0": {
+          "id": "7f9dfaa4-d50b-4662-bb62-61f6d06b0be0",
+          "node_type": {
+            "End": {
+              "tag": "elara_not_ready"
+            }
+          },
+          "position": [
+            4700.0,
+            800.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "1aca68ee-e88d-4bcc-9582-c3e2840feb3c",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "829a0c2f-4c8f-4388-ae8f-24a9a0782e6e": {
+          "id": "829a0c2f-4c8f-4388-ae8f-24a9a0782e6e",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "Commander Voss has requested your presence in the command center. However, you are free to explore the station first. Tensions between the Solari and Umbral delegations are... elevated.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1000.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "cf1c0643-88e2-4d87-ac98-67842905b14a",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "6bfdc93d-57d8-4229-a737-63917a09a75e",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "8b4ac94c-4660-4479-bb83-c08cf4667fcc": {
+          "id": "8b4ac94c-4660-4479-bb83-c08cf4667fcc",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "encounters",
+                  "value": {
+                    "Int": 2
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            4400.0,
+            300.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "ca1bb8fd-896a-4450-a6b2-77c853b27d25",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "d1efd830-f54a-45ad-8a55-2b1d44b15008",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "9035aac2-e630-4b1d-8509-f0eb29e6dc0b": {
+          "id": "9035aac2-e630-4b1d-8509-f0eb29e6dc0b",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "f5ff1ea6-c277-4481-8967-7a34602e6328",
+              "speaker_name": "Ambassador Kael",
+              "text": "You have yet to prove yourself to the Dominion. Words are wind, Agent. Show me where your loyalties lie.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            4100.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "a7efbf3e-9fb6-4f31-9814-6dfec19178ec",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "edfb1938-143f-4beb-951c-eb1eae2ed33f",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "91a48568-0c1b-4579-b14f-3b33f619483c": {
+          "id": "91a48568-0c1b-4579-b14f-3b33f619483c",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4e9448cf-ec0a-42e3-862b-404e98d7cab9",
+              "speaker_name": "Dr. Elara Chen",
+              "text": "I haven't told anyone this, but... the signal is artificial. And it's coming from inside the station. Someone on Meridian is broadcasting. The peace talks may be a cover.",
+              "emotion": "scared",
+              "portrait_override": null,
+              "audio_clip": "audio/elara_whisper.wav",
+              "metadata": {}
+            }
+          },
+          "position": [
+            4400.0,
+            650.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "8ddce7ad-d910-4b52-846f-9a6049dce51b",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "fe43be72-fc05-4653-9dd7-c03e7e4ca35f",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "925dfbb8-b24a-4e5b-8283-c5b2ed33c57a": {
+          "id": "925dfbb8-b24a-4e5b-8283-c5b2ed33c57a",
+          "node_type": {
+            "End": {
+              "tag": "thrix_respectful"
+            }
+          },
+          "position": [
+            4400.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "869bf1f6-1fa8-4d65-a508-e5e87524c14a",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "98014263-4d62-4f93-9895-51eddd7a027a": {
+          "id": "98014263-4d62-4f93-9895-51eddd7a027a",
+          "node_type": "Start",
+          "position": [
+            100.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "00aa4f27-95d2-40b3-aabf-5e18b8a5598d",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "a3c0ed57-a567-4bfd-b2d9-6849955132cd": {
+          "id": "a3c0ed57-a567-4bfd-b2d9-6849955132cd",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "chapter",
+                  "value": {
+                    "Int": 1
+                  }
+                },
+                {
+                  "action_type": "PlaySound",
+                  "key": "station_ambient.wav",
+                  "value": {
+                    "Bool": true
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            700.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "c340fcc5-3535-4c4a-9f93-3a7acdb1a74e",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "b381f92b-ca8a-49a3-a5e2-84c03e687669",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "a4e866cd-2a59-4c0b-a727-5158cc66e78d": {
+          "id": "a4e866cd-2a59-4c0b-a727-5158cc66e78d",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "You are now oriented. The diplomatic sessions can begin whenever you are ready. Good luck, {player_name}.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            2600.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "11f85c1e-8c84-4a37-b261-19aeed993f76",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "78dc6ae3-e8a8-433f-95d7-29873eeeed22",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "a4fa6b82-f29c-4dad-8938-1b8bd129ce5a": {
+          "id": "a4fa6b82-f29c-4dad-8938-1b8bd129ce5a",
+          "node_type": {
+            "End": {
+              "tag": "weapon_refused"
+            }
+          },
+          "position": [
+            2600.0,
+            650.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "2458df88-6e9a-412c-b7bb-a6003e3fe50d",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "a79d2035-e50d-4974-b805-204ef1374beb": {
+          "id": "a79d2035-e50d-4974-b805-204ef1374beb",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "7b4bbb29-f627-4592-8564-ddb666502e56",
+              "speaker_name": "Warden Thrix",
+              "text": "Perhaps you are different from the usual diplomats. There is steel in your eyes. The Collective respects strength.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            4100.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "deb469e9-702f-486a-b2ae-31f07951332d",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "dd018fab-010f-436e-b243-0827a7fc43a3",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "a8e4fd1b-332f-4144-96a3-d80d73625c06": {
+          "id": "a8e4fd1b-332f-4144-96a3-d80d73625c06",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "b2526a8f-6b60-43e5-b1a8-5691e855be52",
+              "speaker_name": "Commander Voss",
+              "text": "Agent. I'm Commander Voss. This station is a powder keg and you're the only diplomat the Council could spare. No pressure.",
+              "emotion": "neutral",
+              "portrait_override": "portraits/voss_serious.png",
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1700.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "b2a2280d-fbf0-46fe-821a-3a42fdf0a39c",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "6f04681f-39dd-4db4-8454-f730f56d48d2",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "b1239d15-4b98-45ef-9787-4c1f058cf00f": {
+          "id": "b1239d15-4b98-45ef-9787-4c1f058cf00f",
+          "node_type": {
+            "Condition": {
+              "variable_name": "trust_elara",
+              "operator": "Gte",
+              "value": {
+                "Int": 2
+              }
+            }
+          },
+          "position": [
+            4100.0,
+            700.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "2914d745-2352-444e-8eec-bc8f2cb24944",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "e280cdca-1cc0-40b3-a67f-d07c1f42f1e4",
+              "direction": "Output",
+              "label": "True"
+            },
+            {
+              "id": "ad13f5a0-2e15-4068-9cef-b1d11b0f541e",
+              "direction": "Output",
+              "label": "False"
+            }
+          ]
+        },
+        "b4bbd705-222a-4a6d-b67e-88f0035a4804": {
+          "id": "b4bbd705-222a-4a6d-b67e-88f0035a4804",
+          "node_type": {
+            "End": {
+              "tag": "weapon_bought"
+            }
+          },
+          "position": [
+            2600.0,
+            800.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "e262e92f-9a47-440c-ae9e-626059d25c33",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "be6794a9-7184-430f-94e8-7fd07ed35cc1": {
+          "id": "be6794a9-7184-430f-94e8-7fd07ed35cc1",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "7b4bbb29-f627-4592-8564-ddb666502e56",
+              "speaker_name": "Warden Thrix",
+              "text": "State your business. The Collective's position is non-negotiable, but I will hear you out. Once.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            4100.0,
+            400.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "f08c9c21-bbd0-4194-890c-c79719283720",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "f802dcbc-800c-4cf1-b697-4769f8c4cfb2",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "bf06160e-6f62-4d0c-8237-24cfb4418a1c": {
+          "id": "bf06160e-6f62-4d0c-8237-24cfb4418a1c",
+          "node_type": {
+            "End": {
+              "tag": "kael_cold_reception"
+            }
+          },
+          "position": [
+            4400.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "c04d2092-308f-4b86-928d-f97eacc187fb",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "c35178b1-7ff8-436c-8081-931975d97af9": {
+          "id": "c35178b1-7ff8-436c-8081-931975d97af9",
+          "node_type": {
+            "SubGraph": {
+              "name": "Station Tour",
+              "child_graph": {
+                "nodes": {
+                  "051adacd-f3ba-4f41-8b7c-4ed520fcdad8": {
+                    "id": "051adacd-f3ba-4f41-8b7c-4ed520fcdad8",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+                        "speaker_name": "ARIA",
+                        "text": "The observation deck offers a view of the Veil Nebula. Many find it calming. I find it... data-rich.",
+                        "emotion": "neutral",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      1000.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "0bac62a0-f9c8-41a1-b994-4cad4b5b22a7",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "6f171cad-6693-455f-b482-1c43cdaf6814",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "500801cd-661c-4e22-9058-fd6a8af4654d": {
+                    "id": "500801cd-661c-4e22-9058-fd6a8af4654d",
+                    "node_type": "Start",
+                    "position": [
+                      100.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [],
+                    "outputs": [
+                      {
+                        "id": "45beeb39-9d74-43e8-a5d0-db4d4ec35fa8",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "8e73b294-e9d1-47a1-952b-33ef538c090b": {
+                    "id": "8e73b294-e9d1-47a1-952b-33ef538c090b",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+                        "speaker_name": "ARIA",
+                        "text": "The docking bay processes all arrivals. Security scanners ensure no contraband enters the station.",
+                        "emotion": "neutral",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      400.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "2102c250-8c75-42c6-a614-77d2300383fe",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "1f392b3e-de7b-4567-ad77-d78d2d42191a",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "9df50aea-5a35-4264-a160-b545e10eba64": {
+                    "id": "9df50aea-5a35-4264-a160-b545e10eba64",
+                    "node_type": {
+                      "End": {
+                        "tag": ""
+                      }
+                    },
+                    "position": [
+                      1300.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "87eb02dd-f838-40e5-8b90-89335c611435",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": []
+                  },
+                  "bd70d3c0-f507-45c9-b71f-6bc12f8a4bb8": {
+                    "id": "bd70d3c0-f507-45c9-b71f-6bc12f8a4bb8",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+                        "speaker_name": "ARIA",
+                        "text": "The commons area serves all three factions. Neutral ground — though 'neutral' is a generous term lately.",
+                        "emotion": "neutral",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      700.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "e679a605-dac9-42d0-8532-bee8e121cea7",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "d1901f57-6bd1-4f1e-b57e-5214f67fbe98",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  }
+                },
+                "connections": [
+                  {
+                    "id": "d2604b03-75b2-4d18-9fa8-7e98670f1c43",
+                    "from_node": "051adacd-f3ba-4f41-8b7c-4ed520fcdad8",
+                    "from_port": "6f171cad-6693-455f-b482-1c43cdaf6814",
+                    "to_node": "9df50aea-5a35-4264-a160-b545e10eba64",
+                    "to_port": "87eb02dd-f838-40e5-8b90-89335c611435"
+                  },
+                  {
+                    "id": "a9a3ea3c-f6e4-4885-8d71-75f9cf251e03",
+                    "from_node": "500801cd-661c-4e22-9058-fd6a8af4654d",
+                    "from_port": "45beeb39-9d74-43e8-a5d0-db4d4ec35fa8",
+                    "to_node": "8e73b294-e9d1-47a1-952b-33ef538c090b",
+                    "to_port": "2102c250-8c75-42c6-a614-77d2300383fe"
+                  },
+                  {
+                    "id": "5527f7e3-896f-4686-835e-96ec959a7e98",
+                    "from_node": "8e73b294-e9d1-47a1-952b-33ef538c090b",
+                    "from_port": "1f392b3e-de7b-4567-ad77-d78d2d42191a",
+                    "to_node": "bd70d3c0-f507-45c9-b71f-6bc12f8a4bb8",
+                    "to_port": "e679a605-dac9-42d0-8532-bee8e121cea7"
+                  },
+                  {
+                    "id": "944e1ab1-d562-4e71-b7c2-e379a8222afe",
+                    "from_node": "bd70d3c0-f507-45c9-b71f-6bc12f8a4bb8",
+                    "from_port": "d1901f57-6bd1-4f1e-b57e-5214f67fbe98",
+                    "to_node": "051adacd-f3ba-4f41-8b7c-4ed520fcdad8",
+                    "to_port": "0bac62a0-f9c8-41a1-b994-4cad4b5b22a7"
+                  }
+                ],
+                "variables": [],
+                "characters": [],
+                "groups": [],
+                "review_statuses": {},
+                "comments": [],
+                "node_tags": {},
+                "locale": {
+                  "default_locale": "en",
+                  "extra_locales": [],
+                  "translations": {}
+                },
+                "barks": {},
+                "quests": [],
+                "world_entities": [],
+                "timelines": []
+              }
+            }
+          },
+          "position": [
+            1700.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "adf791b2-55a5-4215-9aeb-0607ac4f164f",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "e914ca03-f199-47c8-84b2-c4423257d5d4",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "c93b126f-1e21-41df-9766-ab8e899e899c": {
+          "id": "c93b126f-1e21-41df-9766-ab8e899e899c",
+          "node_type": {
+            "End": {
+              "tag": "thrix_met"
+            }
+          },
+          "position": [
+            4700.0,
+            400.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "8cfb8c08-c9a1-40f1-8c82-b807930a07b3",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "cdf20896-06e3-4d5c-addc-bf83b90ac46b": {
+          "id": "cdf20896-06e3-4d5c-addc-bf83b90ac46b",
+          "node_type": {
+            "Choice": {
+              "prompt": "The station buzzes with activity. Where do you go?",
+              "choices": [
+                {
+                  "id": "499a6eaf-3de6-4f6d-9832-44c98d18206f",
+                  "text": "Meet Ambassador Kael (Solari)",
+                  "condition": null
+                },
+                {
+                  "id": "18cda17d-ad41-4fd9-9d3d-91515b1950b2",
+                  "text": "Speak with Warden Thrix (Umbral)",
+                  "condition": null
+                },
+                {
+                  "id": "16128dc3-4f64-4268-8eec-7e0b855e7253",
+                  "text": "Visit Dr. Elara's lab",
+                  "condition": null
+                },
+                {
+                  "id": "542d3a74-2789-4061-a79f-f01fb8a55e62",
+                  "text": "Help Zeph with a delivery",
+                  "condition": {
+                    "variable_name": "encounters",
+                    "operator": "Gte",
+                    "value": {
+                      "Int": 1
+                    }
+                  }
+                },
+                {
+                  "id": "cd9ceead-e3e9-423c-a6a0-8543986ad414",
+                  "text": "Seek Elder Saya's counsel",
+                  "condition": null
+                }
+              ]
+            }
+          },
+          "position": [
+            3100.0,
+            500.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "2aa14c95-38c0-479d-b7c6-89a2cf6f6690",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "056ab032-093e-4b67-92d4-e85142071125",
+              "direction": "Output",
+              "label": "Kael (Solari)"
+            },
+            {
+              "id": "da229af5-ab8c-40eb-9384-91320d15cdce",
+              "direction": "Output",
+              "label": "Thrix (Umbral)"
+            },
+            {
+              "id": "60b2ab54-0ec6-466f-9325-0740fbe76cd0",
+              "direction": "Output",
+              "label": "Elara's Lab"
+            },
+            {
+              "id": "1e33629a-d1d3-4a4c-98f7-5d8eae58cd10",
+              "direction": "Output",
+              "label": "Help Zeph"
+            },
+            {
+              "id": "62c38011-db2b-4e99-aded-9eba67c05728",
+              "direction": "Output",
+              "label": "Elder Saya"
+            }
+          ]
+        },
+        "ce818872-2d5e-477f-bf2c-a5379ea69dee": {
+          "id": "ce818872-2d5e-477f-bf2c-a5379ea69dee",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4e9448cf-ec0a-42e3-862b-404e98d7cab9",
+              "speaker_name": "Dr. Elara Chen",
+              "text": "I've been studying what we call the Ancient Signal — a repeating pattern from deep space. Its structure is unlike anything natural. It's... deliberate.",
+              "emotion": "surprised",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            3800.0,
+            700.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "66d555a1-331b-465d-bd67-168713e56146",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "d66148c4-462e-4e28-bf69-6a9347698f89",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "cf6e38d8-7212-4964-b360-cc018e32de01": {
+          "id": "cf6e38d8-7212-4964-b360-cc018e32de01",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "7b4bbb29-f627-4592-8564-ddb666502e56",
+              "speaker_name": "Warden Thrix",
+              "text": "The Umbral Collective does NOT need your interference! We survived centuries in the void alone. We do not bend.",
+              "emotion": "angry",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            4100.0,
+            300.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "46b9720e-5f53-4db9-952a-3611f688847a",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "2174d6fa-8535-4b07-95df-c919b5d7d799",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "dc899014-b44f-467c-af89-ab904433a1f4": {
+          "id": "dc899014-b44f-467c-af89-ab904433a1f4",
+          "node_type": {
+            "End": {
+              "tag": "zeph_quest_started"
+            }
+          },
+          "position": [
+            4100.0,
+            1000.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "b2cf99ef-5e12-437e-b1cb-68ba97ee7513",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "ddace9c4-5056-45ac-99ab-d158819a1daa": {
+          "id": "ddace9c4-5056-45ac-99ab-d158819a1daa",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "b2526a8f-6b60-43e5-b1a8-5691e855be52",
+              "speaker_name": "Commander Voss",
+              "text": "The Solari Dominion wants expansion rights. The Umbral Collective demands isolation. Find common ground before they tear this station apart.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {
+                "quest_hook": "true"
+              }
+            }
+          },
+          "position": [
+            2300.0,
+            200.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "4e02fccb-a3aa-4280-a351-2f30d32c0bc9",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "ff7ac624-8a4a-4e53-b98a-6e0d63f2ba33",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "df1b06f0-ae30-4e84-9b73-ad94887ba678": {
+          "id": "df1b06f0-ae30-4e84-9b73-ad94887ba678",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "peace_progress",
+                  "value": {
+                    "Int": 1
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            3800.0,
+            1250.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "9f41dcd7-2e13-4d16-8551-6081618c2bb6",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "73f0ec9f-4241-4005-8fd2-7fe69211e309",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "ee7e8a97-c2a7-48f3-9b0e-c0aa848f2f88": {
+          "id": "ee7e8a97-c2a7-48f3-9b0e-c0aa848f2f88",
+          "node_type": {
+            "End": {
+              "tag": "briefing_read"
+            }
+          },
+          "position": [
+            2000.0,
+            950.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "5c79d57a-640f-42af-a7ff-0af632edb488",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "f0071c1d-d503-462a-87cf-fa843a0bf614": {
+          "id": "f0071c1d-d503-462a-87cf-fa843a0bf614",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4e9448cf-ec0a-42e3-862b-404e98d7cab9",
+              "speaker_name": "Dr. Elara Chen",
+              "text": "Oh! You must be the new envoy. I'm Dr. Elara Chen, chief science officer. Forgive the mess — I've been analyzing something extraordinary.",
+              "emotion": "happy",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            3500.0,
+            700.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "cc16f4c7-7871-4c30-a5f8-b0e3b53fc536",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "69ca5a95-8a4b-48ad-8e7a-82e05703bd1b",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "f35d108e-9b66-46fd-abcf-3a5e9c8b7c5b": {
+          "id": "f35d108e-9b66-46fd-abcf-3a5e9c8b7c5b",
+          "node_type": {
+            "SubGraph": {
+              "name": "Zeph's Favor",
+              "child_graph": {
+                "nodes": {
+                  "398fbe28-dbee-42d5-9325-4cff5c2c6937": {
+                    "id": "398fbe28-dbee-42d5-9325-4cff5c2c6937",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "32c25667-f3c0-4ea9-bf69-d94433cb766d",
+                        "speaker_name": "Zeph",
+                        "text": "Simple job: deliver this package to bay 7. Don't open it. Don't ask what's inside. Don't... okay, it's definitely not explosives.",
+                        "emotion": "happy",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      400.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "a7baef56-8f13-47af-8466-8fe43187528f",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "90a93300-2d99-4605-a0af-dde18a7212bd",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "606082ff-f4be-4be3-8dd5-0339b84a64ac": {
+                    "id": "606082ff-f4be-4be3-8dd5-0339b84a64ac",
+                    "node_type": {
+                      "End": {
+                        "tag": ""
+                      }
+                    },
+                    "position": [
+                      1000.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "781ed4b1-aa80-41f8-b698-67b80dda6c16",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": []
+                  },
+                  "84ee62f3-a839-40cf-b14e-2df6edc5b4ef": {
+                    "id": "84ee62f3-a839-40cf-b14e-2df6edc5b4ef",
+                    "node_type": {
+                      "Dialogue": {
+                        "speaker_id": "32c25667-f3c0-4ea9-bf69-d94433cb766d",
+                        "speaker_name": "Zeph",
+                        "text": "You're back! And in one piece! That's more than the last courier. Here — your cut.",
+                        "emotion": "happy",
+                        "portrait_override": null,
+                        "audio_clip": null,
+                        "metadata": {}
+                      }
+                    },
+                    "position": [
+                      700.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [
+                      {
+                        "id": "3d364f12-2ed7-4ee8-8a24-3f067a7906c5",
+                        "direction": "Input",
+                        "label": ""
+                      }
+                    ],
+                    "outputs": [
+                      {
+                        "id": "36ecaade-7630-46b0-af70-f6cdedd166e5",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  },
+                  "e1282153-3839-485e-9fa4-b384986e4402": {
+                    "id": "e1282153-3839-485e-9fa4-b384986e4402",
+                    "node_type": "Start",
+                    "position": [
+                      100.0,
+                      200.0
+                    ],
+                    "collapsed": false,
+                    "inputs": [],
+                    "outputs": [
+                      {
+                        "id": "e36b5d71-8b66-4584-8816-074a6e3be907",
+                        "direction": "Output",
+                        "label": ""
+                      }
+                    ]
+                  }
+                },
+                "connections": [
+                  {
+                    "id": "e423f1a0-3ee3-4778-a82e-09eb9442c637",
+                    "from_node": "398fbe28-dbee-42d5-9325-4cff5c2c6937",
+                    "from_port": "90a93300-2d99-4605-a0af-dde18a7212bd",
+                    "to_node": "84ee62f3-a839-40cf-b14e-2df6edc5b4ef",
+                    "to_port": "3d364f12-2ed7-4ee8-8a24-3f067a7906c5"
+                  },
+                  {
+                    "id": "42f1a434-701a-4487-8ee0-8e62f42995df",
+                    "from_node": "84ee62f3-a839-40cf-b14e-2df6edc5b4ef",
+                    "from_port": "36ecaade-7630-46b0-af70-f6cdedd166e5",
+                    "to_node": "606082ff-f4be-4be3-8dd5-0339b84a64ac",
+                    "to_port": "781ed4b1-aa80-41f8-b698-67b80dda6c16"
+                  },
+                  {
+                    "id": "4ae0e977-d56c-40d5-937b-24a83823f118",
+                    "from_node": "e1282153-3839-485e-9fa4-b384986e4402",
+                    "from_port": "e36b5d71-8b66-4584-8816-074a6e3be907",
+                    "to_node": "398fbe28-dbee-42d5-9325-4cff5c2c6937",
+                    "to_port": "a7baef56-8f13-47af-8466-8fe43187528f"
+                  }
+                ],
+                "variables": [],
+                "characters": [],
+                "groups": [],
+                "review_statuses": {},
+                "comments": [],
+                "node_tags": {},
+                "locale": {
+                  "default_locale": "en",
+                  "extra_locales": [],
+                  "translations": {}
+                },
+                "barks": {},
+                "quests": [],
+                "world_entities": [],
+                "timelines": []
+              }
+            }
+          },
+          "position": [
+            3500.0,
+            1000.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "e098221a-75a8-43d2-a645-924a9c42b0cb",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "0962a0a2-4a13-412d-8501-1c59f28b882a",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "f426f165-e845-4f42-b9d5-bc0f96af959c": {
+          "id": "f426f165-e845-4f42-b9d5-bc0f96af959c",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "9e85ac7b-6b03-4afd-91c3-1a740d13d5b0",
+              "speaker_name": "Elder Saya",
+              "text": "The stars speak of convergence, young diplomat. Two rivers that have flowed apart for centuries now rush toward the same sea. Whether they merge or collide depends on you.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            3500.0,
+            1250.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "9d1d85d1-b738-4456-a26e-18390b04cfdb",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "3ded3db7-81dd-40b2-b890-587b7b1e8f5d",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "f519cfba-73cd-4236-869e-5be19c426632": {
+          "id": "f519cfba-73cd-4236-869e-5be19c426632",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "has_weapon",
+                  "value": {
+                    "Bool": true
+                  }
+                },
+                {
+                  "action_type": "RemoveItem",
+                  "key": "credits",
+                  "value": {
+                    "Int": 200
+                  }
+                },
+                {
+                  "action_type": "AddItem",
+                  "key": "neural_disruptor",
+                  "value": {
+                    "Int": 1
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            2300.0,
+            800.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "26286ec8-307a-49cf-b597-6bb1c0810021",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "9608df4e-1889-4444-9b8a-703579d1cc1a",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "f961d0bd-3470-44fe-bf79-4c463d5aeeaf": {
+          "id": "f961d0bd-3470-44fe-bf79-4c463d5aeeaf",
+          "node_type": {
+            "Event": {
+              "actions": [
+                {
+                  "action_type": "SetVariable",
+                  "key": "trust_kael",
+                  "value": {
+                    "Int": 1
+                  }
+                },
+                {
+                  "action_type": "SetVariable",
+                  "key": "encounters",
+                  "value": {
+                    "Int": 2
+                  }
+                }
+              ]
+            }
+          },
+          "position": [
+            4400.0,
+            100.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "09b96b53-722e-4b01-a1c3-c2d5da3e21d5",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "e6afdade-4ec3-4c5d-a682-e57dc750e28d",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "fb5cd156-d234-4449-834f-82e5e3bd9cd3": {
+          "id": "fb5cd156-d234-4449-834f-82e5e3bd9cd3",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "f5ff1ea6-c277-4481-8967-7a34602e6328",
+              "speaker_name": "Ambassador Kael",
+              "text": "I see you understand the Solari vision. Progress through unity, order through strength. We could use an ally like you at the negotiating table.",
+              "emotion": "happy",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            4100.0,
+            0.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "554550d2-1f95-4a84-8591-8f2a3fd2532e",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "fd33bac5-ac04-4b99-b7d8-797435f81d1e",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        },
+        "fd232f39-5ea1-433a-96f9-fd9358116ee2": {
+          "id": "fd232f39-5ea1-433a-96f9-fd9358116ee2",
+          "node_type": {
+            "End": {
+              "tag": "kael_met"
+            }
+          },
+          "position": [
+            4700.0,
+            100.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "0e115176-4609-4d1c-80f1-5ed5548a41b7",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "fd266cff-6b62-4dee-8062-e62cd024a8e1": {
+          "id": "fd266cff-6b62-4dee-8062-e62cd024a8e1",
+          "node_type": {
+            "End": {
+              "tag": "conspiracy_discovered"
+            }
+          },
+          "position": [
+            5000.0,
+            650.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "3da27d87-f555-4bba-9919-496b532c5a77",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": []
+        },
+        "ff4a53b6-1e9d-49fd-a73f-099872bfa7d9": {
+          "id": "ff4a53b6-1e9d-49fd-a73f-099872bfa7d9",
+          "node_type": {
+            "Dialogue": {
+              "speaker_id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+              "speaker_name": "ARIA",
+              "text": "Briefing summary: Station Meridian hosts 3,000 residents. The Solari delegation arrived 72 hours ago. The Umbral contingent arrived 48 hours ago. Three altercations have already been reported.",
+              "emotion": "neutral",
+              "portrait_override": null,
+              "audio_clip": null,
+              "metadata": {}
+            }
+          },
+          "position": [
+            1700.0,
+            950.0
+          ],
+          "collapsed": false,
+          "inputs": [
+            {
+              "id": "646611bd-c4af-493f-a2aa-52450746b2f9",
+              "direction": "Input",
+              "label": ""
+            }
+          ],
+          "outputs": [
+            {
+              "id": "fc4bacb1-eadb-4871-b319-05b3190fc33c",
+              "direction": "Output",
+              "label": ""
+            }
+          ]
+        }
+      },
+      "connections": [
+        {
+          "id": "1e2936d5-5501-4e28-9c4c-91b02d43cefb",
+          "from_node": "0235049b-decd-4ddd-b0bf-961456a36501",
+          "from_port": "c616ebaa-6b69-41fb-b1dc-b882f8198a88",
+          "to_node": "3703bdea-390a-442a-891a-5e3acd1e3e92",
+          "to_port": "1d20af8a-d9e0-438b-b1d8-f098f6287c47"
+        },
+        {
+          "id": "1dee8bc8-48e7-4d21-a8dd-0f24af7b7e07",
+          "from_node": "2d4fe58b-5813-4404-b31d-db0c933fc814",
+          "from_port": "01c4ff87-aaef-4ca6-b3fc-97d83b17bd3e",
+          "to_node": "dc899014-b44f-467c-af89-ab904433a1f4",
+          "to_port": "b2cf99ef-5e12-437e-b1cb-68ba97ee7513"
+        },
+        {
+          "id": "6686abcd-8cf0-401c-8068-bbc573ec793c",
+          "from_node": "2f691f03-49bc-4b01-9163-e83daab0dad6",
+          "from_port": "ee08f15a-47a3-4025-9ca7-baf1fd4df165",
+          "to_node": "fd266cff-6b62-4dee-8062-e62cd024a8e1",
+          "to_port": "3da27d87-f555-4bba-9919-496b532c5a77"
+        },
+        {
+          "id": "e5cb4830-d191-4421-82ea-c32e37bf07a2",
+          "from_node": "2fd7707c-fc47-4771-b660-db72f804d92e",
+          "from_port": "48694729-c255-4e2d-8c26-4427d1337919",
+          "to_node": "2fda72fe-75b9-4277-a115-fa080b9d58d2",
+          "to_port": "c1f7e641-7baf-4e27-8299-f3d0b6b3265b"
+        },
+        {
+          "id": "368ea5b3-2492-4fe6-9607-41a2ddf67c23",
+          "from_node": "2fd7707c-fc47-4771-b660-db72f804d92e",
+          "from_port": "db77c570-1f55-4f31-934d-55732982bd02",
+          "to_node": "f519cfba-73cd-4236-869e-5be19c426632",
+          "to_port": "26286ec8-307a-49cf-b597-6bb1c0810021"
+        },
+        {
+          "id": "3fc5a44e-5df2-49d2-bb5c-fa305da3dcd5",
+          "from_node": "2fda72fe-75b9-4277-a115-fa080b9d58d2",
+          "from_port": "7c81198c-66ab-4bb3-9924-8522b406d9d5",
+          "to_node": "a4fa6b82-f29c-4dad-8938-1b8bd129ce5a",
+          "to_port": "2458df88-6e9a-412c-b7bb-a6003e3fe50d"
+        },
+        {
+          "id": "f392d3a2-bc5a-4cd5-af09-f6d703add1fc",
+          "from_node": "3703bdea-390a-442a-891a-5e3acd1e3e92",
+          "from_port": "18b4cbe5-3c7a-4ef7-8272-5e6952b157b7",
+          "to_node": "be6794a9-7184-430f-94e8-7fd07ed35cc1",
+          "to_port": "f08c9c21-bbd0-4194-890c-c79719283720"
+        },
+        {
+          "id": "7d107213-db4d-40d2-a137-afff2d6a3175",
+          "from_node": "3703bdea-390a-442a-891a-5e3acd1e3e92",
+          "from_port": "2522ee1b-6250-42f3-9378-2789e1ed57f7",
+          "to_node": "a79d2035-e50d-4974-b805-204ef1374beb",
+          "to_port": "deb469e9-702f-486a-b2ae-31f07951332d"
+        },
+        {
+          "id": "a2e1ecae-26b1-4929-a77b-e5a3cb8c7486",
+          "from_node": "3703bdea-390a-442a-891a-5e3acd1e3e92",
+          "from_port": "aa5c36d2-2de1-42b7-bc78-f1adb6ccc7fe",
+          "to_node": "cf6e38d8-7212-4964-b360-cc018e32de01",
+          "to_port": "46b9720e-5f53-4db9-952a-3611f688847a"
+        },
+        {
+          "id": "4b07ab04-eb56-4c77-92c9-31961adb8457",
+          "from_node": "3a220414-8de2-4a63-80a1-d905053fa982",
+          "from_port": "002f38f5-7bf6-4047-a9f1-3079ad73f54f",
+          "to_node": "c35178b1-7ff8-436c-8081-931975d97af9",
+          "to_port": "adf791b2-55a5-4215-9aeb-0607ac4f164f"
+        },
+        {
+          "id": "2098840a-6f63-4d6d-88e6-9b5dc6d3b2e2",
+          "from_node": "3a220414-8de2-4a63-80a1-d905053fa982",
+          "from_port": "26537505-6a19-490b-a49d-40b9e25a06db",
+          "to_node": "ff4a53b6-1e9d-49fd-a73f-099872bfa7d9",
+          "to_port": "646611bd-c4af-493f-a2aa-52450746b2f9"
+        },
+        {
+          "id": "98dfe043-94f0-4fce-80fc-1fca0ad0b33f",
+          "from_node": "3a220414-8de2-4a63-80a1-d905053fa982",
+          "from_port": "59a6a21e-fb0d-4e3d-b6b8-48a7d99ab45e",
+          "to_node": "463e4c69-ee99-4da3-bf56-94c8de728e05",
+          "to_port": "c2b81914-706a-4154-9986-129eb19c72bc"
+        },
+        {
+          "id": "e70eed56-bef1-45c6-829b-57f45cb42a25",
+          "from_node": "3a220414-8de2-4a63-80a1-d905053fa982",
+          "from_port": "a884ea2f-4988-4d64-81b8-1a6fc95ec1fc",
+          "to_node": "a8e4fd1b-332f-4144-96a3-d80d73625c06",
+          "to_port": "b2a2280d-fbf0-46fe-821a-3a42fdf0a39c"
+        },
+        {
+          "id": "695c27bc-6501-40c7-b78a-73884db6765a",
+          "from_node": "415f7a43-cf5d-41bb-9d20-5234f7d3bb09",
+          "from_port": "a5c282ec-74f5-4cd5-b764-8d3ca0de5b2b",
+          "to_node": "66708fce-07f6-44ec-abea-6c3224917389",
+          "to_port": "a9c60623-1610-448c-a0c9-07e53a94276d"
+        },
+        {
+          "id": "12f5f048-d552-4b33-81c2-96255f18bfbd",
+          "from_node": "41ba3c1d-1575-4578-99fd-5e7a53b22a02",
+          "from_port": "826a4b7e-f0bb-4cc0-a613-495f64b0898c",
+          "to_node": "a3c0ed57-a567-4bfd-b2d9-6849955132cd",
+          "to_port": "c340fcc5-3535-4c4a-9f93-3a7acdb1a74e"
+        },
+        {
+          "id": "63aba3d4-bf2f-4c21-b4d2-a620fe60d03a",
+          "from_node": "463e4c69-ee99-4da3-bf56-94c8de728e05",
+          "from_port": "edbe2975-81b2-4114-b955-da930e2f7267",
+          "to_node": "2fd7707c-fc47-4771-b660-db72f804d92e",
+          "to_port": "e1502424-5677-45e8-ab08-452017783c9f"
+        },
+        {
+          "id": "a6c75f97-5a74-41d2-885a-20450ec9e335",
+          "from_node": "4dd68d4f-e6d5-4c0a-bc19-d7389e514ba4",
+          "from_port": "dbe4ad93-b71e-4f2d-89cc-44f3a0fe71aa",
+          "to_node": "ddace9c4-5056-45ac-99ab-d158819a1daa",
+          "to_port": "4e02fccb-a3aa-4280-a351-2f30d32c0bc9"
+        },
+        {
+          "id": "a123d5e3-76b8-4cb3-9ee2-4f11c5bfb788",
+          "from_node": "59ef3ee2-b1fc-4ed8-9b1c-cf1b29e8b5e8",
+          "from_port": "500e2363-dfff-42fc-8d74-24ae1b4d8f92",
+          "to_node": "7f9dfaa4-d50b-4662-bb62-61f6d06b0be0",
+          "to_port": "1aca68ee-e88d-4bcc-9582-c3e2840feb3c"
+        },
+        {
+          "id": "bef56077-b6e8-4f43-9786-38305f90edfe",
+          "from_node": "66708fce-07f6-44ec-abea-6c3224917389",
+          "from_port": "22d7d359-aca1-4e68-9a02-ac8bce1cfac5",
+          "to_node": "9035aac2-e630-4b1d-8509-f0eb29e6dc0b",
+          "to_port": "a7efbf3e-9fb6-4f31-9814-6dfec19178ec"
+        },
+        {
+          "id": "d8fbd547-56a8-4b2e-8aad-5453028a2be9",
+          "from_node": "66708fce-07f6-44ec-abea-6c3224917389",
+          "from_port": "c2a4f870-571f-40dc-90f4-c5fb0030eea0",
+          "to_node": "fb5cd156-d234-4449-834f-82e5e3bd9cd3",
+          "to_port": "554550d2-1f95-4a84-8591-8f2a3fd2532e"
+        },
+        {
+          "id": "0477907c-36a6-47c5-b4fe-4b9201ba4ffa",
+          "from_node": "829a0c2f-4c8f-4388-ae8f-24a9a0782e6e",
+          "from_port": "6bfdc93d-57d8-4229-a737-63917a09a75e",
+          "to_node": "3a220414-8de2-4a63-80a1-d905053fa982",
+          "to_port": "c93673ab-4aef-4fde-93a6-9fb537c4ad08"
+        },
+        {
+          "id": "46ab39b2-28f4-4814-9b41-9d39c6287e5b",
+          "from_node": "8b4ac94c-4660-4479-bb83-c08cf4667fcc",
+          "from_port": "d1efd830-f54a-45ad-8a55-2b1d44b15008",
+          "to_node": "c93b126f-1e21-41df-9766-ab8e899e899c",
+          "to_port": "8cfb8c08-c9a1-40f1-8c82-b807930a07b3"
+        },
+        {
+          "id": "01e76384-18e8-432e-85b3-480146585089",
+          "from_node": "9035aac2-e630-4b1d-8509-f0eb29e6dc0b",
+          "from_port": "edfb1938-143f-4beb-951c-eb1eae2ed33f",
+          "to_node": "bf06160e-6f62-4d0c-8237-24cfb4418a1c",
+          "to_port": "c04d2092-308f-4b86-928d-f97eacc187fb"
+        },
+        {
+          "id": "c83f3347-12f6-4786-b21c-6705492d8470",
+          "from_node": "91a48568-0c1b-4579-b14f-3b33f619483c",
+          "from_port": "fe43be72-fc05-4653-9dd7-c03e7e4ca35f",
+          "to_node": "2f691f03-49bc-4b01-9163-e83daab0dad6",
+          "to_port": "9e8889e8-bdd8-4833-86e6-0befa159f52e"
+        },
+        {
+          "id": "c3d7e22b-ee89-40e5-b697-07444357463d",
+          "from_node": "98014263-4d62-4f93-9895-51eddd7a027a",
+          "from_port": "00aa4f27-95d2-40b3-aabf-5e18b8a5598d",
+          "to_node": "41ba3c1d-1575-4578-99fd-5e7a53b22a02",
+          "to_port": "2b5cb1d3-9d7e-4296-b22e-59fe3c3dbece"
+        },
+        {
+          "id": "27ff98f5-42d5-4438-803d-e51dd23e6e8e",
+          "from_node": "a3c0ed57-a567-4bfd-b2d9-6849955132cd",
+          "from_port": "b381f92b-ca8a-49a3-a5e2-84c03e687669",
+          "to_node": "829a0c2f-4c8f-4388-ae8f-24a9a0782e6e",
+          "to_port": "cf1c0643-88e2-4d87-ac98-67842905b14a"
+        },
+        {
+          "id": "2c8da7e2-e475-4bfe-ac77-15dbd0a23cc6",
+          "from_node": "a4e866cd-2a59-4c0b-a727-5158cc66e78d",
+          "from_port": "78dc6ae3-e8a8-433f-95d7-29873eeeed22",
+          "to_node": "3ebe152a-7ac0-473d-859c-362f284a51f1",
+          "to_port": "165a7191-32ea-47c4-b39d-4093dbbd642d"
+        },
+        {
+          "id": "1241447e-ae47-4a5e-bc8a-609f4bf0951c",
+          "from_node": "a79d2035-e50d-4974-b805-204ef1374beb",
+          "from_port": "dd018fab-010f-436e-b243-0827a7fc43a3",
+          "to_node": "925dfbb8-b24a-4e5b-8283-c5b2ed33c57a",
+          "to_port": "869bf1f6-1fa8-4d65-a508-e5e87524c14a"
+        },
+        {
+          "id": "f3e8bf82-3228-48be-aa3b-3b88c7f94e9d",
+          "from_node": "a8e4fd1b-332f-4144-96a3-d80d73625c06",
+          "from_port": "6f04681f-39dd-4db4-8454-f730f56d48d2",
+          "to_node": "4dd68d4f-e6d5-4c0a-bc19-d7389e514ba4",
+          "to_port": "98736247-0632-4d39-80dc-3938953b646c"
+        },
+        {
+          "id": "c2b99284-9dba-4e35-8590-df0d73cf8139",
+          "from_node": "b1239d15-4b98-45ef-9787-4c1f058cf00f",
+          "from_port": "ad13f5a0-2e15-4068-9cef-b1d11b0f541e",
+          "to_node": "59ef3ee2-b1fc-4ed8-9b1c-cf1b29e8b5e8",
+          "to_port": "84f06b0b-b738-4f2b-ad06-08a4e8d9be84"
+        },
+        {
+          "id": "944a6e84-cc85-4d76-adf7-13240bd03fbe",
+          "from_node": "b1239d15-4b98-45ef-9787-4c1f058cf00f",
+          "from_port": "e280cdca-1cc0-40b3-a67f-d07c1f42f1e4",
+          "to_node": "91a48568-0c1b-4579-b14f-3b33f619483c",
+          "to_port": "8ddce7ad-d910-4b52-846f-9a6049dce51b"
+        },
+        {
+          "id": "feef6943-c037-4c63-b594-19f1a7d9cc76",
+          "from_node": "be6794a9-7184-430f-94e8-7fd07ed35cc1",
+          "from_port": "f802dcbc-800c-4cf1-b697-4769f8c4cfb2",
+          "to_node": "553f6e6d-8243-4066-90b1-487c45f2cd97",
+          "to_port": "fbfda17b-c05b-4ce5-b201-b1a2e819b5b9"
+        },
+        {
+          "id": "55af1890-6e5d-4ca3-8197-44a6743d4edc",
+          "from_node": "c35178b1-7ff8-436c-8081-931975d97af9",
+          "from_port": "e914ca03-f199-47c8-84b2-c4423257d5d4",
+          "to_node": "0307a7dc-cfd9-4166-b712-e1c1b7cb534e",
+          "to_port": "af8f1e84-2fa3-4567-9524-4722a5a95d98"
+        },
+        {
+          "id": "ce54d6e4-14d2-4de8-add7-b7829536e525",
+          "from_node": "cdf20896-06e3-4d5c-addc-bf83b90ac46b",
+          "from_port": "056ab032-093e-4b67-92d4-e85142071125",
+          "to_node": "415f7a43-cf5d-41bb-9d20-5234f7d3bb09",
+          "to_port": "067307ae-d0ad-43a9-93f7-87771dab2452"
+        },
+        {
+          "id": "fbb10f98-fcc4-432f-9530-2367b90edd1d",
+          "from_node": "cdf20896-06e3-4d5c-addc-bf83b90ac46b",
+          "from_port": "1e33629a-d1d3-4a4c-98f7-5d8eae58cd10",
+          "to_node": "f35d108e-9b66-46fd-abcf-3a5e9c8b7c5b",
+          "to_port": "e098221a-75a8-43d2-a645-924a9c42b0cb"
+        },
+        {
+          "id": "86729ac7-fcc5-477b-a188-499584a5b6f9",
+          "from_node": "cdf20896-06e3-4d5c-addc-bf83b90ac46b",
+          "from_port": "60b2ab54-0ec6-466f-9325-0740fbe76cd0",
+          "to_node": "f0071c1d-d503-462a-87cf-fa843a0bf614",
+          "to_port": "cc16f4c7-7871-4c30-a5f8-b0e3b53fc536"
+        },
+        {
+          "id": "c0f22348-e42e-4269-b3aa-d3a6325d3d6e",
+          "from_node": "cdf20896-06e3-4d5c-addc-bf83b90ac46b",
+          "from_port": "62c38011-db2b-4e99-aded-9eba67c05728",
+          "to_node": "f426f165-e845-4f42-b9d5-bc0f96af959c",
+          "to_port": "9d1d85d1-b738-4456-a26e-18390b04cfdb"
+        },
+        {
+          "id": "e6624bec-7e96-426c-b5c9-9f2c7a5dc47c",
+          "from_node": "cdf20896-06e3-4d5c-addc-bf83b90ac46b",
+          "from_port": "da229af5-ab8c-40eb-9384-91320d15cdce",
+          "to_node": "0235049b-decd-4ddd-b0bf-961456a36501",
+          "to_port": "27792162-1b16-4008-bf45-515d3fb09d8e"
+        },
+        {
+          "id": "f97806b9-3a16-4680-b712-71e3ecdfb0f2",
+          "from_node": "ce818872-2d5e-477f-bf2c-a5379ea69dee",
+          "from_port": "d66148c4-462e-4e28-bf69-6a9347698f89",
+          "to_node": "b1239d15-4b98-45ef-9787-4c1f058cf00f",
+          "to_port": "2914d745-2352-444e-8eec-bc8f2cb24944"
+        },
+        {
+          "id": "a0f5f317-6e6f-4352-96f3-bdf251d0ca62",
+          "from_node": "cf6e38d8-7212-4964-b360-cc018e32de01",
+          "from_port": "2174d6fa-8535-4b07-95df-c919b5d7d799",
+          "to_node": "8b4ac94c-4660-4479-bb83-c08cf4667fcc",
+          "to_port": "ca1bb8fd-896a-4450-a6b2-77c853b27d25"
+        },
+        {
+          "id": "26ebddf0-6eb7-4d74-b613-446f1eaac7f3",
+          "from_node": "ddace9c4-5056-45ac-99ab-d158819a1daa",
+          "from_port": "ff7ac624-8a4a-4e53-b98a-6e0d63f2ba33",
+          "to_node": "a4e866cd-2a59-4c0b-a727-5158cc66e78d",
+          "to_port": "11f85c1e-8c84-4a37-b261-19aeed993f76"
+        },
+        {
+          "id": "9c580d15-684f-4689-a482-3119ad9dfc1f",
+          "from_node": "df1b06f0-ae30-4e84-9b73-ad94887ba678",
+          "from_port": "73f0ec9f-4241-4005-8fd2-7fe69211e309",
+          "to_node": "3acae8ac-903e-48bb-bfe0-fc948a453a0a",
+          "to_port": "713aab79-b93f-4a63-a356-bbc1bad0eafc"
+        },
+        {
+          "id": "d1fed803-73d5-4272-8c52-a49f3ced0b5c",
+          "from_node": "f0071c1d-d503-462a-87cf-fa843a0bf614",
+          "from_port": "69ca5a95-8a4b-48ad-8e7a-82e05703bd1b",
+          "to_node": "ce818872-2d5e-477f-bf2c-a5379ea69dee",
+          "to_port": "66d555a1-331b-465d-bd67-168713e56146"
+        },
+        {
+          "id": "2940e36a-9d67-430b-836a-8c09da4f690a",
+          "from_node": "f35d108e-9b66-46fd-abcf-3a5e9c8b7c5b",
+          "from_port": "0962a0a2-4a13-412d-8501-1c59f28b882a",
+          "to_node": "2d4fe58b-5813-4404-b31d-db0c933fc814",
+          "to_port": "0304302c-f4b6-4696-b819-f846538ed814"
+        },
+        {
+          "id": "9f640f59-b299-4b67-8c85-e44d49205d1c",
+          "from_node": "f426f165-e845-4f42-b9d5-bc0f96af959c",
+          "from_port": "3ded3db7-81dd-40b2-b890-587b7b1e8f5d",
+          "to_node": "df1b06f0-ae30-4e84-9b73-ad94887ba678",
+          "to_port": "9f41dcd7-2e13-4d16-8551-6081618c2bb6"
+        },
+        {
+          "id": "7aef3c20-a322-4118-8390-fb15c0ccd267",
+          "from_node": "f519cfba-73cd-4236-869e-5be19c426632",
+          "from_port": "9608df4e-1889-4444-9b8a-703579d1cc1a",
+          "to_node": "b4bbd705-222a-4a6d-b67e-88f0035a4804",
+          "to_port": "e262e92f-9a47-440c-ae9e-626059d25c33"
+        },
+        {
+          "id": "4aa348b9-e137-4a9e-86a1-6b945beccd0e",
+          "from_node": "f961d0bd-3470-44fe-bf79-4c463d5aeeaf",
+          "from_port": "e6afdade-4ec3-4c5d-a682-e57dc750e28d",
+          "to_node": "fd232f39-5ea1-433a-96f9-fd9358116ee2",
+          "to_port": "0e115176-4609-4d1c-80f1-5ed5548a41b7"
+        },
+        {
+          "id": "3cb9c322-730c-4512-ac5f-a7468222f822",
+          "from_node": "fb5cd156-d234-4449-834f-82e5e3bd9cd3",
+          "from_port": "fd33bac5-ac04-4b99-b7d8-797435f81d1e",
+          "to_node": "f961d0bd-3470-44fe-bf79-4c463d5aeeaf",
+          "to_port": "09b96b53-722e-4b01-a1c3-c2d5da3e21d5"
+        },
+        {
+          "id": "9f75bb32-462a-407a-aab1-b6d2e9c695ab",
+          "from_node": "ff4a53b6-1e9d-49fd-a73f-099872bfa7d9",
+          "from_port": "fc4bacb1-eadb-4871-b319-05b3190fc33c",
+          "to_node": "ee7e8a97-c2a7-48f3-9b0e-c0aa848f2f88",
+          "to_port": "5c79d57a-640f-42af-a7ff-0af632edb488"
+        }
+      ],
+      "variables": [
+        {
+          "id": "66a1ff7b-f65b-49ec-9385-77ada2ed2e76",
+          "name": "chapter",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 1
+          }
+        },
+        {
+          "id": "4d8568ce-fdc2-422c-86fa-a2435579ea21",
+          "name": "credits",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 500
+          }
+        },
+        {
+          "id": "ea2c37c1-aaeb-4eec-96d1-3cc56c1e8e15",
+          "name": "discovered_conspiracy",
+          "var_type": "Bool",
+          "default_value": {
+            "Bool": false
+          }
+        },
+        {
+          "id": "7aee0f4d-5896-448b-bddd-842b3e98d988",
+          "name": "encounters",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "bac794c0-3f35-4ca1-a4ba-36fe31d41d1c",
+          "name": "faction_reputation_solari",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "01c161b4-eec1-4bce-ad2d-2382899aa539",
+          "name": "faction_reputation_umbral",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "304fe3b6-256d-4386-b8b8-1cd362307a90",
+          "name": "has_evidence",
+          "var_type": "Bool",
+          "default_value": {
+            "Bool": false
+          }
+        },
+        {
+          "id": "b62bfa6d-c579-47b5-b7bf-0f030427a9e3",
+          "name": "has_weapon",
+          "var_type": "Bool",
+          "default_value": {
+            "Bool": false
+          }
+        },
+        {
+          "id": "006512e0-be0b-4831-b4b6-d1ac8a0d46ac",
+          "name": "peace_progress",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "fc039022-3596-4b4e-b50b-1eeb481622be",
+          "name": "player_name",
+          "var_type": "Text",
+          "default_value": {
+            "Text": "Agent"
+          }
+        },
+        {
+          "id": "74453ec0-4751-429d-b997-c5aa66aae29f",
+          "name": "trust_elara",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        },
+        {
+          "id": "9ff940a7-e7b4-4d24-b8b8-5bb97155db84",
+          "name": "trust_kael",
+          "var_type": "Int",
+          "default_value": {
+            "Int": 0
+          }
+        }
+      ],
+      "characters": [
+        {
+          "id": "4bb65652-aecd-404e-b9f7-cca82add68e3",
+          "name": "ARIA",
+          "color": [
+            100,
+            200,
+            220,
+            255
+          ],
+          "portrait_path": "portraits/aria.png",
+          "voice_id": "aria_synthetic_v2",
+          "relationships": []
+        },
+        {
+          "id": "f5ff1ea6-c277-4481-8967-7a34602e6328",
+          "name": "Ambassador Kael",
+          "color": [
+            220,
+            190,
+            80,
+            255
+          ],
+          "portrait_path": "portraits/kael.png",
+          "voice_id": null,
+          "relationships": [
+            {
+              "name": "Loyalty",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "b2526a8f-6b60-43e5-b1a8-5691e855be52",
+          "name": "Commander Voss",
+          "color": [
+            120,
+            144,
+            180,
+            255
+          ],
+          "portrait_path": "portraits/voss.png",
+          "voice_id": null,
+          "relationships": [
+            {
+              "name": "Trust",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            },
+            {
+              "name": "Respect",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "4e9448cf-ec0a-42e3-862b-404e98d7cab9",
+          "name": "Dr. Elara Chen",
+          "color": [
+            180,
+            220,
+            140,
+            255
+          ],
+          "portrait_path": "portraits/elara.png",
+          "voice_id": null,
+          "relationships": [
+            {
+              "name": "Trust",
+              "value": 0,
+              "min": -100,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "9e85ac7b-6b03-4afd-91c3-1a740d13d5b0",
+          "name": "Elder Saya",
+          "color": [
+            200,
+            200,
+            200,
+            255
+          ],
+          "portrait_path": "portraits/saya.png",
+          "voice_id": null,
+          "relationships": []
+        },
+        {
+          "id": "7b4bbb29-f627-4592-8564-ddb666502e56",
+          "name": "Warden Thrix",
+          "color": [
+            160,
+            80,
+            180,
+            255
+          ],
+          "portrait_path": "portraits/thrix.png",
+          "voice_id": null,
+          "relationships": []
+        },
+        {
+          "id": "32c25667-f3c0-4ea9-bf69-d94433cb766d",
+          "name": "Zeph",
+          "color": [
+            220,
+            140,
+            60,
+            255
+          ],
+          "portrait_path": "portraits/zeph.png",
+          "voice_id": null,
+          "relationships": []
+        }
+      ],
+      "groups": [],
+      "review_statuses": {},
+      "comments": [],
+      "node_tags": {},
+      "locale": {
+        "default_locale": "en",
+        "extra_locales": [],
+        "translations": {}
+      },
+      "barks": {},
+      "quests": [],
+      "world_entities": [],
+      "timelines": []
+    }
+  }
+]

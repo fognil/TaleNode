@@ -2,6 +2,7 @@ pub mod bark;
 pub mod character;
 pub mod conn_index;
 pub mod connection;
+mod demo_project;
 mod example_project;
 pub mod graph;
 pub mod graph_diff;
