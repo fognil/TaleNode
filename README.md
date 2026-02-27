@@ -225,6 +225,7 @@ Export via **File > Export Unity Plugin...** to copy the plugin directly into yo
 | `Cmd/Ctrl+D` | Duplicate selected |
 | `Cmd/Ctrl+F` | Find |
 | `Cmd/Ctrl+H` | Find & Replace |
+| `Cmd/Ctrl+Shift+F` | Canvas filter |
 | `Delete` | Delete selected nodes |
 | `F` | Zoom to fit |
 | `Escape` | Close search / Exit SubGraph |
@@ -254,7 +255,7 @@ Export via **File > Export Unity Plugin...** to copy the plugin directly into yo
 ```bash
 cargo check          # Compile check
 cargo clippy         # Lint (0 warnings required)
-cargo test           # Run tests (360+ tests)
+cargo test           # Run tests (520+ tests)
 cargo run --release  # Run with optimizations
 ```
 
@@ -297,9 +298,3 @@ Full documentation at [talenode.readthedocs.io](https://talenode.readthedocs.io)
 ## License
 
 MIT -- see [LICENSE](LICENSE) for details.
-
----
-
-<p align="center">
-  &copy; fognil
-</p>
