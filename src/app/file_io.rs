@@ -64,6 +64,11 @@ impl TaleNodeApp {
             };
             match project.save_split() {
                 Ok((main_json, versions_json)) => {
+                    // Create .bak backup before overwriting
+                    if path.exists() {
+                        let bak = path.with_extension("talenode.bak");
+                        let _ = std::fs::copy(&path, &bak);
+                    }
                     if let Err(e) = std::fs::write(&path, main_json) {
                         self.status_message =
                             Some((format!("Failed to write file: {e}"), Instant::now(), true));

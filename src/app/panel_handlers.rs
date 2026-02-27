@@ -339,20 +339,20 @@ impl TaleNodeApp {
         self.tokio_runtime.spawn(async move {
             let client =
                 crate::integrations::deepl::DeepLClient::new(api_key, use_pro);
-            match client.translate_all(pairs, &locale).await {
-                Ok(translations) => {
-                    let _ = tx.send(
-                        crate::app::async_runtime::AsyncResult::TranslationDone {
-                            locale,
-                            translations,
-                        },
-                    );
-                }
-                Err(e) => {
-                    let _ = tx.send(
-                        crate::app::async_runtime::AsyncResult::TranslationError(e),
-                    );
-                }
+            let (translations, err) =
+                client.translate_all(pairs, &locale).await;
+            if !translations.is_empty() {
+                let _ = tx.send(
+                    crate::app::async_runtime::AsyncResult::TranslationDone {
+                        locale,
+                        translations,
+                    },
+                );
+            }
+            if let Some(e) = err {
+                let _ = tx.send(
+                    crate::app::async_runtime::AsyncResult::TranslationError(e),
+                );
             }
         });
 

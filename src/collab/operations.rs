@@ -74,8 +74,12 @@ pub fn apply_op(graph: &mut DialogueGraph, op: &CollabOp) -> bool {
             if let Ok(conn) =
                 serde_json::from_value::<Connection>(conn_json.clone())
             {
-                graph.connections.push(conn);
-                return true;
+                return graph.add_connection(
+                    conn.from_node,
+                    conn.from_port,
+                    conn.to_node,
+                    conn.to_port,
+                );
             }
         }
         CollabOp::RemoveConnection { connection_id } => {

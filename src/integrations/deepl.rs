@@ -79,26 +79,39 @@ impl DeepLClient {
     }
 
     /// Translate all (key, source_text) pairs to the target language.
-    /// Returns (key, translated_text) pairs. Automatically batches.
+    /// Returns (key, translated_text) pairs and an optional error if a batch failed.
+    /// On partial failure, successfully translated pairs are still returned.
     pub async fn translate_all(
         &self,
         pairs: Vec<(String, String)>,
         target_lang: &str,
-    ) -> Result<Vec<(String, String)>, String> {
-        let mut result = Vec::with_capacity(pairs.len());
+    ) -> (Vec<(String, String)>, Option<String>) {
+        let total = pairs.len();
+        let mut result = Vec::with_capacity(total);
 
         for chunk in pairs.chunks(BATCH_SIZE) {
             let texts: Vec<String> = chunk.iter().map(|(_, t)| t.clone()).collect();
-            let translated = self.translate_batch(&texts, target_lang).await?;
-
-            for (i, (key, _)) in chunk.iter().enumerate() {
-                if let Some(text) = translated.get(i) {
-                    result.push((key.clone(), text.clone()));
+            match self.translate_batch(&texts, target_lang).await {
+                Ok(translated) => {
+                    for (i, (key, _)) in chunk.iter().enumerate() {
+                        if let Some(text) = translated.get(i) {
+                            result.push((key.clone(), text.clone()));
+                        }
+                    }
+                }
+                Err(e) => {
+                    let msg = format!(
+                        "{} (translated {}/{} before failure)",
+                        e,
+                        result.len(),
+                        total
+                    );
+                    return (result, Some(msg));
                 }
             }
         }
 
-        Ok(result)
+        (result, None)
     }
 }
 

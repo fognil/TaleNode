@@ -294,12 +294,7 @@ fn op_str(op: crate::model::node::CompareOp) -> &'static str {
 }
 
 
-/// Simple pseudo-random float in [0, max) using system time.
+/// Pseudo-random float in [0, max) using thread-local PRNG.
 fn rand_simple(max: f32) -> f32 {
-    use std::time::SystemTime;
-    let nanos = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap_or_default()
-        .subsec_nanos();
-    (nanos as f32 / u32::MAX as f32) * max
+    fastrand::f32() * max
 }
