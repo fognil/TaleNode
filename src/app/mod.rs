@@ -17,6 +17,7 @@ mod panels;
 mod quest_handlers;
 mod search;
 pub mod settings;
+mod shortcuts;
 mod subgraph_nav;
 mod templates;
 pub(super) mod theme;
@@ -62,6 +63,15 @@ enum InteractionState {
     BoxSelecting {
         start: Pos2,
     },
+}
+
+/// Filter state for focusing the canvas on a subset of nodes.
+#[derive(Debug, Clone, Default)]
+struct CanvasFilter {
+    active: bool,
+    tags: Vec<String>,
+    node_types: HashSet<std::mem::Discriminant<crate::model::node::NodeType>>,
+    visible_cache: HashSet<Uuid>,
 }
 
 /// Top-level application state.
@@ -132,6 +142,9 @@ pub struct TaleNodeApp {
     available_ai_models: Vec<String>,
     ai_models_loading: bool,
     spatial_grid: SpatialGrid,
+    minimap_bounds_dirty: bool,
+    minimap_bounds_cache: Option<egui::Rect>,
+    canvas_filter: CanvasFilter,
 }
 
 impl TaleNodeApp {
@@ -209,6 +222,9 @@ impl TaleNodeApp {
             available_ai_models: Vec::new(),
             ai_models_loading: false,
             spatial_grid: SpatialGrid::default(),
+            minimap_bounds_dirty: true,
+            minimap_bounds_cache: None,
+            canvas_filter: CanvasFilter::default(),
         }
     }
 
@@ -217,6 +233,7 @@ impl TaleNodeApp {
         self.history.save_snapshot(&self.graph);
         self.spatial_grid.mark_dirty();
         self.validation_dirty = true;
+        self.minimap_bounds_dirty = true;
         if self.has_script_tab() {
             self.script_panel_stale = true;
         }
@@ -249,6 +266,11 @@ impl eframe::App for TaleNodeApp {
         if self.show_search {
             egui::TopBottomPanel::top("search_bar").show(ctx, |ui| {
                 self.show_search_bar(ui);
+            });
+        }
+        if self.canvas_filter.active {
+            egui::TopBottomPanel::top("filter_bar").show(ctx, |ui| {
+                self.show_filter_bar(ui);
             });
         }
         if self.is_in_subgraph() {
@@ -309,84 +331,3 @@ impl eframe::App for TaleNodeApp {
     }
 }
 
-impl TaleNodeApp {
-    fn handle_keyboard_shortcuts(&mut self, ctx: &egui::Context) {
-        if ctx.input(|i| {
-            i.modifiers.command && !i.modifiers.shift && i.key_pressed(egui::Key::S)
-        }) {
-            self.do_save(false);
-        }
-        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::O)) {
-            self.do_open();
-        }
-        if ctx.input(|i| {
-            i.modifiers.command && !i.modifiers.shift && i.key_pressed(egui::Key::Z)
-        }) {
-            if let Some(prev) = self.history.undo(&self.graph) {
-                self.graph = prev;
-                self.selected_nodes.clear();
-                self.spatial_grid.mark_dirty();
-                self.validation_dirty = true;
-            }
-        }
-        if ctx.input(|i| {
-            i.modifiers.command && i.modifiers.shift && i.key_pressed(egui::Key::Z)
-        }) {
-            if let Some(next) = self.history.redo(&self.graph) {
-                self.graph = next;
-                self.selected_nodes.clear();
-                self.spatial_grid.mark_dirty();
-                self.validation_dirty = true;
-            }
-        }
-        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::F)) {
-            self.show_search = true;
-        }
-        if ctx.input(|i| {
-            if cfg!(target_os = "macos") {
-                i.modifiers.command && i.modifiers.shift && i.key_pressed(egui::Key::H)
-            } else {
-                i.modifiers.command && i.key_pressed(egui::Key::H)
-            }
-        }) {
-            self.show_search = true;
-            self.show_replace = true;
-        }
-        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::N)) {
-            self.pending_confirmation = Some(confirm::PendingAction::NewProject);
-        }
-        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::A)) {
-            self.selected_nodes = self.graph.nodes.keys().copied().collect();
-        }
-        if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::D))
-            && !self.selected_nodes.is_empty()
-        {
-            self.duplicate_selected();
-        }
-        if !self.show_search
-            && ctx.input(|i| !i.modifiers.command && i.key_pressed(egui::Key::F))
-        {
-            let size = ctx.screen_rect().size();
-            self.canvas.zoom_to_fit(&self.graph.nodes, size);
-        }
-        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
-            if self.show_search {
-                self.show_search = false;
-                self.show_replace = false;
-                self.search_query.clear();
-                self.search_results.clear();
-                self.search_results_set.clear();
-                self.replace_query.clear();
-            } else if self.is_in_subgraph() {
-                self.exit_subgraph();
-            }
-        }
-        if self.show_search
-            && !self.search_results.is_empty()
-            && ctx.input(|i| i.key_pressed(egui::Key::Enter))
-        {
-            self.search_index = (self.search_index + 1) % self.search_results.len();
-            self.focus_search_result();
-        }
-    }
-}

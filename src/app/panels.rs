@@ -99,7 +99,7 @@ impl TaleNodeApp {
                             if let Some(node_id) = warning.node_id {
                                 if resp.interact(Sense::click()).clicked() {
                                     self.selected_nodes.clear();
-                                    self.selected_nodes.push(node_id);
+                                    self.selected_nodes.insert(node_id);
                                     if let Some(node) = self.graph.nodes.get(&node_id) {
                                         self.canvas.pan_offset = egui::Vec2::new(
                                             -node.position[0] * self.canvas.zoom,
@@ -208,6 +208,33 @@ impl TaleNodeApp {
         }
     }
 
+    fn compute_minimap_bounds(&mut self) {
+        if !self.minimap_bounds_dirty {
+            return;
+        }
+        self.minimap_bounds_dirty = false;
+        let mut min_x = f32::MAX;
+        let mut min_y = f32::MAX;
+        let mut max_x = f32::MIN;
+        let mut max_y = f32::MIN;
+        for node in self.graph.nodes.values() {
+            let rect = node_widget::node_rect(node);
+            min_x = min_x.min(rect.min.x);
+            min_y = min_y.min(rect.min.y);
+            max_x = max_x.max(rect.max.x);
+            max_y = max_y.max(rect.max.y);
+        }
+        if min_x < max_x && min_y < max_y {
+            let margin = 200.0;
+            self.minimap_bounds_cache = Some(Rect::from_min_max(
+                Pos2::new(min_x - margin, min_y - margin),
+                Pos2::new(max_x + margin, max_y + margin),
+            ));
+        } else {
+            self.minimap_bounds_cache = None;
+        }
+    }
+
     pub(super) fn draw_minimap(
         &mut self,
         ui: &egui::Ui,
@@ -217,111 +244,46 @@ impl TaleNodeApp {
         if self.graph.nodes.is_empty() {
             return;
         }
+        self.compute_minimap_bounds();
+        let Some(world) = self.minimap_bounds_cache else { return };
 
         let minimap_size = 160.0;
-        let padding = 10.0;
         let minimap_rect = Rect::from_min_size(
-            Pos2::new(
-                canvas_rect.max.x - minimap_size - padding,
-                canvas_rect.max.y - minimap_size - padding,
-            ),
+            Pos2::new(canvas_rect.max.x - minimap_size - 10.0, canvas_rect.max.y - minimap_size - 10.0),
             egui::Vec2::splat(minimap_size),
         );
+        painter.rect_filled(minimap_rect, 4.0, Color32::from_rgba_premultiplied(30, 30, 30, 200));
+        painter.rect_stroke(minimap_rect, 4.0, Stroke::new(1.0, Color32::from_rgb(80, 80, 80)), StrokeKind::Inside);
 
-        // Background
-        painter.rect_filled(
-            minimap_rect,
-            4.0,
-            Color32::from_rgba_premultiplied(30, 30, 30, 200),
-        );
-        painter.rect_stroke(
-            minimap_rect,
-            4.0,
-            Stroke::new(1.0, Color32::from_rgb(80, 80, 80)),
-            StrokeKind::Inside,
-        );
+        let inner = minimap_rect.shrink(4.0);
+        let scale = (inner.width() / world.width()).min(inner.height() / world.height());
+        let map = |p: Pos2| Pos2::new(inner.min.x + (p.x - world.min.x) * scale, inner.min.y + (p.y - world.min.y) * scale);
+        let unmap = |p: Pos2| Pos2::new((p.x - inner.min.x) / scale + world.min.x, (p.y - inner.min.y) / scale + world.min.y);
 
-        // Compute bounding box of all nodes in canvas coords
-        let mut min_x = f32::MAX;
-        let mut min_y = f32::MAX;
-        let mut max_x = f32::MIN;
-        let mut max_y = f32::MIN;
-
+        let use_dots = self.graph.nodes.len() > 500;
         for node in self.graph.nodes.values() {
-            let rect = node_widget::node_rect(node);
-            min_x = min_x.min(rect.min.x);
-            min_y = min_y.min(rect.min.y);
-            max_x = max_x.max(rect.max.x);
-            max_y = max_y.max(rect.max.y);
-        }
-
-        let margin = 200.0;
-        min_x -= margin;
-        min_y -= margin;
-        max_x += margin;
-        max_y += margin;
-
-        let world_w = max_x - min_x;
-        let world_h = max_y - min_y;
-        if world_w <= 0.0 || world_h <= 0.0 {
-            return;
-        }
-
-        let inner_margin = 4.0;
-        let inner_rect = minimap_rect.shrink(inner_margin);
-        let scale = (inner_rect.width() / world_w).min(inner_rect.height() / world_h);
-
-        let map = |canvas_pos: Pos2| -> Pos2 {
-            Pos2::new(
-                inner_rect.min.x + (canvas_pos.x - min_x) * scale,
-                inner_rect.min.y + (canvas_pos.y - min_y) * scale,
-            )
-        };
-
-        let unmap = |screen_pos: Pos2| -> Pos2 {
-            Pos2::new(
-                (screen_pos.x - inner_rect.min.x) / scale + min_x,
-                (screen_pos.y - inner_rect.min.y) / scale + min_y,
-            )
-        };
-
-        // Draw nodes as small colored rectangles
-        for node in self.graph.nodes.values() {
-            let rect = node_widget::node_rect(node);
-            let mapped_min = map(rect.min);
-            let mapped_max = map(rect.max);
-            let mapped_rect = Rect::from_min_max(mapped_min, mapped_max);
             let color = node_widget::node_color(&node.node_type);
-            painter.rect_filled(mapped_rect, 1.0, color);
+            if use_dots {
+                let center = map(Pos2::new(node.position[0], node.position[1]));
+                painter.circle_filled(center, 1.5, color);
+            } else {
+                let rect = node_widget::node_rect(node);
+                painter.rect_filled(Rect::from_min_max(map(rect.min), map(rect.max)), 1.0, color);
+            }
         }
 
-        // Draw viewport rectangle
-        let vp_min = self.canvas.screen_to_canvas(canvas_rect.min);
-        let vp_max = self.canvas.screen_to_canvas(canvas_rect.max);
-        let vp_mapped_min = map(vp_min);
-        let vp_mapped_max = map(vp_max);
-        let vp_rect =
-            Rect::from_min_max(vp_mapped_min, vp_mapped_max).intersect(inner_rect);
-        painter.rect_stroke(
-            vp_rect,
-            1.0,
-            Stroke::new(1.0, Color32::from_rgb(200, 200, 200)),
-            StrokeKind::Inside,
-        );
+        let vp_min = map(self.canvas.screen_to_canvas(canvas_rect.min));
+        let vp_max = map(self.canvas.screen_to_canvas(canvas_rect.max));
+        let vp_rect = Rect::from_min_max(vp_min, vp_max).intersect(inner);
+        painter.rect_stroke(vp_rect, 1.0, Stroke::new(1.0, Color32::from_rgb(200, 200, 200)), StrokeKind::Inside);
 
-        // Handle click/drag on minimap to navigate
         let pointer_pos = ui.input(|i| i.pointer.interact_pos()).unwrap_or(Pos2::ZERO);
-        let pointer_down = ui.input(|i| i.pointer.primary_down());
-
-        if pointer_down && minimap_rect.contains(pointer_pos) {
-            let canvas_target = unmap(pointer_pos);
-            let canvas_center = egui::Vec2::new(
-                canvas_rect.width() * 0.5,
-                canvas_rect.height() * 0.5,
-            );
+        if ui.input(|i| i.pointer.primary_down()) && minimap_rect.contains(pointer_pos) {
+            let target = unmap(pointer_pos);
+            let half = egui::Vec2::new(canvas_rect.width() * 0.5, canvas_rect.height() * 0.5);
             self.canvas.pan_offset = egui::Vec2::new(
-                canvas_center.x + canvas_rect.min.x - canvas_target.x * self.canvas.zoom,
-                canvas_center.y + canvas_rect.min.y - canvas_target.y * self.canvas.zoom,
+                half.x + canvas_rect.min.x - target.x * self.canvas.zoom,
+                half.y + canvas_rect.min.y - target.y * self.canvas.zoom,
             );
         }
     }

@@ -98,9 +98,13 @@ impl TaleNodeApp {
         } else {
             None
         };
+        let filter_active = self.canvas_filter.active && !self.canvas_filter.visible_cache.is_empty();
         let node_ids: Vec<Uuid> = self.graph.nodes.keys().copied().collect();
         for id in &node_ids {
             if hidden_nodes.contains(id) {
+                continue;
+            }
+            if filter_active && !self.canvas_filter.visible_cache.contains(id) {
                 continue;
             }
             if let Some(node) = self.graph.nodes.get(id) {
