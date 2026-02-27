@@ -36,6 +36,23 @@ This removes the group but keeps all nodes in place.
 - The group label is displayed at the top of the rectangle.
 - Group bounds are calculated from the positions of member nodes.
 
+## Collapsing Groups
+
+Groups can be collapsed to hide all their member nodes behind a single compact header. This is useful for hiding completed sections or reducing clutter on large graphs.
+
+- **Collapse**: Right-click on the canvas inside a group and select **Collapse Group**
+- **Expand**: Right-click the collapsed group and select **Expand Group**
+
+When collapsed:
+
+- All member nodes and their internal connections are hidden
+- The group renders as a compact header showing the group name and node count (e.g. "Quest Offer (12 nodes)")
+- Connections from outside the group to hidden nodes are drawn with reduced opacity
+- The group uses its configured color as the header background
+
+!!! tip
+    Collapsing a group with 50+ nodes can significantly reduce visual clutter and improve canvas responsiveness.
+
 ## Tips
 
 !!! tip

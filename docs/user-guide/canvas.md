@@ -120,9 +120,49 @@ When collapsed:
 !!! tip
     Collapsing supports undo — press ++ctrl+z++ to revert a collapse/expand toggle.
 
+## Canvas Filter
+
+Press ++ctrl+shift+f++ to toggle the **filter bar**, which lets you focus the canvas on a subset of nodes by tag or type.
+
+- **Tags dropdown**: Select one or more tags — only nodes with at least one matching tag are shown
+- **Type checkboxes**: Check node types (Dialogue, Choice, Condition, Event, Random) to show only those types
+- **Clear button**: Reset all filters and show everything
+
+When a filter is active:
+
+- Nodes that don't match the filter are hidden from the canvas
+- Connections where both endpoints are filtered out are also hidden
+- **Start**, **End**, and **SubGraph** nodes are always visible (structural nodes)
+
+!!! tip
+    Combine tag and type filters to quickly isolate specific parts of a large graph. For example, filter by tag "Act 2" and type "Choice" to see only choice nodes in Act 2.
+
 ## Zoom to Fit
 
 Press ++f++ to automatically zoom and pan the canvas so that **all nodes** are visible on screen. This is useful after importing a graph or when you've lost track of nodes placed far apart.
+
+## Level of Detail
+
+When you zoom out on a large graph, TaleNode automatically reduces rendering detail for better performance:
+
+| Zoom Level | Detail |
+|---|---|
+| **50% and above** | Full detail — all text, ports, labels, body content |
+| **25%–50%** | Medium — header, body rectangle, port circles, no text |
+| **Below 25%** | Low — single colored rectangle per node, no text or ports |
+
+This happens automatically — no configuration needed. Port hover detection and node tooltips are also disabled at medium/low zoom levels since those details aren't visible.
+
+## Performance at Scale
+
+TaleNode is optimized for graphs with 1000+ nodes:
+
+- **Viewport culling**: Only nodes and connections visible on screen are rendered
+- **Spatial indexing**: Click and hover hit-testing uses a grid index instead of checking every node
+- **Adaptive wires**: Connection curves use fewer segments when they're small on screen
+- **Minimap caching**: The minimap caches node bounds and renders dots instead of rectangles above 500 nodes
+
+These optimizations are automatic and require no user configuration.
 
 ## Background Color
 

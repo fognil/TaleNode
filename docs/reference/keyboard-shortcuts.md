@@ -35,12 +35,13 @@ Complete list of keyboard shortcuts in TaleNode.
 | ++f++ | Zoom to fit (show all nodes) |
 | ++escape++ | Close search bar / Exit sub-graph |
 
-## Search & Replace
+## Search, Replace & Filter
 
 | Shortcut | Action |
 |---|---|
 | ++ctrl+f++ | Open search bar |
 | ++ctrl+h++ / ++cmd+shift+h++ | Open search bar with replace |
+| ++ctrl+shift+f++ | Toggle canvas filter bar |
 | ++escape++ | Close search bar |
 | ++enter++ | Next search result |
 
@@ -56,4 +57,5 @@ Complete list of keyboard shortcuts in TaleNode.
 | Context menu | Right-click on canvas |
 | Click minimap | Navigate to that area of the graph |
 | Enter sub-graph | Double-click on SubGraph node |
+| Collapse/expand group | Right-click inside group > Collapse/Expand Group |
 | Node tooltip | Hover over node (shows content preview) |
