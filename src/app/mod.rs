@@ -35,6 +35,7 @@ use crate::model::node::Node;
 use crate::model::port::{PortDirection, PortId};
 use crate::ui::canvas::CanvasState;
 use crate::ui::playtest::PlaytestState;
+use crate::ui::spatial_grid::SpatialGrid;
 use crate::validation::validator::{self, ValidationWarning};
 
 /// Which port the user started dragging from.
@@ -127,6 +128,7 @@ pub struct TaleNodeApp {
     writing_choice_count: usize,
     available_ai_models: Vec<String>,
     ai_models_loading: bool,
+    spatial_grid: SpatialGrid,
 }
 
 impl TaleNodeApp {
@@ -201,12 +203,14 @@ impl TaleNodeApp {
             writing_choice_count: 3,
             available_ai_models: Vec::new(),
             ai_models_loading: false,
+            spatial_grid: SpatialGrid::default(),
         }
     }
 
     /// Save a snapshot for undo before mutating the graph.
     fn snapshot(&mut self) {
         self.history.save_snapshot(&self.graph);
+        self.spatial_grid.mark_dirty();
         if self.has_script_tab() {
             self.script_panel_stale = true;
         }
@@ -328,6 +332,7 @@ impl TaleNodeApp {
             if let Some(prev) = self.history.undo(&self.graph) {
                 self.graph = prev;
                 self.selected_nodes.clear();
+                self.spatial_grid.mark_dirty();
             }
         }
         if ctx.input(|i| {
@@ -336,6 +341,7 @@ impl TaleNodeApp {
             if let Some(next) = self.history.redo(&self.graph) {
                 self.graph = next;
                 self.selected_nodes.clear();
+                self.spatial_grid.mark_dirty();
             }
         }
         if ctx.input(|i| i.modifiers.command && i.key_pressed(egui::Key::F)) {

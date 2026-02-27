@@ -149,6 +149,7 @@ impl TaleNodeApp {
                     if let Some(prev) = self.history.undo(&self.graph) {
                         self.graph = prev;
                         self.selected_nodes.clear();
+                        self.spatial_grid.mark_dirty();
                     }
                     ui.close_menu();
                 }
@@ -163,6 +164,7 @@ impl TaleNodeApp {
                     if let Some(next) = self.history.redo(&self.graph) {
                         self.graph = next;
                         self.selected_nodes.clear();
+                        self.spatial_grid.mark_dirty();
                     }
                     ui.close_menu();
                 }

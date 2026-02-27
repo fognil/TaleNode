@@ -9,27 +9,33 @@ use super::canvas_tooltip::node_tooltip_text;
 use super::{DragWire, InteractionState, TaleNodeApp};
 
 impl TaleNodeApp {
-    /// Hit-test: find node under screen position (topmost first).
+    /// Hit-test: find node under screen position using spatial grid.
     pub(super) fn node_at_screen_pos(&self, screen_pos: Pos2) -> Option<Uuid> {
-        for node in self.graph.nodes.values() {
-            let rect = node_widget::node_rect(node);
-            let screen_rect = self.canvas.canvas_rect_to_screen(rect);
-            if screen_rect.contains(screen_pos) {
-                return Some(node.id);
+        let canvas_pos = self.canvas.screen_to_canvas(screen_pos);
+        let candidates = self.spatial_grid.query_point(canvas_pos.x, canvas_pos.y);
+        for id in candidates {
+            if let Some(node) = self.graph.nodes.get(&id) {
+                let rect = node_widget::node_rect(node);
+                let screen_rect = self.canvas.canvas_rect_to_screen(rect);
+                if screen_rect.contains(screen_pos) {
+                    return Some(node.id);
+                }
             }
         }
         None
     }
 
-    /// Hit-test: find port under screen position. Returns (node_id, port_id, direction).
+    /// Hit-test: find port under screen position using spatial grid.
     pub(super) fn port_at_screen_pos(
         &self,
         screen_pos: Pos2,
     ) -> Option<(Uuid, PortId, PortDirection)> {
         let hit_radius = (PORT_RADIUS + 4.0) * self.canvas.zoom;
+        let canvas_pos = self.canvas.screen_to_canvas(screen_pos);
+        let candidates = self.spatial_grid.query_point(canvas_pos.x, canvas_pos.y);
 
-        for node in self.graph.nodes.values() {
-            // Skip ports on collapsed nodes — they aren't visible
+        for id in candidates {
+            let Some(node) = self.graph.nodes.get(&id) else { continue };
             if node.collapsed {
                 continue;
             }
@@ -55,6 +61,9 @@ impl TaleNodeApp {
         let canvas_rect = ui.available_rect_before_wrap();
         let response = ui.allocate_rect(canvas_rect, Sense::click_and_drag());
         let painter = ui.painter_at(canvas_rect);
+
+        // Rebuild spatial grid if needed
+        self.spatial_grid.rebuild_if_dirty(&self.graph.nodes);
 
         // Handle pan/zoom
         self.canvas.handle_input(&response, ui);
@@ -244,6 +253,7 @@ impl TaleNodeApp {
                             node.position[1] += delta.y;
                         }
                     }
+                    self.spatial_grid.mark_dirty();
                 }
                 InteractionState::DraggingWire(drag) => {
                     drag.cursor_pos = pointer_pos;
@@ -288,12 +298,19 @@ impl TaleNodeApp {
                 }
                 InteractionState::BoxSelecting { start } => {
                     let sel_rect = Rect::from_two_pos(*start, pointer_pos);
+                    let canvas_min = self.canvas.screen_to_canvas(sel_rect.min);
+                    let canvas_max = self.canvas.screen_to_canvas(sel_rect.max);
+                    let candidates = self.spatial_grid.query_rect(
+                        canvas_min.x, canvas_min.y, canvas_max.x, canvas_max.y,
+                    );
                     self.selected_nodes.clear();
-                    for node in self.graph.nodes.values() {
-                        let node_rect = node_widget::node_rect(node);
-                        let screen_rect = self.canvas.canvas_rect_to_screen(node_rect);
-                        if sel_rect.intersects(screen_rect) {
-                            self.selected_nodes.push(node.id);
+                    for id in candidates {
+                        if let Some(node) = self.graph.nodes.get(&id) {
+                            let screen_rect =
+                                self.canvas.canvas_rect_to_screen(node_widget::node_rect(node));
+                            if sel_rect.intersects(screen_rect) {
+                                self.selected_nodes.push(node.id);
+                            }
                         }
                     }
                 }
