@@ -19,6 +19,11 @@ const NODE_TEXT_PREVIEW_LINES: usize = 2;
 
 pub const PORT_RADIUS: f32 = NODE_PORT_RADIUS;
 
+/// Below this zoom, skip body text and port labels (Medium LOD).
+pub const LOD_MEDIUM_ZOOM: f32 = 0.5;
+/// Below this zoom, render as colored rectangle only (Low LOD).
+pub const LOD_LOW_ZOOM: f32 = 0.25;
+
 /// Get the color associated with each node type.
 pub fn node_color(node_type: &NodeType) -> Color32 {
     match node_type {
@@ -123,20 +128,25 @@ pub fn draw_node(
     }
 
     let color = resolve_node_color(node, characters);
-    let body_color = Color32::from_rgb(50, 50, 50);
     let rounding = CornerRadius::same(NODE_ROUNDING);
+    let zoom = canvas.zoom;
 
-    // Node header
+    // LOD: Low — just a colored rectangle
+    if zoom < LOD_LOW_ZOOM {
+        painter.rect_filled(screen_rect, rounding, color);
+        draw_border(painter, &screen_rect, rounding, zoom, is_selected, is_search_match, playtest_active);
+        return;
+    }
+
+    let body_color = Color32::from_rgb(50, 50, 50);
     let header_rect = Rect::from_min_size(
         screen_rect.min,
-        Vec2::new(screen_rect.width(), NODE_HEADER_HEIGHT * canvas.zoom),
+        Vec2::new(screen_rect.width(), NODE_HEADER_HEIGHT * zoom),
     );
 
     if node.collapsed {
-        // Collapsed: header only with full rounding
         painter.rect_filled(screen_rect, rounding, color);
     } else {
-        // Expanded: body background + header on top
         painter.rect_filled(screen_rect, rounding, body_color);
         painter.rect_filled(
             header_rect,
@@ -145,45 +155,39 @@ pub fn draw_node(
         );
     }
 
-    // Collapse toggle triangle
     draw_collapse_triangle(painter, node, canvas, &header_rect);
 
-    // Title text (shifted right to make room for triangle)
-    let title = node.title();
-    let font_size = 14.0 * canvas.zoom;
-    let title_center = Pos2::new(
-        header_rect.center().x + 8.0 * canvas.zoom,
-        header_rect.center().y,
-    );
-    painter.text(
-        title_center,
-        egui::Align2::CENTER_CENTER,
-        title,
-        FontId::proportional(font_size),
-        Color32::WHITE,
-    );
+    // LOD: Medium — header + body + ports as circles, skip text content and port labels
+    let is_full_detail = zoom >= LOD_MEDIUM_ZOOM;
 
-    if !node.collapsed {
-        // Body content (type-specific — delegated to node_body module)
-        draw_node_body(painter, node, canvas, &screen_rect, &header_rect);
-
-        // Draw ports
-        draw_ports(painter, node, canvas, color, hovered_port);
+    if is_full_detail {
+        let title = node.title();
+        let font_size = 14.0 * zoom;
+        let title_center = Pos2::new(
+            header_rect.center().x + 8.0 * zoom,
+            header_rect.center().y,
+        );
+        painter.text(
+            title_center, egui::Align2::CENTER_CENTER, title,
+            FontId::proportional(font_size), Color32::WHITE,
+        );
     }
 
-    // Border
-    draw_border(
-        painter, &screen_rect, rounding, canvas.zoom,
-        is_selected, is_search_match, playtest_active,
-    );
+    if !node.collapsed {
+        if is_full_detail {
+            draw_node_body(painter, node, canvas, &screen_rect, &header_rect);
+        }
+        draw_ports(painter, node, canvas, color, hovered_port, is_full_detail);
+    }
 
-    // Review status badge
-    if review_status != ReviewStatus::Draft {
+    draw_border(painter, &screen_rect, rounding, zoom, is_selected, is_search_match, playtest_active);
+
+    if is_full_detail && review_status != ReviewStatus::Draft {
         let badge_color = crate::ui::comments_panel::status_color(review_status);
-        let badge_radius = 5.0 * canvas.zoom;
+        let badge_radius = 5.0 * zoom;
         let badge_pos = Pos2::new(
-            header_rect.max.x - badge_radius - 4.0 * canvas.zoom,
-            header_rect.min.y + badge_radius + 4.0 * canvas.zoom,
+            header_rect.max.x - badge_radius - 4.0 * zoom,
+            header_rect.min.y + badge_radius + 4.0 * zoom,
         );
         painter.circle_filled(badge_pos, badge_radius, badge_color);
     }
@@ -277,10 +281,10 @@ fn draw_ports(
     canvas: &CanvasState,
     accent_color: Color32,
     hovered_port: Option<PortId>,
+    show_labels: bool,
 ) {
     let port_radius = NODE_PORT_RADIUS * canvas.zoom;
     let hover_radius = (NODE_PORT_RADIUS + 3.0) * canvas.zoom;
-    let label_font = FontId::proportional(10.0 * canvas.zoom);
 
     for (i, port) in node.inputs.iter().enumerate() {
         let canvas_pos = port_position(node, i, false);
@@ -298,11 +302,12 @@ fn draw_ports(
             screen_pos, r,
             Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
         );
-        if !port.label.is_empty() {
+        if show_labels && !port.label.is_empty() {
+            let label_font = FontId::proportional(10.0 * canvas.zoom);
             painter.text(
                 Pos2::new(screen_pos.x + port_radius + 4.0 * canvas.zoom, screen_pos.y),
                 egui::Align2::LEFT_CENTER, &port.label,
-                label_font.clone(), Color32::from_rgb(180, 180, 180),
+                label_font, Color32::from_rgb(180, 180, 180),
             );
         }
     }
@@ -323,11 +328,12 @@ fn draw_ports(
             screen_pos, r,
             Stroke::new(1.5 * canvas.zoom, Color32::WHITE),
         );
-        if !port.label.is_empty() {
+        if show_labels && !port.label.is_empty() {
+            let label_font = FontId::proportional(10.0 * canvas.zoom);
             painter.text(
                 Pos2::new(screen_pos.x - port_radius - 4.0 * canvas.zoom, screen_pos.y),
                 egui::Align2::RIGHT_CENTER, &port.label,
-                label_font.clone(), Color32::from_rgb(180, 180, 180),
+                label_font, Color32::from_rgb(180, 180, 180),
             );
         }
     }

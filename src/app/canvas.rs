@@ -83,8 +83,10 @@ impl TaleNodeApp {
         // Draw connections (below nodes) — culled by viewport
         draw_connections(&painter, &self.graph, &self.canvas, None, canvas_viewport);
 
-        // Detect port hover for visual feedback
-        let hovered_port_info = if response.hovered() {
+        // Detect port hover for visual feedback (skip at low zoom — ports not visible)
+        let hovered_port_info = if self.canvas.zoom >= crate::ui::node_widget::LOD_MEDIUM_ZOOM
+            && response.hovered()
+        {
             response.hover_pos().and_then(|hp| self.port_at_screen_pos(hp))
         } else {
             None
@@ -121,8 +123,11 @@ impl TaleNodeApp {
             }
         }
 
-        // Node tooltip on hover (when not dragging and not hovering a port)
-        if hovered_port_info.is_none() && matches!(self.interaction, InteractionState::Idle) {
+        // Node tooltip on hover (skip at low zoom — text not readable)
+        if self.canvas.zoom >= crate::ui::node_widget::LOD_MEDIUM_ZOOM
+            && hovered_port_info.is_none()
+            && matches!(self.interaction, InteractionState::Idle)
+        {
             if let Some(hp) = response.hover_pos() {
                 if let Some(nid) = self.node_at_screen_pos(hp) {
                     if let Some(node) = self.graph.nodes.get(&nid) {
@@ -173,17 +178,9 @@ impl TaleNodeApp {
         if let InteractionState::BoxSelecting { start } = self.interaction {
             if let Some(cursor) = response.hover_pos() {
                 let sel_rect = Rect::from_two_pos(start, cursor);
-                painter.rect_filled(
-                    sel_rect,
-                    0.0,
-                    Color32::from_rgba_premultiplied(100, 150, 255, 30),
-                );
-                painter.rect_stroke(
-                    sel_rect,
-                    0.0,
-                    Stroke::new(1.0, Color32::from_rgb(100, 150, 255)),
-                    StrokeKind::Outside,
-                );
+                let sel_color = Color32::from_rgb(100, 150, 255);
+                painter.rect_filled(sel_rect, 0.0, Color32::from_rgba_premultiplied(100, 150, 255, 30));
+                painter.rect_stroke(sel_rect, 0.0, Stroke::new(1.0, sel_color), StrokeKind::Outside);
             }
         }
 
