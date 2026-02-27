@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 128" width="140" height="128">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD54F"/>
+      <stop offset="50%" stop-color="#FFA726"/>
+      <stop offset="100%" stop-color="#F57C00"/>
+    </linearGradient>
+    <radialGradient id="dot-glow">
+      <stop offset="40%" stop-color="rgba(255,183,50,0.5)"/>
+      <stop offset="100%" stop-color="rgba(255,183,50,0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Speech bubble -->
+  <path fill="rgba(255,183,50,0.07)" stroke="url(#gold)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"
+    d="M 32 16 L 72 16 Q 86 16 86 30 L 86 76 Q 86 90 72 90
+       L 46 90 L 30 110 L 37 90 L 32 90 Q 18 90 18 76 L 18 30 Q 18 16 32 16 Z"/>
+
+  <!-- Input port -->
+  <circle fill="url(#dot-glow)" cx="18" cy="53" r="12"/>
+  <circle fill="url(#gold)" cx="18" cy="53" r="5.5"/>
+
+  <!-- Output port -->
+  <circle fill="url(#dot-glow)" cx="86" cy="53" r="12"/>
+  <circle fill="url(#gold)" cx="86" cy="53" r="5.5"/>
+
+  <!-- Branch upper -->
+  <path fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round"
+    d="M 91.5 53 C 104 53 106 24 122 20"/>
+  <circle fill="url(#dot-glow)" cx="122" cy="20" r="10"/>
+  <circle fill="url(#gold)" cx="122" cy="20" r="4.5"/>
+
+  <!-- Branch middle -->
+  <path fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round"
+    d="M 91.5 53 C 108 53 114 53 130 53"/>
+  <circle fill="url(#dot-glow)" cx="130" cy="53" r="10"/>
+  <circle fill="url(#gold)" cx="130" cy="53" r="4.5"/>
+
+  <!-- Branch lower -->
+  <path fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round"
+    d="M 91.5 53 C 104 53 106 82 122 86"/>
+  <circle fill="url(#dot-glow)" cx="122" cy="86" r="10"/>
+  <circle fill="url(#gold)" cx="122" cy="86" r="4.5"/>
+</svg>
