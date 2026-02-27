@@ -2,6 +2,7 @@ mod async_handlers;
 pub mod async_runtime;
 mod bark_handlers;
 mod canvas;
+mod canvas_interactions;
 mod canvas_tooltip;
 mod collab_handlers;
 mod confirm;
@@ -9,6 +10,7 @@ mod context_menu;
 mod dock;
 mod extension_handlers;
 mod file_import;
+mod export_io;
 mod file_io;
 mod file_io_locale;
 mod menu;
@@ -22,6 +24,7 @@ mod subgraph_nav;
 mod templates;
 pub(super) mod theme;
 mod timeline_handlers;
+mod translate_handlers;
 mod voice_handlers;
 mod world_handlers;
 mod writing_handlers;
@@ -145,6 +148,8 @@ pub struct TaleNodeApp {
     minimap_bounds_dirty: bool,
     minimap_bounds_cache: Option<egui::Rect>,
     canvas_filter: CanvasFilter,
+    pending_zoom_fit: bool,
+    portrait_cache: crate::ui::portrait_cache::PortraitCache,
 }
 
 impl TaleNodeApp {
@@ -225,6 +230,8 @@ impl TaleNodeApp {
             minimap_bounds_dirty: true,
             minimap_bounds_cache: None,
             canvas_filter: CanvasFilter::default(),
+            pending_zoom_fit: false,
+            portrait_cache: crate::ui::portrait_cache::PortraitCache::new(),
         }
     }
 

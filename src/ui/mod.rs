@@ -15,6 +15,7 @@ pub mod locale_panel;
 mod node_body;
 pub mod node_widget;
 pub mod playtest;
+pub mod portrait_cache;
 pub mod playtest_checkpoint;
 pub mod playtest_panel;
 pub mod quest_panel;
