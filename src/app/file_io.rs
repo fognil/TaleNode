@@ -27,6 +27,7 @@ impl TaleNodeApp {
                     }
                 }
                 self.graph = project.graph;
+                self.graph.rebuild_connection_index();
                 self.project_name = project.name;
                 self.versions = project.versions;
                 self.project_path = Some(path);
@@ -389,6 +390,7 @@ impl TaleNodeApp {
     pub(super) fn do_new_project(&mut self) {
         self.graph = DialogueGraph::new();
         self.graph.add_node(Node::new_start([100.0, 200.0]));
+        self.graph.rebuild_connection_index();
         self.selected_nodes.clear();
         self.project_name = "Untitled".to_string();
         self.project_path = None;

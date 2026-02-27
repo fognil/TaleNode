@@ -28,8 +28,10 @@ pub fn run_import_plugin(
     _plugin: &PluginManifest,
     input: &str,
 ) -> Result<DialogueGraph, String> {
-    serde_json::from_str::<DialogueGraph>(input)
-        .map_err(|e| format!("Import parse error: {e}"))
+    let mut graph = serde_json::from_str::<DialogueGraph>(input)
+        .map_err(|e| format!("Import parse error: {e}"))?;
+    graph.rebuild_connection_index();
+    Ok(graph)
 }
 
 #[cfg(test)]

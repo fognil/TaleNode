@@ -52,6 +52,7 @@ impl TaleNodeApp {
                     Ok(new_graph) => {
                         self.snapshot();
                         self.graph = new_graph;
+                        self.graph.rebuild_connection_index();
                         self.selected_nodes.clear();
                         self.script_panel_dirty = false;
                         self.script_panel_stale = false;

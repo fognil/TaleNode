@@ -87,6 +87,7 @@ impl TaleNodeApp {
             Ok(new_graph) => {
                 self.snapshot();
                 self.graph = new_graph;
+                self.graph.rebuild_connection_index();
                 self.plugin_last_result = Some((
                     format!("Imported from {}", path.display()),
                     false,

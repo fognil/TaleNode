@@ -1,5 +1,6 @@
 pub mod bark;
 pub mod character;
+pub mod conn_index;
 pub mod connection;
 mod example_project;
 pub mod graph;

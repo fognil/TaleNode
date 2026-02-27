@@ -64,7 +64,9 @@ impl Project {
     }
 
     pub fn load_from_string(json: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(json)
+        let mut project: Self = serde_json::from_str(json)?;
+        project.graph.rebuild_connection_index();
+        Ok(project)
     }
 
     /// Create a version snapshot of the current graph.

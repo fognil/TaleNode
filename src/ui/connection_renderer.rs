@@ -1,4 +1,4 @@
-use egui::{Color32, Pos2, Stroke};
+use egui::{Color32, Pos2, Rect, Shape, Stroke};
 
 use crate::model::connection::Connection;
 use crate::model::graph::DialogueGraph;
@@ -9,15 +9,17 @@ const WIRE_THICKNESS: f32 = 2.5;
 const WIRE_COLOR: Color32 = Color32::from_rgb(180, 180, 180);
 const WIRE_SELECTED_COLOR: Color32 = Color32::from_rgb(255, 255, 100);
 
-/// Draw all connections in the graph.
+/// Draw all visible connections in the graph.
+/// `canvas_viewport` is the visible area in canvas coordinates for culling.
 pub fn draw_connections(
     painter: &egui::Painter,
     graph: &DialogueGraph,
     canvas: &CanvasState,
     selected_connection: Option<uuid::Uuid>,
+    canvas_viewport: Rect,
 ) {
     for conn in &graph.connections {
-        draw_connection(painter, conn, graph, canvas, selected_connection);
+        draw_connection(painter, conn, graph, canvas, selected_connection, canvas_viewport);
     }
 }
 
@@ -27,6 +29,7 @@ fn draw_connection(
     graph: &DialogueGraph,
     canvas: &CanvasState,
     selected_connection: Option<uuid::Uuid>,
+    canvas_viewport: Rect,
 ) {
     let from_node = match graph.nodes.get(&conn.from_node) {
         Some(n) => n,
@@ -51,6 +54,13 @@ fn draw_connection(
 
     let from_canvas = port_position(from_node, from_index, true);
     let to_canvas = port_position(to_node, to_index, false);
+
+    // Viewport culling: skip if both endpoints are outside the visible area.
+    // The bezier control points extend horizontally, so expand the check region.
+    let wire_bounds = Rect::from_two_pos(from_canvas, to_canvas).expand(100.0);
+    if !canvas_viewport.intersects(wire_bounds) {
+        return;
+    }
 
     let from_screen = canvas.canvas_to_screen(from_canvas);
     let to_screen = canvas.canvas_to_screen(to_canvas);
@@ -81,8 +91,7 @@ pub fn draw_bezier_wire(
     let thickness = WIRE_THICKNESS * zoom;
     let stroke = Stroke::new(thickness, color);
 
-    // Approximate bezier with line segments
-    let segments = 32;
+    let segments = adaptive_segment_count(from, to, zoom);
     let mut points = Vec::with_capacity(segments + 1);
     for i in 0..=segments {
         let t = i as f32 / segments as f32;
@@ -90,8 +99,19 @@ pub fn draw_bezier_wire(
         points.push(p);
     }
 
-    for pair in points.windows(2) {
-        painter.line_segment([pair[0], pair[1]], stroke);
+    // Batch as a single polyline shape instead of N individual line_segments
+    painter.add(Shape::line(points, stroke));
+}
+
+/// Compute the number of bezier segments based on screen-space distance and zoom.
+fn adaptive_segment_count(from: Pos2, to: Pos2, zoom: f32) -> usize {
+    let screen_dist = from.distance(to);
+    // More segments for longer wires, fewer when zoomed out
+    let segments = (screen_dist / 12.0).clamp(4.0, 32.0) as usize;
+    if zoom < 0.25 {
+        segments.min(6)
+    } else {
+        segments
     }
 }
 
@@ -107,4 +127,34 @@ fn cubic_bezier(p0: Pos2, p1: Pos2, p2: Pos2, p3: Pos2, t: f32) -> Pos2 {
         uuu * p0.x + 3.0 * uu * t * p1.x + 3.0 * u * tt * p2.x + ttt * p3.x,
         uuu * p0.y + 3.0 * uu * t * p1.y + 3.0 * u * tt * p2.y + ttt * p3.y,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn adaptive_segments_short_wire() {
+        let from = Pos2::new(0.0, 0.0);
+        let to = Pos2::new(30.0, 0.0);
+        let count = adaptive_segment_count(from, to, 1.0);
+        assert!(count >= 4);
+        assert!(count <= 8);
+    }
+
+    #[test]
+    fn adaptive_segments_long_wire() {
+        let from = Pos2::new(0.0, 0.0);
+        let to = Pos2::new(500.0, 0.0);
+        let count = adaptive_segment_count(from, to, 1.0);
+        assert_eq!(count, 32);
+    }
+
+    #[test]
+    fn adaptive_segments_low_zoom_capped() {
+        let from = Pos2::new(0.0, 0.0);
+        let to = Pos2::new(500.0, 0.0);
+        let count = adaptive_segment_count(from, to, 0.2);
+        assert!(count <= 6);
+    }
 }

@@ -21,6 +21,7 @@ impl TaleNodeApp {
         match crate::import::yarn_import::import_yarn(&contents) {
             Ok(graph) => {
                 self.graph = graph;
+                self.graph.rebuild_connection_index();
                 self.selected_nodes.clear();
                 self.project_name = path
                     .file_stem()
@@ -133,6 +134,7 @@ impl TaleNodeApp {
         match crate::import::ink_import::import_ink(&contents) {
             Ok(graph) => {
                 self.graph = graph;
+                self.graph.rebuild_connection_index();
                 self.selected_nodes.clear();
                 self.project_name = path
                     .file_stem()

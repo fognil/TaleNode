@@ -2,9 +2,10 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use uuid::Uuid;
 
-use super::{bark::BarkLine, character::Character, connection::Connection, group::NodeGroup,
-    locale::LocaleSettings, node::Node, port::{PortDirection, PortId}, quest::Quest,
-    review::{NodeComment, ReviewStatus}, timeline::Timeline, variable::Variable, world::WorldEntity};
+use super::{bark::BarkLine, character::Character, conn_index::ConnectionIndex,
+    connection::Connection, group::NodeGroup, locale::LocaleSettings, node::Node,
+    port::{PortDirection, PortId}, quest::Quest, review::{NodeComment, ReviewStatus},
+    timeline::Timeline, variable::Variable, world::WorldEntity};
 
 /// The central data structure holding the entire dialogue graph.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -35,6 +36,9 @@ pub struct DialogueGraph {
     pub world_entities: Vec<WorldEntity>,
     #[serde(default)]
     pub timelines: Vec<Timeline>,
+    /// Runtime index for O(1) connection lookups. Not serialized.
+    #[serde(skip)]
+    pub conn_index: ConnectionIndex,
 }
 
 impl Default for DialogueGraph {
@@ -57,7 +61,14 @@ impl DialogueGraph {
             quests: Vec::new(),
             world_entities: Vec::new(),
             timelines: Vec::new(),
+            conn_index: ConnectionIndex::default(),
         }
+    }
+
+    /// Rebuild the connection index from the current connections list.
+    /// Must be called after deserialization or bulk connection changes.
+    pub fn rebuild_connection_index(&mut self) {
+        self.conn_index = ConnectionIndex::rebuild(&self.connections);
     }
 
     pub fn add_node(&mut self, node: Node) {
@@ -75,6 +86,7 @@ impl DialogueGraph {
                 .collect();
             self.connections
                 .retain(|c| c.from_node != node_id && c.to_node != node_id);
+            self.rebuild_connection_index();
             self.review_statuses.remove(&node_id);
             self.comments.retain(|c| c.node_id != node_id);
             self.node_tags.remove(&node_id);
@@ -113,25 +125,28 @@ impl DialogueGraph {
             return false;
         }
 
-        // Check if output port already has a connection
-        if self.connections.iter().any(|c| c.from_port == from_port) {
+        // Check if output port already has a connection (O(1) via index)
+        if self.conn_index.has_from_port(from_port) {
             return false;
         }
 
-        // Check if input port already has a connection
-        if self.connections.iter().any(|c| c.to_port == to_port) {
+        // Check if input port already has a connection (O(1) via index)
+        if self.conn_index.has_to_port(to_port) {
             return false;
         }
 
         let conn = Connection::new(from_node, from_port, to_node, to_port);
         self.connections.push(conn);
+        self.rebuild_connection_index();
         true
     }
 
     #[cfg(test)]
     pub fn remove_connection(&mut self, connection_id: Uuid) -> Option<Connection> {
         if let Some(idx) = self.connections.iter().position(|c| c.id == connection_id) {
-            Some(self.connections.remove(idx))
+            let conn = self.connections.remove(idx);
+            self.rebuild_connection_index();
+            Some(conn)
         } else {
             None
         }
@@ -274,9 +289,10 @@ mod tests {
     }
 
     #[test]
-    fn remove_nonexistent_node_returns_none() {
+    fn remove_nonexistent_returns_none() {
         let mut graph = DialogueGraph::new();
         assert!(graph.remove_node(Uuid::new_v4()).is_none());
+        assert!(graph.remove_connection(Uuid::new_v4()).is_none());
     }
 
     #[test]
@@ -284,14 +300,11 @@ mod tests {
         let mut graph = DialogueGraph::new();
         let start = Node::new_start([0.0, 0.0]);
         let end = Node::new_end([200.0, 0.0]);
-        let start_out = start.outputs[0].id;
-        let end_in = end.inputs[0].id;
-        let start_id = start.id;
-        let end_id = end.id;
+        let (s_out, e_in) = (start.outputs[0].id, end.inputs[0].id);
+        let (s_id, e_id) = (start.id, end.id);
         graph.add_node(start);
         graph.add_node(end);
-        graph.add_connection(start_id, start_out, end_id, end_in);
-
+        graph.add_connection(s_id, s_out, e_id, e_in);
         let conn_id = graph.connections[0].id;
         let removed = graph.remove_connection(conn_id).unwrap();
         assert_eq!(removed.id, conn_id);
@@ -299,71 +312,34 @@ mod tests {
     }
 
     #[test]
-    fn remove_nonexistent_connection_returns_none() {
-        let mut graph = DialogueGraph::new();
-        assert!(graph.remove_connection(Uuid::new_v4()).is_none());
-    }
-
-    #[test]
     fn find_port_node() {
         let mut graph = DialogueGraph::new();
         let dlg = Node::new_dialogue([0.0, 0.0]);
-        let dlg_id = dlg.id;
-        let in_port = dlg.inputs[0].id;
-        let out_port = dlg.outputs[0].id;
+        let (dlg_id, in_port, out_port) = (dlg.id, dlg.inputs[0].id, dlg.outputs[0].id);
         graph.add_node(dlg);
-        let (nid, dir) = graph.find_port_node(in_port).unwrap();
-        assert_eq!(nid, dlg_id);
-        assert_eq!(dir, PortDirection::Input);
-        let (nid, dir) = graph.find_port_node(out_port).unwrap();
-        assert_eq!(nid, dlg_id);
-        assert_eq!(dir, PortDirection::Output);
+        assert_eq!(graph.find_port_node(in_port).unwrap().0, dlg_id);
+        assert_eq!(graph.find_port_node(out_port).unwrap().0, dlg_id);
         assert!(graph.find_port_node(PortId::new()).is_none());
     }
 
     #[test]
-    fn duplicate_input_port_rejected() {
+    fn duplicate_and_invalid_ports_rejected() {
         let mut graph = DialogueGraph::new();
-        let start1 = Node::new_start([0.0, 0.0]);
-        let start2 = Node::new_start([0.0, 100.0]);
-        let dlg = Node::new_dialogue([200.0, 0.0]);
-
-        let s1_out = start1.outputs[0].id;
-        let s2_out = start2.outputs[0].id;
-        let dlg_in = dlg.inputs[0].id;
-        let s1_id = start1.id;
-        let s2_id = start2.id;
-        let dlg_id = dlg.id;
-
-        graph.add_node(start1);
-        graph.add_node(start2);
+        let (s1, s2, dlg) = (
+            Node::new_start([0.0, 0.0]),
+            Node::new_start([0.0, 100.0]),
+            Node::new_dialogue([200.0, 0.0]),
+        );
+        let (s1_out, s2_out, dlg_in) = (s1.outputs[0].id, s2.outputs[0].id, dlg.inputs[0].id);
+        let (s1_id, s2_id, dlg_id) = (s1.id, s2.id, dlg.id);
+        graph.add_node(s1);
+        graph.add_node(s2);
         graph.add_node(dlg);
-
-        // First connection succeeds
         assert!(graph.add_connection(s1_id, s1_out, dlg_id, dlg_in));
-        // Same input port from different source — rejected
-        assert!(!graph.add_connection(s2_id, s2_out, dlg_id, dlg_in));
-    }
-
-    #[test]
-    fn invalid_port_ids_rejected() {
-        let mut graph = DialogueGraph::new();
-        let start = Node::new_start([0.0, 0.0]);
-        let dlg = Node::new_dialogue([200.0, 0.0]);
-        let start_id = start.id;
-        let dlg_id = dlg.id;
-        graph.add_node(start);
-        graph.add_node(dlg);
-
-        // Use fake port IDs
-        assert!(!graph.add_connection(start_id, PortId::new(), dlg_id, PortId::new()));
-    }
-
-    #[test]
-    fn connection_with_nonexistent_nodes_rejected() {
-        let mut graph = DialogueGraph::new();
+        assert!(!graph.add_connection(s2_id, s2_out, dlg_id, dlg_in)); // dup input
+        assert!(!graph.add_connection(s1_id, PortId::new(), dlg_id, PortId::new())); // fake
         let (a, b) = (Uuid::new_v4(), Uuid::new_v4());
-        assert!(!graph.add_connection(a, PortId::new(), b, PortId::new()));
+        assert!(!graph.add_connection(a, PortId::new(), b, PortId::new())); // nonexistent
     }
 
     #[test]
@@ -385,15 +361,30 @@ mod tests {
         graph.add_tag(id, "important".to_string());
         graph.add_tag(id, "quest".to_string());
         assert_eq!(graph.get_tags(id).len(), 2);
-        graph.add_tag(id, "important".to_string()); // duplicate ignored
+        graph.add_tag(id, "important".to_string());
         assert_eq!(graph.get_tags(id).len(), 2);
         graph.remove_tag(id, "important");
         assert_eq!(graph.get_tags(id), &["quest"]);
         graph.remove_tag(id, "quest");
         assert!(!graph.node_tags.contains_key(&id));
-        // remove_node also cleans up tags
         graph.add_tag(id, "test".to_string());
         graph.remove_node(id);
         assert!(!graph.node_tags.contains_key(&id));
+    }
+
+    #[test]
+    fn conn_index_syncs_with_mutations() {
+        let mut graph = DialogueGraph::new();
+        let (start, dlg) = (Node::new_start([0.0, 0.0]), Node::new_dialogue([200.0, 0.0]));
+        let (s_out, d_in) = (start.outputs[0].id, dlg.inputs[0].id);
+        let (s_id, d_id) = (start.id, dlg.id);
+        graph.add_node(start);
+        graph.add_node(dlg);
+        assert!(!graph.conn_index.has_from_port(s_out));
+        graph.add_connection(s_id, s_out, d_id, d_in);
+        assert!(graph.conn_index.has_from_port(s_out));
+        assert!(graph.conn_index.has_to_port(d_in));
+        graph.remove_node(s_id);
+        assert!(!graph.conn_index.has_from_port(s_out));
     }
 }

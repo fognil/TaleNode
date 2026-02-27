@@ -39,6 +39,7 @@ impl super::TaleNodeApp {
         };
         self.subgraph_stack.push(frame);
         self.graph = child_graph;
+        self.graph.rebuild_connection_index();
         self.canvas = CanvasState::default();
         self.interaction = super::InteractionState::Idle;
         self.context_menu_pos = None;

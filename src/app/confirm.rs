@@ -66,6 +66,7 @@ impl TaleNodeApp {
                 if let Some(_old_graph) = project.restore_version(*id) {
                     self.snapshot();
                     self.graph = project.graph;
+                    self.graph.rebuild_connection_index();
                 }
             }
         }

@@ -65,8 +65,14 @@ impl TaleNodeApp {
         // Draw groups (below connections and nodes)
         self.draw_groups(&painter);
 
-        // Draw connections (below nodes)
-        draw_connections(&painter, &self.graph, &self.canvas, None);
+        // Compute canvas-space viewport for culling
+        let canvas_viewport = egui::Rect::from_min_max(
+            self.canvas.screen_to_canvas(canvas_rect.min),
+            self.canvas.screen_to_canvas(canvas_rect.max),
+        );
+
+        // Draw connections (below nodes) — culled by viewport
+        draw_connections(&painter, &self.graph, &self.canvas, None, canvas_viewport);
 
         // Detect port hover for visual feedback
         let hovered_port_info = if response.hovered() {
