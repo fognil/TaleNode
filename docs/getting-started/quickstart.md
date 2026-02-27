@@ -71,6 +71,17 @@ Your finished graph should look like this:
                                         └─ "Business" → [Dialogue: "Shall not pass!"] → [End: hostile]
 ```
 
+## Demo Project
+
+Want to explore a fully built example? Open the included demo project **"The Last Constellation"** from `examples/the_last_constellation.talenode`. It contains:
+
+- A 3-act sci-fi dialogue scenario with 30+ nodes
+- 5 characters with portraits, colors, and relationships
+- Branching paths, conditions, events, and random encounters
+- Variables tracking trust, reputation, and story state
+
+Use **File > Open** and navigate to the `examples/` folder to load it.
+
 ## What's Next?
 
 - [Canvas & Navigation](../user-guide/canvas.md) — Learn pan, zoom, and selection

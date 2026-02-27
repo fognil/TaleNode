@@ -69,12 +69,12 @@ Select nodes and press ++ctrl+d++. Duplicated nodes appear offset by 30px down a
 
 ## Minimap
 
-A minimap is displayed in the bottom-right corner of the canvas (160x160 pixels). It shows:
+A minimap is displayed in the bottom-right corner of the canvas. It shows:
 
-- All nodes as small colored rectangles matching their type color
+- All nodes as small colored rectangles matching their type color (dots above 500 nodes)
 - The current viewport as a white rectangle outline
 
-Click or drag on the minimap to quickly navigate to a different part of your graph.
+The minimap automatically scales to match the **aspect ratio** of your graph — wide graphs get a wide minimap, tall graphs get a tall minimap (up to 180px max dimension). Click or drag on the minimap to quickly navigate to a different part of your graph.
 
 ## Search
 
@@ -141,14 +141,16 @@ When a filter is active:
 
 Press ++f++ to automatically zoom and pan the canvas so that **all nodes** are visible on screen. This is useful after importing a graph or when you've lost track of nodes placed far apart.
 
+Zoom-to-fit also triggers automatically when **opening a project file**, so you always start with the full graph in view.
+
 ## Level of Detail
 
 When you zoom out on a large graph, TaleNode automatically reduces rendering detail for better performance:
 
 | Zoom Level | Detail |
 |---|---|
-| **50% and above** | Full detail — all text, ports, labels, body content |
-| **25%–50%** | Medium — header, body rectangle, port circles, no text |
+| **50% and above** | Full detail — all text, ports, labels, body content, portrait thumbnails |
+| **25%–50%** | Medium — header, body rectangle, port circles, no text or portraits |
 | **Below 25%** | Low — single colored rectangle per node, no text or ports |
 
 This happens automatically — no configuration needed. Port hover detection and node tooltips are also disabled at medium/low zoom levels since those details aren't visible.

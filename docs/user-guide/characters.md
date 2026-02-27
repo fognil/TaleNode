@@ -16,15 +16,22 @@ Click **+ Add** in the Characters section. A new character is created with:
 
 ### Editing a Character
 
-Each character has three fields:
+Each character card shows aligned property fields:
 
 | Field | Description |
 |---|---|
 | **Name** | Display name (e.g., "Guard", "Princess", "Merchant") |
 | **Color** | RGB color picker — used for visual identification in the UI |
-| **Portrait Path** | File path to a portrait image (used by your game engine) |
+| **Portrait** | File path to a portrait image, with a live thumbnail preview and **[...]** browse button |
+| **Voice** | Voice assignment dropdown (visible when voices are loaded — see [Voice Synthesis](voice-synthesis.md)) |
 
-A colored indicator square is shown next to each character name in the left panel, matching the assigned color.
+A colored indicator square is shown next to each character name in the left panel header, matching the assigned color.
+
+### Portrait Preview
+
+When a portrait path is set, a small thumbnail is displayed inline next to the path field. Click **[...]** to open a file picker (supports PNG, JPG, JPEG, BMP, GIF). Portraits are cached in memory for fast rendering — changing the path updates the preview immediately.
+
+Portraits also appear on **Dialogue nodes** on the canvas (at medium zoom and above) and in the **Inspector** when editing a Dialogue node with a linked speaker.
 
 ### Removing a Character
 

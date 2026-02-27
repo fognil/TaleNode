@@ -21,10 +21,16 @@ No editable properties. The Inspector shows a brief description of the Start nod
 
 | Field | Description |
 |---|---|
-| **Speaker** | Character name. Type freely or select from defined Characters. |
+| **Speaker** | Dropdown to select from defined Characters, or type a custom name. |
+| **Name** | Manual name override — editable even when a character is selected. |
+| **Portrait** | Live thumbnail preview + optional path override with **[...]** browse button. Falls back to the character's portrait if no override is set. |
 | **Text** | Multi-line text area for the dialogue line. Supports `{variable}` interpolation syntax. |
 | **Emotion** | Dropdown: `neutral`, `happy`, `sad`, `angry`, `surprised`, `scared` |
-| **Audio Clip** | Optional file path for voice acting audio. |
+| **Audio Clip** | Optional file path for voice acting audio with **Browse** button. |
+
+#### Portrait Override
+
+By default, a Dialogue node uses its speaker character's portrait. To use a different portrait for a specific line (e.g., a close-up or alternate expression), type or browse for an image in the **Portrait** field. Clear the field to revert to the character's default portrait.
 
 ### Choice Node
 

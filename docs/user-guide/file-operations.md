@@ -209,6 +209,17 @@ Imports an Inkle Ink `.ink` file. Knots and stitches are converted to nodes, cho
 
 For detailed information on each import format, see [Import Formats](import.md).
 
+## Undo/Redo Memory Management
+
+TaleNode uses snapshot-based undo — each edit saves a copy of the full graph. To keep memory usage reasonable on large projects:
+
+- The **5 most recent** snapshots are kept as full in-memory graphs for instant undo
+- **Older snapshots** are automatically compressed to JSON bytes, reducing memory by ~10x
+- Compressed snapshots are transparently decompressed on demand when you undo far back
+- Rapid text edits are **debounced** (300ms minimum interval) to avoid flooding the undo stack
+
+This is automatic — no configuration needed.
+
 ## Tips
 
 !!! tip
