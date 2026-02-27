@@ -114,66 +114,97 @@ impl TaleNodeApp {
         }
     }
 
+    /// Compute the bounding rect of a group in canvas coordinates.
+    fn group_bounds(&self, group: &crate::model::group::NodeGroup) -> Option<Rect> {
+        let mut min_x = f32::MAX;
+        let mut min_y = f32::MAX;
+        let mut max_x = f32::MIN;
+        let mut max_y = f32::MIN;
+        for &nid in &group.node_ids {
+            if let Some(node) = self.graph.nodes.get(&nid) {
+                let r = node_widget::node_rect(node);
+                min_x = min_x.min(r.min.x);
+                min_y = min_y.min(r.min.y);
+                max_x = max_x.max(r.max.x);
+                max_y = max_y.max(r.max.y);
+            }
+        }
+        if min_x >= max_x || min_y >= max_y {
+            return None;
+        }
+        let pad = 20.0;
+        Some(Rect::from_min_max(
+            Pos2::new(min_x - pad, min_y - pad - 20.0),
+            Pos2::new(max_x + pad, max_y + pad),
+        ))
+    }
+
+    /// Build the set of node IDs hidden by collapsed groups.
+    pub(super) fn hidden_by_collapsed_groups(&self) -> std::collections::HashSet<uuid::Uuid> {
+        let mut hidden = std::collections::HashSet::new();
+        for group in &self.graph.groups {
+            if group.collapsed {
+                for &nid in &group.node_ids {
+                    hidden.insert(nid);
+                }
+            }
+        }
+        hidden
+    }
+
     pub(super) fn draw_groups(&self, painter: &egui::Painter) {
+        let clip = painter.clip_rect();
         for group in &self.graph.groups {
             if group.node_ids.is_empty() {
                 continue;
             }
-            let mut min_x = f32::MAX;
-            let mut min_y = f32::MAX;
-            let mut max_x = f32::MIN;
-            let mut max_y = f32::MIN;
+            let Some(group_rect) = self.group_bounds(group) else { continue };
+            let screen_rect = self.canvas.canvas_rect_to_screen(group_rect);
 
-            for &node_id in &group.node_ids {
-                if let Some(node) = self.graph.nodes.get(&node_id) {
-                    let rect = node_widget::node_rect(node);
-                    min_x = min_x.min(rect.min.x);
-                    min_y = min_y.min(rect.min.y);
-                    max_x = max_x.max(rect.max.x);
-                    max_y = max_y.max(rect.max.y);
-                }
-            }
-
-            if min_x >= max_x || min_y >= max_y {
+            // Viewport culling
+            if !clip.intersects(screen_rect) {
                 continue;
             }
 
-            let pad = 20.0;
-            let group_rect = Rect::from_min_max(
-                Pos2::new(min_x - pad, min_y - pad - 20.0),
-                Pos2::new(max_x + pad, max_y + pad),
-            );
-            let screen_rect = self.canvas.canvas_rect_to_screen(group_rect);
-
             let [r, g, b, a] = group.color;
-            painter.rect_filled(
-                screen_rect,
-                8.0,
-                Color32::from_rgba_premultiplied(r, g, b, a),
-            );
-            painter.rect_stroke(
-                screen_rect,
-                8.0,
-                Stroke::new(
-                    1.0,
-                    Color32::from_rgba_premultiplied(
-                        r,
-                        g,
-                        b,
-                        (a as u16 * 3).min(255) as u8,
-                    ),
-                ),
-                StrokeKind::Inside,
-            );
+            let border_a = (a as u16 * 3).min(255) as u8;
 
-            let font_size = 12.0 * self.canvas.zoom;
-            painter.text(
-                Pos2::new(screen_rect.min.x + 8.0, screen_rect.min.y + 4.0),
-                egui::Align2::LEFT_TOP,
-                &group.name,
-                egui::FontId::proportional(font_size),
-                Color32::from_rgba_premultiplied(r, g, b, 200),
-            );
+            if group.collapsed {
+                // Collapsed: compact header-only rectangle
+                let collapsed_h = 32.0 * self.canvas.zoom;
+                let collapsed_rect = Rect::from_min_size(
+                    screen_rect.min,
+                    egui::Vec2::new(screen_rect.width(), collapsed_h),
+                );
+                painter.rect_filled(collapsed_rect, 8.0, Color32::from_rgba_premultiplied(r, g, b, 80));
+                painter.rect_stroke(
+                    collapsed_rect, 8.0,
+                    Stroke::new(1.5, Color32::from_rgba_premultiplied(r, g, b, border_a)),
+                    StrokeKind::Inside,
+                );
+                let font_size = 12.0 * self.canvas.zoom;
+                let label = format!("{} ({} nodes)", group.name, group.node_ids.len());
+                painter.text(
+                    Pos2::new(collapsed_rect.min.x + 8.0, collapsed_rect.center().y),
+                    egui::Align2::LEFT_CENTER, &label,
+                    egui::FontId::proportional(font_size),
+                    Color32::from_rgba_premultiplied(r, g, b, 220),
+                );
+            } else {
+                painter.rect_filled(screen_rect, 8.0, Color32::from_rgba_premultiplied(r, g, b, a));
+                painter.rect_stroke(
+                    screen_rect, 8.0,
+                    Stroke::new(1.0, Color32::from_rgba_premultiplied(r, g, b, border_a)),
+                    StrokeKind::Inside,
+                );
+                let font_size = 12.0 * self.canvas.zoom;
+                painter.text(
+                    Pos2::new(screen_rect.min.x + 8.0, screen_rect.min.y + 4.0),
+                    egui::Align2::LEFT_TOP, &group.name,
+                    egui::FontId::proportional(font_size),
+                    Color32::from_rgba_premultiplied(r, g, b, 200),
+                );
+            }
         }
     }
 

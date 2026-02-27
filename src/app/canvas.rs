@@ -62,7 +62,6 @@ impl TaleNodeApp {
         let response = ui.allocate_rect(canvas_rect, Sense::click_and_drag());
         let painter = ui.painter_at(canvas_rect);
 
-        // Rebuild spatial grid if needed
         self.spatial_grid.rebuild_if_dirty(&self.graph.nodes);
 
         // Handle pan/zoom
@@ -80,8 +79,11 @@ impl TaleNodeApp {
             self.canvas.screen_to_canvas(canvas_rect.max),
         );
 
+        // Nodes hidden by collapsed groups
+        let hidden_nodes = self.hidden_by_collapsed_groups();
+
         // Draw connections (below nodes) — culled by viewport
-        draw_connections(&painter, &self.graph, &self.canvas, None, canvas_viewport);
+        draw_connections(&painter, &self.graph, &self.canvas, None, canvas_viewport, &hidden_nodes);
 
         // Detect port hover for visual feedback (skip at low zoom — ports not visible)
         let hovered_port_info = if self.canvas.zoom >= crate::ui::node_widget::LOD_MEDIUM_ZOOM
@@ -103,6 +105,9 @@ impl TaleNodeApp {
         };
         let node_ids: Vec<Uuid> = self.graph.nodes.keys().copied().collect();
         for id in &node_ids {
+            if hidden_nodes.contains(id) {
+                continue;
+            }
             if let Some(node) = self.graph.nodes.get(id) {
                 let is_selected = self.selected_nodes.contains(id);
                 let is_search_match = self.search_results.contains(id);

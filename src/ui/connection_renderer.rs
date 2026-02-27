@@ -11,18 +11,21 @@ const WIRE_SELECTED_COLOR: Color32 = Color32::from_rgb(255, 255, 100);
 
 /// Draw all visible connections in the graph.
 /// `canvas_viewport` is the visible area in canvas coordinates for culling.
+/// `hidden_nodes` contains nodes inside collapsed groups — skip if both ends hidden.
 pub fn draw_connections(
     painter: &egui::Painter,
     graph: &DialogueGraph,
     canvas: &CanvasState,
     selected_connection: Option<uuid::Uuid>,
     canvas_viewport: Rect,
+    hidden_nodes: &std::collections::HashSet<uuid::Uuid>,
 ) {
     for conn in &graph.connections {
-        draw_connection(painter, conn, graph, canvas, selected_connection, canvas_viewport);
+        draw_connection(painter, conn, graph, canvas, selected_connection, canvas_viewport, hidden_nodes);
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_connection(
     painter: &egui::Painter,
     conn: &Connection,
@@ -30,7 +33,14 @@ fn draw_connection(
     canvas: &CanvasState,
     selected_connection: Option<uuid::Uuid>,
     canvas_viewport: Rect,
+    hidden_nodes: &std::collections::HashSet<uuid::Uuid>,
 ) {
+    let from_hidden = hidden_nodes.contains(&conn.from_node);
+    let to_hidden = hidden_nodes.contains(&conn.to_node);
+    if from_hidden && to_hidden {
+        return;
+    }
+
     let from_node = match graph.nodes.get(&conn.from_node) {
         Some(n) => n,
         None => return,
@@ -40,23 +50,12 @@ fn draw_connection(
         None => return,
     };
 
-    // Find port indices
-    let from_index = from_node
-        .outputs
-        .iter()
-        .position(|p| p.id == conn.from_port)
-        .unwrap_or(0);
-    let to_index = to_node
-        .inputs
-        .iter()
-        .position(|p| p.id == conn.to_port)
-        .unwrap_or(0);
+    let from_index = from_node.outputs.iter().position(|p| p.id == conn.from_port).unwrap_or(0);
+    let to_index = to_node.inputs.iter().position(|p| p.id == conn.to_port).unwrap_or(0);
 
     let from_canvas = port_position(from_node, from_index, true);
     let to_canvas = port_position(to_node, to_index, false);
 
-    // Viewport culling: skip if both endpoints are outside the visible area.
-    // The bezier control points extend horizontally, so expand the check region.
     let wire_bounds = Rect::from_two_pos(from_canvas, to_canvas).expand(100.0);
     if !canvas_viewport.intersects(wire_bounds) {
         return;
@@ -66,10 +65,14 @@ fn draw_connection(
     let to_screen = canvas.canvas_to_screen(to_canvas);
 
     let is_selected = selected_connection.is_some_and(|id| id == conn.id);
-    let color = if is_selected {
-        WIRE_SELECTED_COLOR
+    let base_color = if is_selected { WIRE_SELECTED_COLOR } else { WIRE_COLOR };
+
+    // Reduce alpha when one endpoint is inside a collapsed group
+    let color = if from_hidden || to_hidden {
+        let [r, g, b, _] = base_color.to_array();
+        Color32::from_rgba_unmultiplied(r, g, b, 80)
     } else {
-        WIRE_COLOR
+        base_color
     };
 
     draw_bezier_wire(painter, from_screen, to_screen, color, canvas.zoom);

@@ -14,6 +14,9 @@ pub struct NodeGroup {
     /// Group background color as [r, g, b, a] (0-255).
     #[serde(default = "NodeGroup::default_color")]
     pub color: [u8; 4],
+    /// Whether the group is collapsed (hides contained nodes).
+    #[serde(default)]
+    pub collapsed: bool,
 }
 
 impl NodeGroup {
@@ -29,6 +32,7 @@ impl NodeGroup {
             name: name.into(),
             node_ids: Vec::new(),
             color: [100, 150, 255, 40],
+            collapsed: false,
         }
     }
 }
@@ -57,10 +61,19 @@ mod tests {
         let mut g = NodeGroup::new("Quest");
         g.node_ids.push(Uuid::new_v4());
         g.node_ids.push(Uuid::new_v4());
+        g.collapsed = true;
         let json = serde_json::to_string(&g).unwrap();
         let loaded: NodeGroup = serde_json::from_str(&json).unwrap();
         assert_eq!(loaded.id, g.id);
         assert_eq!(loaded.name, "Quest");
         assert_eq!(loaded.node_ids.len(), 2);
+        assert!(loaded.collapsed);
+    }
+
+    #[test]
+    fn collapsed_field_defaults_false_on_old_data() {
+        let json = r#"{"id":"00000000-0000-0000-0000-000000000001","name":"Old","node_ids":[],"color":[100,150,255,40]}"#;
+        let loaded: NodeGroup = serde_json::from_str(json).unwrap();
+        assert!(!loaded.collapsed);
     }
 }

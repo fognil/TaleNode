@@ -49,15 +49,26 @@ impl TaleNodeApp {
                             self.graph.groups.push(group);
                             close_menu = true;
                         }
-                        let has_group = self.graph.groups.iter().any(|g| {
+                        let matching_group_idx = self.graph.groups.iter().position(|g| {
                             self.selected_nodes.iter().any(|id| g.node_ids.contains(id))
                         });
-                        if has_group && ui.button("Ungroup").clicked() {
+                        if matching_group_idx.is_some()
+                            && ui.button("Ungroup").clicked()
+                        {
                             self.snapshot();
                             self.graph.groups.retain(|g| {
                                 !self.selected_nodes.iter().any(|id| g.node_ids.contains(id))
                             });
                             close_menu = true;
+                        }
+                        if let Some(idx) = matching_group_idx {
+                            let is_collapsed = self.graph.groups[idx].collapsed;
+                            let label = if is_collapsed { "Expand Group" } else { "Collapse Group" };
+                            if ui.button(label).clicked() {
+                                self.snapshot();
+                                self.graph.groups[idx].collapsed = !is_collapsed;
+                                close_menu = true;
+                            }
                         }
                         if ui.button("Save as Template").clicked() {
                             self.dock_add_tab(super::dock::DockTab::Templates);
