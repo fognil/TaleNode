@@ -1,12 +1,40 @@
+use std::time::Instant;
+
 use crate::model::graph::DialogueGraph;
 
 const MAX_HISTORY: usize = 100;
+/// Keep this many recent snapshots uncompressed for fast undo.
+const KEEP_UNCOMPRESSED: usize = 5;
+/// Minimum interval between snapshots for debouncing rapid edits.
+const DEBOUNCE_MS: u128 = 300;
 
-/// Snapshot-based undo/redo history.
-/// Stores full graph snapshots for simplicity and reliability.
+/// A snapshot that is either a full in-memory graph or compressed JSON bytes.
+enum Snapshot {
+    Full(Box<DialogueGraph>),
+    Compressed(Vec<u8>),
+}
+
+impl Snapshot {
+    fn into_graph(self) -> Option<DialogueGraph> {
+        match self {
+            Snapshot::Full(g) => Some(*g),
+            Snapshot::Compressed(bytes) => serde_json::from_slice(&bytes).ok(),
+        }
+    }
+
+    fn compress(graph: DialogueGraph) -> Self {
+        match serde_json::to_vec(&graph) {
+            Ok(bytes) => Snapshot::Compressed(bytes),
+            Err(_) => Snapshot::Full(Box::new(graph)),
+        }
+    }
+}
+
+/// Snapshot-based undo/redo history with compression for old entries.
 pub struct UndoHistory {
-    undo_stack: Vec<DialogueGraph>,
-    redo_stack: Vec<DialogueGraph>,
+    undo_stack: Vec<Snapshot>,
+    redo_stack: Vec<Snapshot>,
+    last_snapshot_time: Option<Instant>,
 }
 
 impl Default for UndoHistory {
@@ -20,50 +48,76 @@ impl UndoHistory {
         Self {
             undo_stack: Vec::new(),
             redo_stack: Vec::new(),
+            last_snapshot_time: None,
+        }
+    }
+
+    /// Compress older entries when the uncompressed tail exceeds the threshold.
+    fn compress_old_entries(stack: &mut [Snapshot]) {
+        let len = stack.len();
+        if len <= KEEP_UNCOMPRESSED {
+            return;
+        }
+        let compress_up_to = len - KEEP_UNCOMPRESSED;
+        for entry in stack.iter_mut().take(compress_up_to) {
+            if matches!(entry, Snapshot::Full(_)) {
+                let old = std::mem::replace(entry, Snapshot::Compressed(Vec::new()));
+                if let Snapshot::Full(graph) = old {
+                    *entry = Snapshot::compress(*graph);
+                }
+            }
         }
     }
 
     /// Save the current graph state before a mutation.
     /// Call this BEFORE modifying the graph.
     pub fn save_snapshot(&mut self, graph: &DialogueGraph) {
-        self.undo_stack.push(graph.clone());
+        self.undo_stack.push(Snapshot::Full(Box::new(graph.clone())));
         if self.undo_stack.len() > MAX_HISTORY {
             self.undo_stack.remove(0);
         }
-        // New action clears redo stack
+        Self::compress_old_entries(&mut self.undo_stack);
         self.redo_stack.clear();
+        self.last_snapshot_time = Some(Instant::now());
+    }
+
+    /// Save a snapshot only if enough time has passed since the last one.
+    /// Returns true if the snapshot was actually saved.
+    pub fn save_snapshot_debounced(&mut self, graph: &DialogueGraph) -> bool {
+        if let Some(last) = self.last_snapshot_time {
+            if last.elapsed().as_millis() < DEBOUNCE_MS {
+                return false;
+            }
+        }
+        self.save_snapshot(graph);
+        true
     }
 
     /// Push an already-cloned graph onto the undo stack.
-    /// Use this when you already have a pre-clone (avoids double-cloning).
     pub fn push_undo(&mut self, graph: DialogueGraph) {
-        self.undo_stack.push(graph);
+        self.undo_stack.push(Snapshot::Full(Box::new(graph)));
         if self.undo_stack.len() > MAX_HISTORY {
             self.undo_stack.remove(0);
         }
+        Self::compress_old_entries(&mut self.undo_stack);
         self.redo_stack.clear();
+        self.last_snapshot_time = Some(Instant::now());
     }
 
     /// Undo: restore the previous graph state.
-    /// Returns the restored graph, or None if nothing to undo.
     pub fn undo(&mut self, current: &DialogueGraph) -> Option<DialogueGraph> {
-        if let Some(prev) = self.undo_stack.pop() {
-            self.redo_stack.push(current.clone());
-            Some(prev)
-        } else {
-            None
-        }
+        let snapshot = self.undo_stack.pop()?;
+        self.redo_stack.push(Snapshot::Full(Box::new(current.clone())));
+        Self::compress_old_entries(&mut self.redo_stack);
+        snapshot.into_graph()
     }
 
     /// Redo: restore the next graph state.
-    /// Returns the restored graph, or None if nothing to redo.
     pub fn redo(&mut self, current: &DialogueGraph) -> Option<DialogueGraph> {
-        if let Some(next) = self.redo_stack.pop() {
-            self.undo_stack.push(current.clone());
-            Some(next)
-        } else {
-            None
-        }
+        let snapshot = self.redo_stack.pop()?;
+        self.undo_stack.push(Snapshot::Full(Box::new(current.clone())));
+        Self::compress_old_entries(&mut self.undo_stack);
+        snapshot.into_graph()
     }
 
     pub fn can_undo(&self) -> bool {
@@ -77,6 +131,7 @@ impl UndoHistory {
     pub fn clear(&mut self) {
         self.undo_stack.clear();
         self.redo_stack.clear();
+        self.last_snapshot_time = None;
     }
 }
 
@@ -226,13 +281,71 @@ mod tests {
         graph.add_node(end);
         graph.add_connection(start_id, start_out, end_id, end_in);
 
-        // Snapshot the connected graph, then remove a node
         history.save_snapshot(&graph);
         graph.remove_node(end_id);
         assert!(graph.connections.is_empty());
 
-        // Undo should restore the connection
         graph = history.undo(&graph).unwrap();
         assert_eq!(graph.connections.len(), 1);
+    }
+
+    #[test]
+    fn old_snapshots_get_compressed() {
+        let mut history = UndoHistory::new();
+        let graph = DialogueGraph::new();
+
+        // Push more than KEEP_UNCOMPRESSED snapshots
+        for _ in 0..10 {
+            history.save_snapshot(&graph);
+        }
+
+        // Oldest entries should be compressed
+        let compressed_count = history
+            .undo_stack
+            .iter()
+            .filter(|s| matches!(s, Snapshot::Compressed(_)))
+            .count();
+        assert!(compressed_count > 0);
+
+        // Most recent KEEP_UNCOMPRESSED should be full
+        let full_count = history
+            .undo_stack
+            .iter()
+            .rev()
+            .take(KEEP_UNCOMPRESSED)
+            .filter(|s| matches!(s, Snapshot::Full(_)))
+            .count();
+        assert_eq!(full_count, KEEP_UNCOMPRESSED);
+    }
+
+    #[test]
+    fn undo_through_compressed_snapshots() {
+        let mut history = UndoHistory::new();
+        let mut graph = DialogueGraph::new();
+
+        // Build up snapshots with different node counts
+        for i in 0..10 {
+            history.save_snapshot(&graph);
+            graph.add_node(Node::new_dialogue([i as f32 * 50.0, 0.0]));
+        }
+        // graph has 10 nodes, undo stack has 10 entries (some compressed)
+
+        // Undo all the way back
+        for expected in (0..10).rev() {
+            graph = history.undo(&graph).unwrap();
+            assert_eq!(graph.nodes.len(), expected);
+        }
+    }
+
+    #[test]
+    fn debounce_skips_rapid_snapshots() {
+        let mut history = UndoHistory::new();
+        let graph = DialogueGraph::new();
+
+        // First snapshot always saves
+        assert!(history.save_snapshot_debounced(&graph));
+        // Immediate second call should be debounced
+        assert!(!history.save_snapshot_debounced(&graph));
+        assert_eq!(history.undo_stack.len(), 1);
     }
 }
