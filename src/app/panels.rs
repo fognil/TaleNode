@@ -247,10 +247,16 @@ impl TaleNodeApp {
         self.compute_minimap_bounds();
         let Some(world) = self.minimap_bounds_cache else { return };
 
-        let minimap_size = 160.0;
+        let max_dim = 180.0;
+        let aspect = world.width() / world.height();
+        let (mw, mh) = if aspect > 1.0 {
+            (max_dim, (max_dim / aspect).max(60.0))
+        } else {
+            ((max_dim * aspect).max(60.0), max_dim)
+        };
         let minimap_rect = Rect::from_min_size(
-            Pos2::new(canvas_rect.max.x - minimap_size - 10.0, canvas_rect.max.y - minimap_size - 10.0),
-            egui::Vec2::splat(minimap_size),
+            Pos2::new(canvas_rect.max.x - mw - 10.0, canvas_rect.max.y - mh - 10.0),
+            egui::Vec2::new(mw, mh),
         );
         painter.rect_filled(minimap_rect, 4.0, Color32::from_rgba_premultiplied(30, 30, 30, 200));
         painter.rect_stroke(minimap_rect, 4.0, Stroke::new(1.0, Color32::from_rgb(80, 80, 80)), StrokeKind::Inside);
